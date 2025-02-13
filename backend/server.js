@@ -14,9 +14,7 @@ app.use(cookieParser());
 app.use(cors({ credentials: true }));
 
 app.listen(port, () =>
-	console.log(
-		`Server started at http://localhost:${port} ${process.env.JWT_SECRET} this`
-	)
+	console.log(`Server started at http://localhost:${port} `)
 );
 
 app.get('/', (req, res) => res.send('<h1>Hello </h1>'));
