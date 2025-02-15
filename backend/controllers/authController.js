@@ -14,7 +14,9 @@ export const registerAccount = async (req, res) => {
 		const existingEmail = await userModel.findOne({ email });
 
 		if (existingEmail) {
-			return res.json({ success: false, message: 'Email is already used.' });
+			return res
+				.status(400)
+				.json({ success: false, message: 'Email is already used.' });
 		}
 
 		const hashedPassword = await bcrypt.hash(password, 10);
@@ -46,7 +48,7 @@ export const registerAccount = async (req, res) => {
 
 		return res.json({ success: true, message: 'Account created' });
 	} catch (err) {
-		res.json({ success: false, message: err.message });
+		return res.status(500).json({ success: false, message: err.message });
 	}
 };
 
@@ -54,7 +56,7 @@ export const loginAccount = async (req, res) => {
 	const { email, password } = req.body;
 
 	if (!email || !password) {
-		return res.json({
+		return res.status(400).json({
 			success: false,
 			message: 'email and password are required',
 		});
@@ -70,7 +72,9 @@ export const loginAccount = async (req, res) => {
 		const passwordIsMatch = await bcrypt.compare(password, user.password);
 
 		if (!passwordIsMatch) {
-			return res.json({ success: false, message: 'Incorrect password' });
+			return res
+				.status(400)
+				.json({ success: false, message: 'Incorrect password' });
 		}
 
 		//create a token and store it to cookie
@@ -86,7 +90,7 @@ export const loginAccount = async (req, res) => {
 
 		return res.json({ success: true, message: 'Login successfully' });
 	} catch (err) {
-		return res.json({ success: false, message: err.message });
+		return res.status(500).json({ success: false, message: err.message });
 	}
 };
 
@@ -98,9 +102,9 @@ export const logOutAccount = async (req, res) => {
 			sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
 		});
 
-		res.json({ success: true, message: 'Logged out successfully' });
+		return res.json({ success: true, message: 'Logged out successfully' });
 	} catch (err) {
-		res.json({ success: false, message: err.message });
+		return res.status(500).json({ success: false, message: err.message });
 	}
 };
 
@@ -110,11 +114,13 @@ export const sendOtp = async (req, res) => {
 		const { userId } = req.body;
 		const user = await userModel.findById(userId);
 		if (user.isAccountVerified) {
-			res.json({ success: false, message: 'account is already verified' });
+			return res
+				.status(401)
+				.json({ success: false, message: 'account is already verified' });
 		}
 		const otp = String(100000 + Math.floor(Math.random() * 900000));
 		user.verifyOtp = otp;
-		user.verifyOtpExpireAt = Date.now() + 3600 * 24 * 1000;
+		user.verifyOtpExpireAt = new Date(Date.now() + 60 * 15 * 1000);
 
 		await user.save();
 
@@ -123,14 +129,17 @@ export const sendOtp = async (req, res) => {
 			from: process.env.SENDER_EMAIL,
 			to: user.email,
 			subject: 'Iskolar Account Verification OTP',
-			text: `Please don't share your OTP code. This OTP will expired on 24 hrs. Your OTP verification code is: ${otp}`,
+			text: `Please don't share your OTP code. This OTP will expired at 15 minutes. Your OTP verification code is: ${otp}`,
 		};
 		await transporter.sendMail(otpEmail);
 
-		res.json({ success: true, message: 'Verification OTP sent on email.' });
+		return res.json({
+			success: true,
+			message: 'Verification OTP sent on email.',
+		});
 	} catch (err) {
 		console.log('error here', err.message);
-		res.json({ success: false, message: err.message });
+		res.status(500).json({ success: false, message: err.message });
 	}
 };
 //verify otp from db and user
@@ -138,7 +147,7 @@ export const verifyOtp = async (req, res) => {
 	const { userId, otp } = req.body;
 
 	if (!userId || !otp) {
-		return res.json({ success: false, message: 'Missing details' });
+		return res.status(400).json({ success: false, message: 'Missing details' });
 	}
 
 	try {
@@ -150,24 +159,116 @@ export const verifyOtp = async (req, res) => {
 			});
 		}
 
-		if (user.verifyOtp === '' || user.verifyOtp !== otp) {
-			return res.json({ success: false, message: 'Invalid OTP' });
+		if (user.isAccountVerified) {
+			return res.status(403).json({
+				success: false,
+				message: 'This account is already verified',
+			});
 		}
 
-		if (user.verifyOtpExpiresAt < Date.now()) {
-			return res.json({ success: false, message: 'OTP is already expired.' });
+		if (!user.verifyOtp || user.verifyOtp !== otp) {
+			return res.status(400).json({ success: false, message: 'Invalid OTP' });
+		}
+
+		if (user.verifyOtpExpireAt < Date.now()) {
+			return res
+				.status(401)
+				.json({ success: false, message: 'OTP is already expired.' });
 		}
 
 		user.isAccountVerified = true;
 
 		//reset state
-		user.verifyOtp = '';
-		user.verifyOtpExpireAt = 0;
+		user.verifyOtp = null;
+		user.verifyOtpExpireAt = null;
 		await user.save();
 
 		return res.json({ success: true, message: 'Account verified' });
 	} catch (err) {
 		console.log('verification otp failed: ', err.message);
 		return res.json({ success: false, message: err.message });
+	}
+};
+
+export const resetPasswordOtp = async (req, res) => {
+	const { userId } = req.body;
+
+	try {
+		const user = await userModel.findById(userId);
+
+		if (!user) {
+			return res
+				.status(404)
+				.json({ success: false, message: 'User does not exist' });
+		}
+
+		const otp = String(100000 + Math.floor(Math.random() * 900000));
+		user.resetOtp = otp;
+		user.resetOtpExpiresAt = new Date(Date.now() + 60 * 15 * 1000);
+
+		await user.save();
+
+		// Generate an otp email
+		const otpEmail = {
+			from: process.env.SENDER_EMAIL,
+			to: user.email,
+			subject: 'Iskolar Reset Password OTP',
+			text: `Please don't share your OTP code. This OTP will expired at 15 minutes. Your OTP verification code is: ${otp}`,
+		};
+		await transporter.sendMail(otpEmail);
+
+		return res.json({
+			success: true,
+			message: 'Reset OTP sent on email.',
+		});
+	} catch (err) {
+		res.status(500).json({ success: false, message: err.message });
+	}
+};
+
+export const verifyChangePassWithOtp = async (req, res) => {
+	const { otp, password, userId } = req.body;
+
+	if (!otp || !password) {
+		return res.status(404).json({
+			success: false,
+			message: 'Please fill in the OTP and new password',
+		});
+	}
+
+	try {
+		const user = await userModel.findById(userId);
+
+		if (!user) {
+			return res
+				.status(404)
+				.json({ success: false, message: 'Account does not exist' });
+		}
+
+		if (!user.resetOtp || user.resetOtp !== otp) {
+			return res.status(400).json({ success: false, message: 'Invalid OTP' });
+		}
+
+		if (user.resetOtpExpiresAt < Date.now()) {
+			return res
+				.status(401)
+				.json({ success: false, message: 'OTP is already expired.' });
+		}
+
+		if (password === user.password) {
+			return res.json({
+				success: false,
+				message: 'Please enter a new password',
+			});
+		}
+
+		user.password = password;
+
+		return res.json({
+			success: true,
+			message: 'Password changed successfully ',
+		});
+	} catch (err) {
+		res.status(500).json({ success: false, message: err.message });
 	}
 };
