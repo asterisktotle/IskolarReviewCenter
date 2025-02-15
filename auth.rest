@@ -33,15 +33,33 @@ Content-Type: application/json
     
 }
 
-### Send an OTP POST /AUTH/SEND-OTP
+### Send an account verification OTP POST /AUTH/SEND-OTP
 POST http://localhost:3100/auth/send-otp
 
-### verify OTP POST /AUTH/VERIFY-OTP
+### verify account verification OTP POST /AUTH/VERIFY-OTP
 POST http://localhost:3100/auth/verify-otp
 Content-Type: application/json
 
 {
-    "otp": "179456"
+    "otp": "372837"
     
 }
+
+### Send reset password OTP POST /AUTH/SEND-OTP
+POST http://localhost:3100/auth/reset-pass-otp
+Content-Type: application/json
+
+
+
+
+### verify reset password OTP POST /AUTH/VERIFY-OTP
+POST http://localhost:3100/auth/verify-reset-pass
+Content-Type: application/json
+
+{
+    "otp": "369746",
+    "password": "newpassword123"
+    
+}
+
 
