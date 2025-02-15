@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import connectDB from './config/db.js';
+import authRouter from './routes/auth-route.js';
 
 const app = express();
 dotenv.config();
@@ -18,3 +19,4 @@ app.listen(port, () =>
 );
 
 app.get('/', (req, res) => res.send('<h1>Hello </h1>'));
+app.use('/auth', authRouter);
