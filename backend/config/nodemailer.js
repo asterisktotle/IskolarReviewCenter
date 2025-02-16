@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
@@ -5,8 +7,8 @@ const transporter = nodemailer.createTransport({
 	port: 587,
 	secure: false, // true for port 465, false for other ports
 	auth: {
-		user: '85c818001@smtp-brevo.com',
-		pass: '42nfQIWObrXNZypm',
+		user: process.env.SMTP_USER,
+		pass: process.env.SMTP_PASS,
 	},
 });
 
