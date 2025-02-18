@@ -7,7 +7,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 createRoot(document.getElementById('root')!).render(
 	<ChakraProvider>
 		<BrowserRouter>
-			<div className="bg-blue-900 h-svh">
+			<div className="bg-darkblue-950">
 				<App />
 			</div>
 		</BrowserRouter>
