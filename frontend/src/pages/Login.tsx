@@ -11,7 +11,7 @@ import {
 	InputGroup,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-// import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -39,6 +39,7 @@ const SignUpForm = () => {
 		console.log('Form submitted: ', data);
 	};
 	const [showPassword, setShowPassword] = useState(false);
+	const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
 	return (
 		<div className=" h-svh flex flex-col justify-center items-center">
@@ -73,11 +74,25 @@ const SignUpForm = () => {
 						</FormControl>
 
 						<FormControl isInvalid={!!errors.password}>
-							<Input
-								placeholder="Password"
-								type="text"
-								{...register('password')}
-							/>
+							<InputGroup>
+								<Input
+									placeholder="Password"
+									type="text"
+									{...register('password')}
+								/>
+
+								<InputRightElement>
+									<IconButton
+										aria-label={
+											showPasswordConfirm ? 'Hide password' : 'Show password'
+										}
+										icon={showPasswordConfirm ? <ViewOffIcon /> : <ViewIcon />}
+										variant="ghost"
+										onClick={() => setShowPasswordConfirm((prev) => !prev)}
+										size="sm"
+									/>
+								</InputRightElement>
+							</InputGroup>
 							{errors.password && (
 								<FormErrorMessage>{errors.password.message}</FormErrorMessage>
 							)}
@@ -95,7 +110,7 @@ const SignUpForm = () => {
 										aria-label={
 											showPassword ? 'Hide password' : 'Show password'
 										}
-										// icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
+										icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
 										variant="ghost"
 										onClick={() => setShowPassword((prev) => !prev)}
 										size="sm"
