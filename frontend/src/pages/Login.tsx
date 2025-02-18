@@ -84,11 +84,11 @@ const SignUpForm = () => {
 								<InputRightElement>
 									<IconButton
 										aria-label={
-											showPasswordConfirm ? 'Hide password' : 'Show password'
+											showPassword ? 'Hide password' : 'Show password'
 										}
-										icon={showPasswordConfirm ? <ViewOffIcon /> : <ViewIcon />}
+										icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
 										variant="ghost"
-										onClick={() => setShowPasswordConfirm((prev) => !prev)}
+										onClick={() => setShowPassword((prev) => !prev)}
 										size="sm"
 									/>
 								</InputRightElement>
@@ -108,11 +108,11 @@ const SignUpForm = () => {
 								<InputRightElement>
 									<IconButton
 										aria-label={
-											showPassword ? 'Hide password' : 'Show password'
+											showPasswordConfirm ? 'Hide password' : 'Show password'
 										}
 										icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
 										variant="ghost"
-										onClick={() => setShowPassword((prev) => !prev)}
+										onClick={() => setShowPasswordConfirm((prev) => !prev)}
 										size="sm"
 									/>
 								</InputRightElement>
