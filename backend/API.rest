@@ -3,7 +3,7 @@ GET http://localhost:3100
 
 
 ### Register a user POST /AUTH/REGISTER
-POST http://localhost:3100/auth/register
+POST http://localhost:3100/api/auth/register
 Content-Type: application/json
 
 {
@@ -14,7 +14,7 @@ Content-Type: application/json
 }
 
 ### Login a user POST /AUTH/LOGIN
-POST http://localhost:3100/auth/login 
+POST http://localhost:3100/api/auth/login 
 Content-Type: application/json
 
 {
@@ -24,7 +24,7 @@ Content-Type: application/json
 }
 
 ### Logout a user POST /AUTH/LOGOUT
-POST http://localhost:3100/auth/logout
+POST http://localhost:3100/api/auth/logout
 Content-Type: application/json
 
 {
@@ -34,10 +34,10 @@ Content-Type: application/json
 }
 
 ### Send an account verification OTP POST /AUTH/SEND-OTP
-POST http://localhost:3100/auth/send-otp
+POST http://localhost:3100/api/auth/send-otp
 
 ### verify account verification OTP POST /AUTH/VERIFY-OTP
-POST http://localhost:3100/auth/verify-otp
+POST http://localhost:3100/api/auth/verify-otp
 Content-Type: application/json
 
 {
@@ -46,14 +46,14 @@ Content-Type: application/json
 }
 
 ### Send reset password OTP POST /AUTH/SEND-OTP
-POST http://localhost:3100/auth/reset-pass-otp
+POST http://localhost:3100/api/auth/reset-pass-otp
 Content-Type: application/json
 
 
 
 
 ### verify reset password OTP POST /AUTH/VERIFY-OTP
-POST http://localhost:3100/auth/verify-reset-pass
+POST http://localhost:3100/api/auth/verify-reset-pass
 Content-Type: application/json
 
 {
@@ -61,3 +61,7 @@ Content-Type: application/json
     "password": "password123"
     
 }
+
+
+### Get user data  GET /USER/DATA
+GET http://localhost:3100/api/user/data
