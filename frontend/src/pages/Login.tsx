@@ -13,25 +13,22 @@ import {
 } from '@chakra-ui/react';
 
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import axios from 'axios';
 
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { formSchema } from '../schema/formSchema';
 import useAuthStore from '../store/store';
-
+import { useNavigate } from 'react-router-dom';
 type FormValues = z.infer<typeof formSchema>;
 
 const SignUpForm = () => {
-	// const [isRegister, setIsRegister] = useState(true);
-	// const [showPassword, setShowPassword] = useState(true);
-	// const [showPasswordConfirm, setShowPasswordConfirm] = useState(true);
-	// const [incorrectPassword, setIncorrectPassword] = useState(false);
-	// const [noUserEmail, setNoUserEmail] = useState(false);
-	// const [email, setEmail] = useState('');
-	// const [password, setPassword] = useState('');
+	const navigate = useNavigate();
 
 	const {
+		isLogin,
+		setIsLogin,
 		isRegister,
 		setIsRegister,
 		showPassword,
@@ -44,6 +41,9 @@ const SignUpForm = () => {
 		noUserEmail,
 		togglePassword,
 		togglePasswordConfirm,
+		backendUrl,
+		getUserData,
+		userData,
 	} = useAuthStore();
 
 	const {
@@ -60,14 +60,54 @@ const SignUpForm = () => {
 		},
 	});
 
-	const registerForm = async (data: FormValues) => {
-		console.log('signup: ', data);
+	const registerForm = async (userData: FormValues) => {
+		const { name, email, password } = userData;
+		try {
+			const { data } = await axios.post(backendUrl + '/api/auth/register', {
+				email,
+				name,
+				password,
+			});
+
+			if (data.success) {
+				setIsLogin(true);
+				console.log(data.message);
+				getUserData();
+				navigate('/');
+			} else {
+				alert(data.message);
+			}
+		} catch (err) {
+			console.error(err.message);
+		}
 	};
 
 	const loginForm = async (e) => {
 		e.preventDefault();
 		const { password, email } = e.target;
-		console.log('Login: ', password.value + ' ' + email.value);
+		// setPassword(password.value);
+		// setEmail(email.value);
+		const userEmail = email.value;
+		const userPass = password.value;
+
+		try {
+			axios.defaults.withCredentials = true;
+			const { data } = await axios.post(backendUrl + '/api/auth/login', {
+				email: userEmail,
+				password: userPass,
+			});
+
+			if (data.success) {
+				setIsLogin(true);
+				console.log(data.message);
+				getUserData();
+				navigate('/');
+			} else {
+				console.log(data.message);
+			}
+		} catch (err) {
+			console.log('error: ', err.message);
+		}
 	};
 
 	const handleInputChange = (e) => setEmail(e.target.value);
@@ -76,7 +116,7 @@ const SignUpForm = () => {
 
 	return (
 		<div className=" h-svh flex flex-col justify-center items-center text-white">
-			<div className=" z-20 px-3 py-4 rounded-3xl w-[90%] max-w-[25rem] sm:w-[25rem] lg:w-[30rem] 2xl:w-[50rem] bg-themeBlue-800  ">
+			<div className=" z-20 px-3 py-4 rounded-3xl w-[90%] max-w-[25rem] sm:w-[25rem] lg:w-[30rem] 2xl:w-[50rem] bg-themeBlue-800">
 				<div>
 					<form onSubmit={isRegister ? handleSubmit(registerForm) : loginForm}>
 						{isRegister ? (
@@ -297,10 +337,10 @@ const SignUpForm = () => {
 						</Box>
 					</div> */}
 			</div>
-			<img
+			{/* <img
 				src={'/welcome-astronaut.png?url.'}
-				className="absolute right-25 t z--20 size-50"
-			/>
+				className="absolute hidden  right-[2%] t z--20 size-50"
+			/> */}
 		</div>
 	);
 };

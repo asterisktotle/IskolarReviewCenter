@@ -1,4 +1,5 @@
 import {
+	isAuthenticated,
 	loginAccount,
 	logOutAccount,
 	registerAccount,
@@ -21,5 +22,7 @@ authRouter.post('/verify-otp', userAuth, verifyOtp);
 //reset password
 authRouter.post('/reset-pass-otp', userAuth, resetPasswordOtp);
 authRouter.post('/verify-reset-pass', userAuth, verifyChangePassWithOtp);
+//check user if authenticated
+authRouter.get('/is-auth', userAuth, isAuthenticated);
 
 export default authRouter;

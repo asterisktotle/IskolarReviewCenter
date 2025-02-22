@@ -1,7 +1,14 @@
-// import React from 'react';
-
+import useAuthStore from '../store/store';
+import { useAuth } from '../hooks/useAuth';
 const Home = () => {
-	return <div className="font-">Home</div>;
+	const { userData } = useAuth();
+
+	return (
+		<div className="text-white">
+			Hello
+			{userData ? userData.name : 'developer'}
+		</div>
+	);
 };
 
 export default Home;
