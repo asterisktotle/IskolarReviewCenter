@@ -21,12 +21,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { formSchema } from '../schema/formSchema';
 import useAuthStore from '../store/store';
 import { useNavigate } from 'react-router-dom';
+// import { useAuth } from '../hooks/useAuth';
+import { useEffect } from 'react';
 type FormValues = z.infer<typeof formSchema>;
 
 const SignUpForm = () => {
 	const navigate = useNavigate();
+	// const { isLogin } = useAuth();
 
 	const {
+		login,
 		isLogin,
 		setIsLogin,
 		isRegister,
@@ -43,7 +47,6 @@ const SignUpForm = () => {
 		togglePasswordConfirm,
 		backendUrl,
 		getUserData,
-		userData,
 	} = useAuthStore();
 
 	const {
@@ -84,27 +87,16 @@ const SignUpForm = () => {
 
 	const loginForm = async (e) => {
 		e.preventDefault();
+
+		//store the user data
 		const { password, email } = e.target;
-		// setPassword(password.value);
-		// setEmail(email.value);
 		const userEmail = email.value;
 		const userPass = password.value;
+		setEmail(userEmail);
+		setPassword(userPass);
 
 		try {
-			axios.defaults.withCredentials = true;
-			const { data } = await axios.post(backendUrl + '/api/auth/login', {
-				email: userEmail,
-				password: userPass,
-			});
-
-			if (data.success) {
-				setIsLogin(true);
-				console.log(data.message);
-				getUserData();
-				navigate('/');
-			} else {
-				console.log(data.message);
-			}
+			await login();
 		} catch (err) {
 			console.log('error: ', err.message);
 		}
@@ -114,6 +106,11 @@ const SignUpForm = () => {
 
 	const handleInputPassword = (e) => setPassword(e.target.value);
 
+	useEffect(() => {
+		if (isLogin) {
+			navigate('/');
+		}
+	}, [isLogin, navigate]);
 	return (
 		<div className=" h-svh flex flex-col justify-center items-center text-white">
 			<div className=" z-20 px-3 py-4 rounded-3xl w-[90%] max-w-[25rem] sm:w-[25rem] lg:w-[30rem] 2xl:w-[50rem] bg-themeBlue-800">

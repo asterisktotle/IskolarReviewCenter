@@ -4,6 +4,7 @@ export const userAuth = async (req, res, next) => {
 	const { token } = req.cookies;
 
 	if (!token) {
+		console.log('token not found');
 		return res
 			.status(401)
 			.json({ success: false, message: 'Unauthorized login.' });

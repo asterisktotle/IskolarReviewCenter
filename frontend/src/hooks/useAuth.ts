@@ -4,25 +4,30 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export const useAuth = () => {
-	const { isLogin, getUserData, getAuth, userData } = useAuthStore();
+	const { isLogin, getUserData, getAuth, userData, logout } = useAuthStore();
 	const navigate = useNavigate();
-	axios.defaults.withCredentials = true;
 
 	useEffect(() => {
 		const checkAuth = async () => {
 			try {
-				await getAuth();
-				if (isLogin) {
+				axios.defaults.withCredentials = true;
+				const loginStatus = await getAuth();
+				if (loginStatus) {
 					await getUserData();
-					navigate('/');
-				} else navigate('/login');
+				} else if (!loginStatus) {
+					navigate('/login');
+					await logout();
+					// sessionStorage.removeItem('auth-store');
+					// document.cookie = 'token=; Max-Age=0; path=/;';
+					console.log('remove local storage');
+				}
 			} catch (err) {
 				console.log('useAuth hook error: ', err.message);
 			}
 		};
 
 		checkAuth();
-	}, []);
+	}, [getAuth, getUserData, navigate, logout]);
 
-	return { userData };
+	return { userData, isLogin };
 };
