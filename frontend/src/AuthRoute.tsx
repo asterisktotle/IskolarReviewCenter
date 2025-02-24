@@ -1,11 +1,12 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import useAuthStore from '../src/store/store.js';
-const AuthenticatedRoute = ({ children }) => {
+const AuthenticatedRoute = () => {
 	const isLogin = useAuthStore((state) => state.isLogin);
 	if (!isLogin) {
+		console.log('auth route mounted');
 		return <Navigate replace to={'/login'} />;
 	}
-	return children;
+	return <Outlet />;
 };
 
 export default AuthenticatedRoute;
