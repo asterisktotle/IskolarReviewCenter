@@ -8,19 +8,17 @@ import AuthenticatedRoute from './AuthRoute';
 
 const App = () => {
 	return (
-		<div>
+		<div className="text-white">
 			<Routes>
-				<Route
-					path="/"
-					element={
-						<AuthenticatedRoute>
-							<Home />
-						</AuthenticatedRoute>
-					}
-				/>
+				{/* Public routes */}
 				<Route path="/login" element={<SignUpForm />} />
-				<Route path="/email-verify" element={<EmailVerify />} />
-				<Route path="/reset-password" element={<ResetPassword />} />
+
+				{/* Protected routes */}
+				<Route element={<AuthenticatedRoute />}>
+					<Route path="/" element={<Home />} />
+					<Route path="/email-verify" element={<EmailVerify />} />
+					<Route path="/reset-password" element={<ResetPassword />} />
+				</Route>
 			</Routes>
 		</div>
 	);
