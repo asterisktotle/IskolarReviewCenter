@@ -154,7 +154,7 @@ const SignUpForm = () => {
 										<InputGroup>
 											<Input
 												placeholder="Password"
-												type={showPassword ? 'password' : 'text'}
+												type={showPassword ? 'text' : 'password'}
 												{...register('password', {
 													setValueAs: (value: string) => value.trim(),
 												})}
@@ -183,7 +183,7 @@ const SignUpForm = () => {
 										<InputGroup>
 											<Input
 												placeholder="Confirm Password"
-												type={showConfirmPassword ? 'password' : 'text'}
+												type={showConfirmPassword ? 'text' : 'password'}
 												{...register('confirmPassword')}
 											/>
 											<InputRightElement>
@@ -241,7 +241,7 @@ const SignUpForm = () => {
 									<InputGroup>
 										<Input
 											placeholder="Password"
-											type={showPassword ? 'password' : 'text'}
+											type={showPassword ? 'text' : 'password'}
 											name="password"
 											value={password}
 											onChange={handleInputPassword}

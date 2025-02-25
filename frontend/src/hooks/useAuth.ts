@@ -17,8 +17,6 @@ export const useAuth = () => {
 				} else if (!loginStatus) {
 					navigate('/login');
 					await logout();
-					// sessionStorage.removeItem('auth-store');
-					// document.cookie = 'token=; Max-Age=0; path=/;';
 					console.log('remove local storage');
 				}
 			} catch (err) {

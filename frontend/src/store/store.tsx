@@ -174,6 +174,17 @@ const useAuthStore = create<AuthStore>()(
 					console.log('logout catch error: ', err.message);
 				}
 			},
+			verifyEmail: async (userEmail: string) => {
+				const { backendUrl, email } = get();
+
+				try {
+					const { data } = await axios.post(
+						backendUrl + '/api/auth/verify-email'
+					);
+				} catch (err) {
+					console.log('VerifyEmail: ', err.message);
+				}
+			},
 		}),
 		{
 			name: 'auth-store',
