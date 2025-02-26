@@ -19,6 +19,7 @@ import {
 	PopoverCloseButton,
 	PopoverAnchor,
 	Portal,
+	Image,
 } from '@chakra-ui/react';
 import useAuthStore from '../store/store';
 import { useNavigate } from 'react-router-dom';
@@ -29,9 +30,10 @@ const NavBar = ({ login }: { login: boolean }) => {
 
 	return (
 		<div className="flex justify-between pt-4 ">
-			<img
+			<Image
 				src="../../public/iskolar.png"
-				width={'200px'}
+				width={'150px'}
+				objectFit="contain"
 				alt="iskolar logo"
 				onClick={() => navigate('/')}
 			/>

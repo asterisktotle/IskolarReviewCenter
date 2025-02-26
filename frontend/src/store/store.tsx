@@ -9,6 +9,10 @@ interface UserData {
 	name: string;
 	isAccountVerified: boolean;
 }
+interface SendOTPVerify {
+	success: boolean;
+	message: string;
+}
 
 interface AuthStore {
 	// Form display states
@@ -20,6 +24,7 @@ interface AuthStore {
 	//  Form values
 	email: string;
 	password: string;
+	otp: [number, number, number, number, number, number];
 
 	// Error state
 	incorrectPassword: boolean;
@@ -46,6 +51,8 @@ interface AuthStore {
 	getAuth: () => Promise<boolean>;
 	login: () => Promise<void>;
 	logout: () => Promise<void>;
+	sendOTPVerify: () => Promise<SendOTPVerify>;
+	verifyOTPEmail: () => Promise<SendOTPVerify>;
 }
 
 const useAuthStore = create<AuthStore>()(
@@ -62,6 +69,7 @@ const useAuthStore = create<AuthStore>()(
 			noUserEmail: false,
 			backendUrl: BACKEND_URL,
 			userData: null,
+			otp: [0, 0, 0, 0, 0, 0],
 
 			// Setters
 			setIsLogin: (value) => set({ isLogin: value }),
@@ -174,15 +182,40 @@ const useAuthStore = create<AuthStore>()(
 					console.log('logout catch error: ', err.message);
 				}
 			},
-			verifyEmail: async (userEmail: string) => {
-				const { backendUrl, email } = get();
+			sendOTPVerify: async () => {
+				const { backendUrl } = get();
 
 				try {
-					const { data } = await axios.post(
-						backendUrl + '/api/auth/verify-email'
-					);
+					const { data } = await axios.post(backendUrl + '/api/auth/send-otp');
+
+					//Error handling
+					if (!data.success) {
+						console.log('VerifyEmail:', data.message);
+						return data;
+					}
+
+					console.log('VerifyEmail: ', data.message);
+					return data;
 				} catch (err) {
-					console.log('VerifyEmail: ', err.message);
+					console.log('VerifyEmail Catch Error: ', err.message);
+				}
+			},
+			verifyOTPEmail: async () => {
+				const { otp, backendUrl } = get();
+				try {
+					const { data } = await axios.post(
+						backendUrl + '/api/auth/verify-otp',
+						{
+							otp,
+						}
+					);
+
+					if (!data.success) {
+						console.log('verifyOTP: ', data.message);
+						return data;
+					}
+				} catch (err) {
+					console.log('verifyOTP catch error: ', err.message);
 				}
 			},
 		}),
