@@ -133,7 +133,7 @@ export const sendOtp = async (req, res) => {
 
 		return res.json({
 			success: true,
-			message: 'Verification OTP sent on email.',
+			message: 'Verification OTP sent on email and will expire in 15 mins.',
 		});
 	} catch (err) {
 		console.log('error here', err.message);
@@ -153,14 +153,14 @@ export const verifyOtp = async (req, res) => {
 		if (!user) {
 			return res.json({
 				success: false,
-				message: 'This user account does not exist.',
+				message: 'User account does not exist.',
 			});
 		}
 
 		if (user.isAccountVerified) {
 			return res.json({
 				success: false,
-				message: 'This account is already verified',
+				message: 'Email is already verified',
 			});
 		}
 
