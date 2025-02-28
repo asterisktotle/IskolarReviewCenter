@@ -20,8 +20,8 @@ authRouter.post('/logout', logOutAccount);
 authRouter.post('/send-otp', userAuth, sendOtp);
 authRouter.post('/verify-otp', userAuth, verifyOtp);
 //reset password
-authRouter.post('/reset-pass-otp', userAuth, resetPasswordOtp);
-authRouter.post('/verify-reset-pass', userAuth, verifyChangePassWithOtp);
+authRouter.post('/reset-pass-otp', resetPasswordOtp);
+authRouter.post('/verify-reset-pass', verifyChangePassWithOtp);
 //check user if authenticated
 authRouter.get('/is-auth', userAuth, isAuthenticated);
 

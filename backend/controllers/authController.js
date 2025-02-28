@@ -187,10 +187,11 @@ export const verifyOtp = async (req, res) => {
 };
 
 export const resetPasswordOtp = async (req, res) => {
-	const { userId } = req.body;
+	// const { userId } = req.body;
+	const { email } = req.body;
 
 	try {
-		const user = await userModel.findById(userId);
+		const user = await userModel.findOne({ email });
 
 		if (!user) {
 			return res.json({ success: false, message: 'User does not exist' });
@@ -221,17 +222,17 @@ export const resetPasswordOtp = async (req, res) => {
 };
 
 export const verifyChangePassWithOtp = async (req, res) => {
-	const { otp, password, userId } = req.body;
+	const { otp, password, email } = req.body;
 
-	if (!otp || !password) {
+	if (!otp || !password || !email) {
 		return res.json({
 			success: false,
-			message: 'Please fill in the OTP and new password',
+			message: 'Please fill in your OTP and new password',
 		});
 	}
 
 	try {
-		const user = await userModel.findById(userId);
+		const user = await userModel.findOne({ email });
 
 		if (!user) {
 			return res.json({ success: false, message: 'Account does not exist' });
@@ -245,14 +246,20 @@ export const verifyChangePassWithOtp = async (req, res) => {
 			return res.json({ success: false, message: 'OTP is already expired.' });
 		}
 
-		if (password === user.password) {
+		const passwordIsMatch = await bcrypt.compare(password, user.password);
+
+		if (passwordIsMatch) {
 			return res.json({
 				success: false,
 				message: 'Please enter a new password',
 			});
 		}
+		const newPassword = await bcrypt.hash(password, 10);
 
-		user.password = password;
+		user.password = newPassword;
+		user.resetOTP = null;
+		user.resetOtpExpiresAt = null;
+		await user.save();
 
 		return res.json({
 			success: true,

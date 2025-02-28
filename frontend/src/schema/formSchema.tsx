@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const formSchema = z
+export const signupSchema = z
 	.object({
 		name: z
 			.string()
@@ -18,3 +18,20 @@ export const formSchema = z
 		message: "Passwords don't match",
 		path: ['confirmPassword'],
 	});
+
+export const signinSchema = z.object({
+	email: z.string().email('Please enter a valid email'),
+	password: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+export const forgotPasswordSchema = z.object({
+	email: z.string().email('Please enter a valid email'),
+});
+
+export const otpSchema = z.object({
+	// email: z.string().email('Please enter a valid email'),
+	otp: z
+		.string()
+		.length(6, 'OTP must be 6 digits')
+		.regex(/^\d+$/, 'OTP must be a number'),
+});
