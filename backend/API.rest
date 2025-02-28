@@ -19,7 +19,7 @@ Content-Type: application/json
 
 {
     "email": "14bcneat@gmail.com",
-    "password": "14bcneat"
+    "password": "oldpassword123"
     
 }
 
@@ -27,11 +27,7 @@ Content-Type: application/json
 POST http://localhost:3100/api/auth/logout
 Content-Type: application/json
 
-{
-    "email": "jander@gmail.com",
-    "password": "1231312"
-    
-}
+
 
 ### Send an account verification OTP POST /AUTH/SEND-OTP
 POST http://localhost:3100/api/auth/send-otp
@@ -50,15 +46,22 @@ POST http://localhost:3100/api/auth/reset-pass-otp
 Content-Type: application/json
 
 
+{
+    "email": "14bcneat@gmail.com"
+    
+}
+
+
 
 
 ### verify reset password OTP POST /AUTH/VERIFY-OTP
 POST http://localhost:3100/api/auth/verify-reset-pass
 Content-Type: application/json
 
-{
-    "otp": "903541",
-    "password": "password123"
+{   
+    "otp": "774625",
+    "email":"14bcneat@gmail.com",
+    "password": "oldpassword123"
     
 }
 

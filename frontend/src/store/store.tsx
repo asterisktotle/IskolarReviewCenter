@@ -17,7 +17,7 @@ interface SendOTPVerify {
 interface AuthStore {
 	// Form display states
 	isLogin: boolean;
-	isRegister: boolean;
+	// isRegister: boolean;
 	showPassword: boolean;
 	showConfirmPassword: boolean;
 
@@ -34,7 +34,7 @@ interface AuthStore {
 
 	//Setters
 	setIsLogin: (value: boolean) => void;
-	setIsRegister: (value: boolean) => void;
+	// setIsRegister: (value: boolean) => void;
 	setUserData: (data: UserData) => void;
 	togglePassword: () => void;
 	togglePasswordConfirm: () => void;
@@ -60,7 +60,7 @@ const useAuthStore = create<AuthStore>()(
 		(set, get) => ({
 			//Initial values
 			isLogin: false,
-			isRegister: true,
+			// isRegister: true,
 			showPassword: false,
 			showConfirmPassword: false,
 			email: '',
@@ -73,7 +73,7 @@ const useAuthStore = create<AuthStore>()(
 
 			// Setters
 			setIsLogin: (value) => set({ isLogin: value }),
-			setIsRegister: (value) => set({ isRegister: value }),
+			// setIsRegister: (value) => set({ isRegister: value }),
 			togglePassword: () =>
 				set((state) => ({ showPassword: !state.showPassword })),
 			togglePasswordConfirm: () =>
