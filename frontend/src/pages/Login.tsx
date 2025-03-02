@@ -9,13 +9,16 @@ import {
 	InputGroup,
 	Button,
 	Container,
+	HStack,
+	PinInputField,
+	PinInput,
 	Flex,
 } from '@chakra-ui/react';
 
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import axios from 'axios';
 
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -46,60 +49,45 @@ const SignUpForm = () => {
 		setIsLogin,
 		// isRegister,
 		// setIsRegister,
-		showPassword,
-		showConfirmPassword,
+		// showPassword,
+		// showConfirmPassword,
 		email,
 		setEmail,
 		password,
 		setPassword,
 		incorrectPassword,
 		noUserEmail,
-		togglePassword,
-		togglePasswordConfirm,
+		// togglePassword,
+		// togglePasswordConfirm,
 		backendUrl,
 		getUserData,
 	} = useAuthStore();
 
 	const [formState, setFormState] = useState('signin');
 
-	// ZOD FORM HANDLER ERROR
-	// const {
-	// 	register,
-	// 	handleSubmit,
-	// 	formState: { errors },
-	// } = useForm<FormValues>({
-	// 	resolver: zodResolver(signupSchema),
-	// 	defaultValues: {
-	// 		name: '',
-	// 		email: '',
-	// 		password: '',
-	// 		confirmPassword: '',
-	// 	},
-	// });
+	// const loginForm = async (e) => {
+	// 	e.preventDefault();
 
-	const loginForm = async (e) => {
-		e.preventDefault();
+	// 	//store the user data
+	// 	const { password, email } = e.target;
+	// 	const userEmail = email.value;
+	// 	const userPass = password.value;
+	// 	setEmail(userEmail);
+	// 	setPassword(userPass);
 
-		//store the user data
-		const { password, email } = e.target;
-		const userEmail = email.value;
-		const userPass = password.value;
-		setEmail(userEmail);
-		setPassword(userPass);
-
-		try {
-			await login();
-		} catch (err) {
-			console.log('error: ', err.message);
-		} finally {
-			email.value = '';
-			password.value = '';
-		}
-	};
+	// 	try {
+	// 		await login();
+	// 	} catch (err) {
+	// 		console.log('error: ', err.message);
+	// 	} finally {
+	// 		email.value = '';
+	// 		password.value = '';
+	// 	}
+	// };
 
 	// INPUT HANDLER
-	const handleInputChange = (e) => setEmail(e.target.value);
-	const handleInputPassword = (e) => setPassword(e.target.value);
+	// const handleInputChange = (e) => setEmail(e.target.value);
+	// const handleInputPassword = (e) => setPassword(e.target.value);
 
 	useEffect(() => {
 		if (isLogin) {
@@ -109,7 +97,33 @@ const SignUpForm = () => {
 
 	//Forms
 	const SignUpForm = () => {
-		//Zod Form Handler
+		const [togglePassword, setTogglePassword] = useState(false);
+		const [toggleConfirmPass, setToggleConfirmPass] = useState(false);
+		const [emailAlreadyUsed, setEmailAlreadyUsed] = useState(false);
+
+		const registerForm = async (userData: FormValuesSignUp) => {
+			const { name, email, password } = userData;
+			try {
+				setEmailAlreadyUsed(false);
+				const { data } = await axios.post(backendUrl + '/api/auth/register', {
+					email,
+					name,
+					password,
+				});
+
+				if (data.success) {
+					setIsLogin(true);
+					console.log(data.message);
+					getUserData();
+					navigate('/');
+				} else {
+					setEmailAlreadyUsed(true);
+				}
+			} catch (err) {
+				console.error(err.message);
+			}
+		};
+
 		const {
 			register,
 			handleSubmit,
@@ -123,28 +137,6 @@ const SignUpForm = () => {
 				confirmPassword: '',
 			},
 		});
-
-		const registerForm = async (userData: FormValuesSignUp) => {
-			const { name, email, password } = userData;
-			try {
-				const { data } = await axios.post(backendUrl + '/api/auth/register', {
-					email,
-					name,
-					password,
-				});
-
-				if (data.success) {
-					setIsLogin(true);
-					console.log(data.message);
-					getUserData();
-					navigate('/');
-				} else {
-					alert(data.message);
-				}
-			} catch (err) {
-				console.error(err.message);
-			}
-		};
 
 		return (
 			<form onSubmit={handleSubmit(registerForm)}>
@@ -168,10 +160,14 @@ const SignUpForm = () => {
 							)}
 						</FormControl>
 
-						<FormControl isInvalid={!!errors.email}>
+						<FormControl isInvalid={!!errors.email || emailAlreadyUsed}>
 							<Input placeholder="Email" type="text" {...register('email')} />
-							{errors.email && (
+							{errors.email ? (
 								<FormErrorMessage>{errors.email.message}</FormErrorMessage>
+							) : (
+								emailAlreadyUsed && (
+									<FormErrorMessage>Email is already used</FormErrorMessage>
+								)
 							)}
 						</FormControl>
 
@@ -179,7 +175,7 @@ const SignUpForm = () => {
 							<InputGroup>
 								<Input
 									placeholder="Password"
-									type={showPassword ? 'text' : 'password'}
+									type={togglePassword ? 'text' : 'password'}
 									{...register('password', {
 										setValueAs: (value: string) => value.trim(),
 									})}
@@ -188,11 +184,11 @@ const SignUpForm = () => {
 								<InputRightElement>
 									<IconButton
 										aria-label={
-											showPassword ? 'Hide password' : 'Show password'
+											togglePassword ? 'Hide password' : 'Show password'
 										}
-										icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
+										icon={togglePassword ? <ViewOffIcon /> : <ViewIcon />}
 										variant="ghost"
-										onClick={togglePassword}
+										onClick={() => setTogglePassword(!togglePassword)}
 										size="sm"
 									/>
 								</InputRightElement>
@@ -206,17 +202,17 @@ const SignUpForm = () => {
 							<InputGroup>
 								<Input
 									placeholder="Confirm Password"
-									type={showConfirmPassword ? 'text' : 'password'}
+									type={toggleConfirmPass ? 'text' : 'password'}
 									{...register('confirmPassword')}
 								/>
 								<InputRightElement>
 									<IconButton
 										aria-label={
-											showConfirmPassword ? 'Hide password' : 'Show password'
+											toggleConfirmPass ? 'Hide password' : 'Show password'
 										}
-										icon={showConfirmPassword ? <ViewOffIcon /> : <ViewIcon />}
+										icon={toggleConfirmPass ? <ViewOffIcon /> : <ViewIcon />}
 										variant="ghost"
-										onClick={togglePasswordConfirm}
+										onClick={() => setToggleConfirmPass(!toggleConfirmPass)}
 										size="sm"
 									/>
 								</InputRightElement>
@@ -239,77 +235,80 @@ const SignUpForm = () => {
 						</Button>
 					</VStack>
 				</Container>
+				<Flex gap={1}>
+					Already have an account?
+					<Box
+						_hover={{
+							textColor: 'yellow',
+						}}
+						cursor={'pointer'}
+						onClick={() => setFormState('signin')}
+					>
+						Sign in
+					</Box>
+				</Flex>
 			</form>
 		);
 	};
 
 	const SignInForm = () => {
-		const {
-			register,
-			handleSubmit,
-			formState: { errors },
-		} = useForm({
-			resolver: zodResolver(signinSchema),
-		});
+		const [togglePassword, setTogglePassword] = useState(false);
+		const [userEmail, setUserEmail] = useState(email);
+		const [userPass, setUserPass] = useState('');
 
-		const handleSignInForm = async (userData: FormValuesSignIn) => {
-			const { email, password } = userData;
-
-			setEmail(email);
-			setPassword(password);
+		const handleSignInForm = async (e) => {
+			e.preventDefault();
+			setEmail(userEmail);
+			setPassword(userPass);
+			console.log('user info submitted: ', userEmail, userPass);
 
 			try {
 				await login();
 			} catch (err) {
 				console.log('error: ', err.message);
-			} finally {
-				email.value = '';
-				password.value = '';
 			}
 		};
 
 		return (
-			<form onSubmit={handleSubmit(handleSignInForm)}>
+			<form onSubmit={handleSignInForm}>
 				<VStack padding={3} spacing={3} align={'stretch'}>
 					<Box fontSize={30}> SIGN IN</Box>
 
 					{/* Email */}
-					<FormControl isRequired isInvalid={!!noUserEmail}>
+					<FormControl isRequired isInvalid={noUserEmail}>
 						<Input
 							placeholder="Email"
-							type="email"
-							{...register('email')}
+							type="text"
 							color={'white'}
 							p={2}
-							// value={email}
-							onChange={handleInputChange}
+							value={userEmail}
+							name="email"
+							onChange={(e) => {
+								setUserEmail(e.target.value);
+							}}
 						/>
-
-						{errors.email ? (
-							<FormErrorMessage>{errors.email.message}</FormErrorMessage>
-						) : (
-							<FormErrorMessage>No user email</FormErrorMessage>
-						)}
+						<FormErrorMessage>No user email</FormErrorMessage>
 					</FormControl>
 
 					{/* Password */}
-					<FormControl isRequired isInvalid={!!incorrectPassword}>
+					<FormControl isRequired isInvalid={incorrectPassword}>
 						<InputGroup>
 							<Input
 								placeholder="Password"
-								type={showPassword ? 'text' : 'password'}
-								// name="password"
-								// value={password}
-								{...register('password')}
-								onChange={handleInputPassword}
+								type={togglePassword ? 'text' : 'password'}
+								name="password"
+								value={userPass}
+								onChange={(e) => setUserPass(e.target.value)}
 							/>
 
 							<InputRightElement>
 								<IconButton
-									aria-label={showPassword ? 'Hide password' : 'Show password'}
-									icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
+									aria-label={
+										togglePassword ? 'Hide password' : 'Show password'
+									}
+									icon={togglePassword ? <ViewOffIcon /> : <ViewIcon />}
 									variant="ghost"
-									onClick={togglePassword}
+									onClick={() => setTogglePassword(!togglePassword)}
 									size="sm"
 								/>
 							</InputRightElement>
@@ -335,12 +334,24 @@ const SignUpForm = () => {
 						cursor={'pointer'}
 						w={'full'}
 						textAlign={'center'}
-						onClick={() => console.log('click forgot password')}
+						onClick={() => setFormState('forgot-password')}
 					>
 						{' '}
 						Forgot Password
 					</Box>
 				</VStack>
+				<Flex gap={1}>
+					Don't have an account?
+					<Box
+						_hover={{
+							textColor: 'yellow',
+						}}
+						cursor={'pointer'}
+						onClick={() => setFormState('signup')}
+					>
+						Sign up
+					</Box>
+				</Flex>
 			</form>
 		);
 	};
@@ -354,71 +365,176 @@ const SignUpForm = () => {
 			resolver: zodResolver(forgotPasswordSchema),
 		});
 
-		const handleForgotPassword = async (email) => {
-			console.log(email);
+		const [otpSent, setOtpSent] = useState(false);
+		const [confirmationMessage, setConfirmationMessage] = useState('');
+
+		const handleForgotPassword = async ({ email }: { email: string }) => {
+			try {
+				setOtpSent(false);
+				const { data } = await axios.post(
+					backendUrl + '/api/auth/reset-pass-otp',
+					{
+						email,
+					}
+				);
+
+				if (!data.success) {
+					console.log('forgot pass error: ', data.message);
+					setConfirmationMessage(data.message);
+				}
+
+				if (data.success) {
+					setOtpSent(true);
+					// setConfirmationMessage(data.message);
+				}
+			} catch (err) {
+				console.error('forgot password error:', err.message);
+				setConfirmationMessage(err.message);
+			}
 		};
 
 		return (
-			<form onSubmit={handleSubmit(handleForgotPassword)}>
-				<VStack padding={3} spacing={3} align={'stretch'}>
-					<Box fontSize={30}> Forgot Password</Box>
+			<div>
+				<form onSubmit={handleSubmit(handleForgotPassword)}>
+					<VStack padding={3} spacing={3} align={'stretch'}>
+						<Box fontSize={30}> Forgot Password</Box>
 
-					<FormControl isRequired isInvalid={!!noUserEmail}>
-						<Input
-							placeholder="Email"
-							type="email"
-							{...register('email')}
-							color={'white'}
-							p={2}
-							onChange={handleInputChange}
-						/>
+						<FormControl isRequired isInvalid={!!noUserEmail}>
+							<Input
+								placeholder="Email"
+								type="email"
+								{...register('email')}
+								color={'white'}
+								p={2}
+								// onChange={handleInputChange}
+							/>
 
-						{errors.email ? (
-							<FormErrorMessage>{errors.email.message}</FormErrorMessage>
-						) : (
-							<FormErrorMessage>Email does not exist</FormErrorMessage>
-						)}
-					</FormControl>
-				</VStack>
-			</form>
+							{errors.email ? (
+								<FormErrorMessage>{errors.email.message}</FormErrorMessage>
+							) : (
+								<FormErrorMessage>{confirmationMessage}</FormErrorMessage>
+							)}
+
+							<Button
+								_hover={{
+									background: '#006da5',
+								}}
+								bg={'#0c638d'}
+								textColor={'white'}
+								type="submit"
+							>
+								Send OTP
+							</Button>
+						</FormControl>
+					</VStack>
+					<Flex gap={2}>
+						{' '}
+						<Box
+							_hover={{
+								textColor: 'yellow',
+							}}
+							cursor={'pointer'}
+							onClick={() => setFormState('signin')}
+						>
+							Sign in
+						</Box>
+						or
+						<Box
+							_hover={{
+								textColor: 'yellow',
+							}}
+							cursor={'pointer'}
+							onClick={() => setFormState('signup')}
+						>
+							Sign up
+						</Box>
+					</Flex>
+				</form>
+
+				{otpSent && <OTPForm />}
+			</div>
 		);
 	};
 
 	const OTPForm = () => {
 		const {
-			register,
+			control,
 			handleSubmit,
 			formState: { errors },
 		} = useForm({
 			resolver: zodResolver(otpSchema),
+			defaultValues: {
+				otp: '',
+			},
 		});
+		const [otpMessageError, setOtpMessageError] = useState('');
+		const [otpMessage, setOtpMessage] = useState('');
+		const [successChangePass, setSuccessChangePass] = useState(false);
 
-		const handleOTP = async (otp) => {
-			console.log(otp);
+		const handleOTP = async ({ otp }: { otp: string }) => {
+			try {
+				setSuccessChangePass(false);
+				const { data } = await axios.post(
+					backendUrl + '/api/auth/verify-reset-pass',
+					{
+						otp,
+					}
+				);
+
+				if (!data.success) {
+					setOtpMessageError(data.message);
+				}
+
+				if (data.success) {
+					setSuccessChangePass(true);
+					setOtpMessage(data.message);
+				}
+			} catch (err) {
+				console.log(err.message);
+			}
 		};
 
 		return (
 			<form onSubmit={handleSubmit(handleOTP)}>
-				<VStack padding={3} spacing={3} align={'stretch'}>
-					<Box fontSize={30}> Forgot Password</Box>
-
-					<FormControl isRequired isInvalid={!!noUserEmail}>
-						<Input
-							placeholder="Email"
-							type="email"
-							{...register('email')}
-							color={'white'}
-							p={2}
-							onChange={handleInputChange}
-						/>
-
-						{errors.email ? (
-							<FormErrorMessage>{errors.email.message}</FormErrorMessage>
-						) : (
-							<FormErrorMessage>Email does not exist</FormErrorMessage>
+				<FormControl isInvalid={!!errors.otp || !!otpMessageError}>
+					<Controller
+						control={control}
+						name="otp"
+						render={({ field: { onChange, value } }) => (
+							<HStack>
+								<Box>Enter your OTP</Box>
+								<PinInput otp size={'xs'} value={value} onChange={onChange}>
+									<PinInputField />
+									<PinInputField />
+									<PinInputField />
+									<PinInputField />
+									<PinInputField />
+									<PinInputField />
+								</PinInput>
+							</HStack>
 						)}
-					</FormControl>
-				</VStack>
+					></Controller>
+
+					{errors.otp ? (
+						<FormErrorMessage>{errors.otp.message}</FormErrorMessage>
+					) : (
+						otpMessageError && (
+							<FormErrorMessage>{otpMessageError}</FormErrorMessage>
+						)
+					)}
+					<Button
+						_hover={{
+							background: '#006da5',
+						}}
+						bg={'#0c638d'}
+						textColor={'white'}
+						type="submit"
+					>
+						Enter
+					</Button>
+
+					{successChangePass && <Box>{otpMessage}</Box>}
+				</FormControl>
 			</form>
 		);
 	};
@@ -431,217 +547,14 @@ const SignUpForm = () => {
 			case 'signin':
 				return <SignInForm />;
 			case 'forgot-password':
-				<ForgotPasswordForm />;
+				return <ForgotPasswordForm />;
 		}
 	};
 
 	return (
 		<div className=" h-svh flex flex-col justify-center items-center text-white">
 			<div className=" z-20 px-3 py-4 rounded-3xl w-[90%] max-w-[25rem] sm:w-[25rem] lg:w-[30rem] 2xl:w-[50rem] bg-themeBlue-800">
-				<div>
-					<form onSubmit={isRegister ? handleSubmit(registerForm) : loginForm}>
-						{/* {formState === 'signup' ? 
-						//REGISTRATION FORM 
-						(
-							<Container>
-								<Container backdropBlur={'3xl'} blur={'3xl'}>
-									<Box fontSize={30}> WELCOME</Box>
-									<Box fontSize={15}>Create an account and join us!</Box>
-								</Container>
-
-								<VStack padding={3} spacing={3} align={'stretch'}>
-									<FormControl isInvalid={!!errors.name}>
-										<Input
-											placeholder="Name"
-											type="text"
-											{...register('name')}
-											color={'white'}
-											p={2}
-										/>
-										{errors.name && (
-											<FormErrorMessage>{errors.name.message}</FormErrorMessage>
-										)}
-									</FormControl>
-
-									<FormControl isInvalid={!!errors.email}>
-										<Input
-											placeholder="Email"
-											type="text"
-											{...register('email')}
-										/>
-										{errors.email && (
-											<FormErrorMessage>
-												{errors.email.message}
-											</FormErrorMessage>
-										)}
-									</FormControl>
-
-									<FormControl isInvalid={!!errors.password}>
-										<InputGroup>
-											<Input
-												placeholder="Password"
-												type={showPassword ? 'text' : 'password'}
-												{...register('password', {
-													setValueAs: (value: string) => value.trim(),
-												})}
-											/>
-
-											<InputRightElement>
-												<IconButton
-													aria-label={
-														showPassword ? 'Hide password' : 'Show password'
-													}
-													icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
-													variant="ghost"
-													onClick={togglePassword}
-													size="sm"
-												/>
-											</InputRightElement>
-										</InputGroup>
-										{errors.password && (
-											<FormErrorMessage>
-												{errors.password.message}
-											</FormErrorMessage>
-										)}
-									</FormControl>
-
-									<FormControl isInvalid={!!errors.confirmPassword}>
-										<InputGroup>
-											<Input
-												placeholder="Confirm Password"
-												type={showConfirmPassword ? 'text' : 'password'}
-												{...register('confirmPassword')}
-											/>
-											<InputRightElement>
-												<IconButton
-													aria-label={
-														showConfirmPassword
-															? 'Hide password'
-															: 'Show password'
-													}
-													icon={
-														showConfirmPassword ? <ViewOffIcon /> : <ViewIcon />
-													}
-													variant="ghost"
-													onClick={togglePasswordConfirm}
-													size="sm"
-												/>
-											</InputRightElement>
-										</InputGroup>
-										{errors.confirmPassword && (
-											<FormErrorMessage>
-												{errors.confirmPassword.message}
-											</FormErrorMessage>
-										)}
-									</FormControl>
-									<Button
-										_hover={{
-											background: '#006da5',
-										}}
-										bg={'#0c638d'}
-										textColor={'white'}
-										type="submit"
-									>
-										Register
-									</Button>
-								</VStack>
-							</Container>
-						) : 
-						// SIGN UP FORM
-						(
-							<VStack padding={3} spacing={3} align={'stretch'}>
-								<Box fontSize={30}> SIGN IN</Box>
-
-								<FormControl isRequired isInvalid={noUserEmail}>
-									<Input
-										placeholder="Email"
-										type="email"
-										name="email"
-										color={'white'}
-										p={2}
-										value={email}
-										onChange={handleInputChange}
-									/>
-
-									<FormErrorMessage>Email does not exist</FormErrorMessage>
-								</FormControl>
-								<FormControl isRequired isInvalid={incorrectPassword}>
-									<InputGroup>
-										<Input
-											placeholder="Password"
-											type={showPassword ? 'text' : 'password'}
-											name="password"
-											value={password}
-											onChange={handleInputPassword}
-										/>
-
-										<InputRightElement>
-											<IconButton
-												aria-label={
-													showPassword ? 'Hide password' : 'Show password'
-												}
-												icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
-												variant="ghost"
-												onClick={togglePassword}
-												size="sm"
-											/>
-										</InputRightElement>
-									</InputGroup>
-									<FormErrorMessage>Incorrect password.</FormErrorMessage>
-								</FormControl>
-								<Button
-									_hover={{
-										background: '#006da5',
-									}}
-									bg={'#0c638d'}
-									textColor={'white'}
-									type="submit"
-								>
-									Sign In
-								</Button>
-								<Box
-									_hover={{
-										textColor: 'orange',
-									}}
-									cursor={'pointer'}
-									w={'full'}
-									textAlign={'center'}
-									onClick={() =>}
-								>
-									{' '}
-									Forgot Password
-								</Box>
-							</VStack>
-						)} */}
-						renderForm();
-					</form>
-					{/* {formState === 'signin' ? (
-						<Flex ml={4} padding={3}>
-							Already have an account?
-							<Box
-								_hover={{
-									textColor: 'green',
-								}}
-								paddingLeft={1}
-								onClick={() => setIsRegister(!isRegister)}
-							>
-								Sign In
-							</Box>
-						</Flex>
-					) : (
-						<Flex padding={3}>
-							<span className="mr-1">Don't have an account?</span>
-							<Box
-								_hover={{
-									textColor: 'green',
-								}}
-								onClick={() => setIsRegister(!isRegister)}
-							>
-								Sign Up
-							</Box>
-						</Flex>
-					)} */}
-				</div>
+				{renderForm()}
 			</div>
 		</div>
 	);

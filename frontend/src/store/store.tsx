@@ -140,6 +140,8 @@ const useAuthStore = create<AuthStore>()(
 					setNoUserEmail,
 				} = get();
 				try {
+					setNoUserEmail(false);
+					setIncorrectPassword(false);
 					const { data } = await axios.post(
 						backendUrl + '/api/auth/login',
 						{
