@@ -186,7 +186,8 @@ export const verifyOtp = async (req, res) => {
 	}
 };
 
-export const resetPasswordOtp = async (req, res) => {
+// Changing Password
+export const resetPasswordRequestOTP = async (req, res) => {
 	// const { userId } = req.body;
 	const { email } = req.body;
 
@@ -195,6 +196,9 @@ export const resetPasswordOtp = async (req, res) => {
 
 		if (!user) {
 			return res.json({ success: false, message: 'User does not exist' });
+		}
+		if (user.resetOTP) {
+			return res.json({ success: false, message: 'OTP is already sent' });
 		}
 
 		const otp = String(100000 + Math.floor(Math.random() * 900000));
@@ -220,6 +224,44 @@ export const resetPasswordOtp = async (req, res) => {
 		res.json({ success: false, message: err.message });
 	}
 };
+
+// export const verifyOtpChangePass = async (req, res) => {
+// 	const { email, password } = req.body;
+
+// 	if (!email || !otp) {
+// 		return res.status(400).json({ success: false, message: 'Missing details' });
+// 	}
+
+// 	try {
+// 		const user = await userModel.findOne({ email });
+// 		if (!user) {
+// 			return res.json({
+// 				success: false,
+// 				message: 'User account does not exist.',
+// 			});
+// 		}
+
+// 		if (!user.resetOTP || user.resetOTP !== otp) {
+// 			return res.json({ success: false, message: 'Invalid OTP' });
+// 		}
+
+// 		if (user.resetOtpExpiresAt < Date.now()) {
+// 			return res.json({ success: false, message: 'OTP is already expired.' });
+// 		}
+
+// 		user.isAccountVerified = true;
+
+// 		//reset state
+// 		user.verifyOtp = null;
+// 		user.verifyOtpExpireAt = null;
+// 		await user.save();
+
+// 		return res.json({ success: true, message: 'Account verified' });
+// 	} catch (err) {
+// 		console.log('verification otp failed: ', err.message);
+// 		return res.json({ success: false, message: err.message });
+// 	}
+// };
 
 export const verifyChangePassWithOtp = async (req, res) => {
 	const { otp, password, email } = req.body;
