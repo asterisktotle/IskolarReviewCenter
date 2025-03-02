@@ -13,6 +13,7 @@ import {
 	PinInputField,
 	PinInput,
 	Flex,
+	Text,
 } from '@chakra-ui/react';
 
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
@@ -64,30 +65,7 @@ const SignUpForm = () => {
 	} = useAuthStore();
 
 	const [formState, setFormState] = useState('signin');
-
-	// const loginForm = async (e) => {
-	// 	e.preventDefault();
-
-	// 	//store the user data
-	// 	const { password, email } = e.target;
-	// 	const userEmail = email.value;
-	// 	const userPass = password.value;
-	// 	setEmail(userEmail);
-	// 	setPassword(userPass);
-
-	// 	try {
-	// 		await login();
-	// 	} catch (err) {
-	// 		console.log('error: ', err.message);
-	// 	} finally {
-	// 		email.value = '';
-	// 		password.value = '';
-	// 	}
-	// };
-
-	// INPUT HANDLER
-	// const handleInputChange = (e) => setEmail(e.target.value);
-	// const handleInputPassword = (e) => setPassword(e.target.value);
+	const [otpSent, setOtpSent] = useState(false);
 
 	useEffect(() => {
 		if (isLogin) {
@@ -357,20 +335,16 @@ const SignUpForm = () => {
 	};
 
 	const ForgotPasswordForm = () => {
-		const {
-			register,
-			handleSubmit,
-			formState: { errors },
-		} = useForm({
+		const { register, handleSubmit } = useForm({
 			resolver: zodResolver(forgotPasswordSchema),
 		});
 
-		const [otpSent, setOtpSent] = useState(false);
-		const [confirmationMessage, setConfirmationMessage] = useState('');
+		const [errorMessage, setErrorMessage] = useState(false);
 
 		const handleForgotPassword = async ({ email }: { email: string }) => {
 			try {
 				setOtpSent(false);
+				setErrorMessage(false);
 				const { data } = await axios.post(
 					backendUrl + '/api/auth/reset-pass-otp',
 					{
@@ -380,41 +354,42 @@ const SignUpForm = () => {
 
 				if (!data.success) {
 					console.log('forgot pass error: ', data.message);
-					setConfirmationMessage(data.message);
+					setErrorMessage(true);
+					return;
 				}
 
 				if (data.success) {
+					console.log(data.message);
 					setOtpSent(true);
-					// setConfirmationMessage(data.message);
+					return;
 				}
 			} catch (err) {
 				console.error('forgot password error:', err.message);
-				setConfirmationMessage(err.message);
 			}
 		};
 
 		return (
-			<div>
-				<form onSubmit={handleSubmit(handleForgotPassword)}>
-					<VStack padding={3} spacing={3} align={'stretch'}>
-						<Box fontSize={30}> Forgot Password</Box>
+			<Box p={3}>
+				<Box fontSize={30}> Forgot Password</Box>
 
-						<FormControl isRequired isInvalid={!!noUserEmail}>
-							<Input
-								placeholder="Email"
-								type="email"
-								{...register('email')}
-								color={'white'}
-								p={2}
-								// onChange={handleInputChange}
-							/>
-
-							{errors.email ? (
-								<FormErrorMessage>{errors.email.message}</FormErrorMessage>
-							) : (
-								<FormErrorMessage>{confirmationMessage}</FormErrorMessage>
-							)}
-
+				{otpSent ? (
+					<OTPForm />
+				) : (
+					<form onSubmit={handleSubmit(handleForgotPassword)}>
+						<VStack padding={3} spacing={3} align={'stretch'}>
+							<FormControl isRequired isInvalid={errorMessage}>
+								<Input
+									placeholder="Email"
+									type="email"
+									{...register('email')}
+									color={'white'}
+									p={2}
+									// onChange={handleInputChange}
+								/>
+								<FormErrorMessage>
+									This account is not registered user.
+								</FormErrorMessage>
+							</FormControl>
 							<Button
 								_hover={{
 									background: '#006da5',
@@ -425,34 +400,44 @@ const SignUpForm = () => {
 							>
 								Send OTP
 							</Button>
-						</FormControl>
-					</VStack>
-					<Flex gap={2}>
-						{' '}
-						<Box
-							_hover={{
-								textColor: 'yellow',
-							}}
-							cursor={'pointer'}
-							onClick={() => setFormState('signin')}
-						>
-							Sign in
-						</Box>
-						or
-						<Box
-							_hover={{
-								textColor: 'yellow',
-							}}
-							cursor={'pointer'}
-							onClick={() => setFormState('signup')}
-						>
-							Sign up
-						</Box>
-					</Flex>
-				</form>
-
-				{otpSent && <OTPForm />}
-			</div>
+							<Flex gap={1}>
+								Already have an OTP?
+								<Box
+									_hover={{
+										textColor: 'yellow',
+									}}
+									cursor={'pointer'}
+									onClick={() => setOtpSent(!otpSent)}
+								>
+									Enter here!
+								</Box>
+							</Flex>
+						</VStack>
+						<Flex gap={2}>
+							{' '}
+							<Box
+								_hover={{
+									textColor: 'yellow',
+								}}
+								cursor={'pointer'}
+								onClick={() => setFormState('signin')}
+							>
+								Sign in
+							</Box>
+							or
+							<Box
+								_hover={{
+									textColor: 'yellow',
+								}}
+								cursor={'pointer'}
+								onClick={() => setFormState('signup')}
+							>
+								Sign up
+							</Box>
+						</Flex>
+					</form>
+				)}
+			</Box>
 		);
 	};
 
@@ -460,6 +445,7 @@ const SignUpForm = () => {
 		const {
 			control,
 			handleSubmit,
+			register,
 			formState: { errors },
 		} = useForm({
 			resolver: zodResolver(otpSchema),
@@ -469,59 +455,125 @@ const SignUpForm = () => {
 		});
 		const [otpMessageError, setOtpMessageError] = useState('');
 		const [otpMessage, setOtpMessage] = useState('');
-		const [successChangePass, setSuccessChangePass] = useState(false);
+		const [successChangePass, setSuccessChangePass] = useState(true);
+		const [togglePassword, setTogglePassword] = useState(false);
 
-		const handleOTP = async ({ otp }: { otp: string }) => {
+		const handleOTP = async (userData) => {
+			const { email, password, otp } = userData;
+
+			console.log('userdata: ', email, password, otp);
 			try {
+				setOtpMessageError('');
 				setSuccessChangePass(false);
 				const { data } = await axios.post(
 					backendUrl + '/api/auth/verify-reset-pass',
 					{
+						email,
+						password,
 						otp,
 					}
 				);
 
 				if (!data.success) {
 					setOtpMessageError(data.message);
-				}
 
-				if (data.success) {
-					setSuccessChangePass(true);
-					setOtpMessage(data.message);
+					console.log('failed send', data.message);
+					return;
 				}
+				setSuccessChangePass(true);
+				setOtpMessage(data.message);
+				console.log('success change password');
 			} catch (err) {
 				console.log(err.message);
+				alert(err.message);
 			}
 		};
 
-		return (
-			<form onSubmit={handleSubmit(handleOTP)}>
-				<FormControl isInvalid={!!errors.otp || !!otpMessageError}>
-					<Controller
-						control={control}
-						name="otp"
-						render={({ field: { onChange, value } }) => (
-							<HStack>
-								<Box>Enter your OTP</Box>
-								<PinInput otp size={'xs'} value={value} onChange={onChange}>
-									<PinInputField />
-									<PinInputField />
-									<PinInputField />
-									<PinInputField />
-									<PinInputField />
-									<PinInputField />
-								</PinInput>
-							</HStack>
-						)}
-					></Controller>
+		if (successChangePass) {
+			return (
+				<Flex gap={1}>
+					<Text>Password Changed Successfully</Text>{' '}
+					<Text
+						_hover={{
+							textColor: 'yellow',
+						}}
+						cursor={'pointer'}
+						onClick={() => setFormState('signin')}
+					>
+						Sign in
+					</Text>
+				</Flex>
+			);
+		}
 
-					{errors.otp ? (
-						<FormErrorMessage>{errors.otp.message}</FormErrorMessage>
-					) : (
-						otpMessageError && (
-							<FormErrorMessage>{otpMessageError}</FormErrorMessage>
-						)
-					)}
+		return (
+			<Box>
+				<form
+					onSubmit={handleSubmit(handleOTP)}
+					className="flex flex-col items-center gap-2 "
+				>
+					<Box>Enter your OTP from the email we've sent you.</Box>
+
+					<FormControl isRequired isInvalid={!!errors.email}>
+						<Input
+							placeholder="Enter your email"
+							type="text"
+							color={'white'}
+							p={2}
+							{...register('email')}
+						/>
+						<FormErrorMessage>{errors.email?.message}</FormErrorMessage>
+					</FormControl>
+					<FormControl isRequired isInvalid={!!errors.password}>
+						<InputGroup>
+							<Input
+								placeholder="Password"
+								type={togglePassword ? 'text' : 'password'}
+								{...register('password')}
+							/>
+
+							<InputRightElement>
+								<IconButton
+									aria-label={
+										togglePassword ? 'Hide password' : 'Show password'
+									}
+									icon={togglePassword ? <ViewOffIcon /> : <ViewIcon />}
+									variant="ghost"
+									onClick={() => setTogglePassword(!togglePassword)}
+									size="sm"
+								/>
+							</InputRightElement>
+						</InputGroup>
+						<FormErrorMessage>{errors.password?.message}</FormErrorMessage>
+					</FormControl>
+
+					<FormControl isInvalid={!!errors.otp || !!otpMessageError}>
+						<Controller
+							control={control}
+							name="otp"
+							render={({ field: { onChange, value } }) => (
+								<HStack justifyContent={'center'} alignItems={'center'}>
+									<PinInput otp size={'md'} value={value} onChange={onChange}>
+										<PinInputField />
+										<PinInputField />
+										<PinInputField />
+										<PinInputField />
+										<PinInputField />
+										<PinInputField />
+									</PinInput>
+								</HStack>
+							)}
+						></Controller>
+
+						{errors.otp ? (
+							<FormErrorMessage>{errors.otp.message}</FormErrorMessage>
+						) : (
+							otpMessageError && (
+								<FormErrorMessage>{otpMessageError}</FormErrorMessage>
+							)
+						)}
+					</FormControl>
+
 					<Button
 						_hover={{
 							background: '#006da5',
@@ -530,12 +582,20 @@ const SignUpForm = () => {
 						textColor={'white'}
 						type="submit"
 					>
-						Enter
+						Enter OTP
 					</Button>
+				</form>
 
-					{successChangePass && <Box>{otpMessage}</Box>}
-				</FormControl>
-			</form>
+				<Box
+					_hover={{
+						textColor: 'yellow',
+					}}
+					cursor={'pointer'}
+					onClick={() => setOtpSent(!otpSent)}
+				>
+					Request OTP
+				</Box>
+			</Box>
 		);
 	};
 

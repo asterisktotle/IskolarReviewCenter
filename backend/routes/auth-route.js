@@ -3,7 +3,7 @@ import {
 	loginAccount,
 	logOutAccount,
 	registerAccount,
-	resetPasswordOtp,
+	resetPasswordRequestOTP,
 	sendOtp,
 	verifyChangePassWithOtp,
 	verifyOtp,
@@ -20,7 +20,7 @@ authRouter.post('/logout', logOutAccount);
 authRouter.post('/send-otp', userAuth, sendOtp);
 authRouter.post('/verify-otp', userAuth, verifyOtp);
 //reset password
-authRouter.post('/reset-pass-otp', resetPasswordOtp);
+authRouter.post('/reset-pass-otp', resetPasswordRequestOTP);
 authRouter.post('/verify-reset-pass', verifyChangePassWithOtp);
 //check user if authenticated
 authRouter.get('/is-auth', userAuth, isAuthenticated);
