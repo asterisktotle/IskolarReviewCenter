@@ -69,7 +69,6 @@ const useAuthStore = create<AuthStore>()(
 
 			// Setters
 			setIsLogin: (value) => set({ isLogin: value }),
-			// setIsRegister: (value) => set({ isRegister: value }),
 
 			setEmail: (email) => set({ email }),
 			setPassword: (password) => set({ password }),

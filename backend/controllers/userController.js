@@ -24,3 +24,18 @@ export const getUserData = async (req, res) => {
 		res.json({ success: false, message: err.message });
 	}
 };
+export const getListsOfUsers = async (req, res) => {
+	try {
+		const users = await userModel
+			.find({ isAdmin: { $ne: true } })
+			.select('name email isAccountVerified ');
+
+		res.json({
+			success: true,
+			data: users,
+			count: users.length,
+		});
+	} catch (err) {
+		res.json({ success: false, message: err.message });
+	}
+};

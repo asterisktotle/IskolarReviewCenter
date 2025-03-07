@@ -6,9 +6,10 @@ import ResetPassword from './pages/ResetPassword';
 import SignUpForm from './pages/Login';
 import AuthenticatedRoute from './AuthRoute';
 import { useEffect } from 'react';
-import useAuthStore from './store/store';
+import useAuthStore from './store/authStore';
 import AdminDashBoard from './pages/AdminDashBoard';
 import AccountSettings from './pages/AccountSettings';
+import SimpleSidebar from './components/SideBar';
 
 const App = () => {
 	const getAuth = useAuthStore((state) => state.getAuth);
@@ -22,6 +23,7 @@ const App = () => {
 			<Routes>
 				{/* Public routes */}
 				<Route path="/login" element={<SignUpForm />} />
+				<Route path="/sidebar" element={<SimpleSidebar />} />
 
 				{/* Protected routes */}
 				<Route element={<AuthenticatedRoute />}>

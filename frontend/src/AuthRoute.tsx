@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import useAuthStore from '../src/store/store.js';
+import useAuthStore from '../src/store/authStore.js';
 import NavBar from './components/NavBar.js';
 const AuthenticatedRoute = () => {
 	const isLogin = useAuthStore((state) => state.isLogin);
@@ -11,7 +11,7 @@ const AuthenticatedRoute = () => {
 	}
 	return (
 		<div>
-			<NavBar login={isLogin} />
+			<NavBar />
 			<Outlet />
 		</div>
 	);
