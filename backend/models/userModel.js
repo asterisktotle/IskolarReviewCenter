@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema({
 	//reset otp
 	resetOtp: { type: String, default: null },
 	resetOtpExpiresAt: { type: Date, default: null },
+
+	//admin
+	isAdmin: { type: Boolean, default: false },
 });
 
 const userModel = mongoose.models.user || mongoose.model('user', userSchema);

@@ -24,7 +24,7 @@ import {
 import useAuthStore from '../store/store';
 import { useNavigate } from 'react-router-dom';
 
-const NavBar = ({ login }: { login: boolean }) => {
+const NavBar = () => {
 	const navigate = useNavigate();
 	const { logout, userData } = useAuthStore();
 
@@ -66,7 +66,11 @@ const NavBar = ({ login }: { login: boolean }) => {
 							gap={2}
 						>
 							{/* <div className="flex flex-col"> */}
-							<Button w={'100px'} onClick={logout} colorScheme="blue">
+							<Button
+								w={'100px'}
+								onClick={() => navigate('/account-settings')}
+								colorScheme="blue"
+							>
 								Account
 							</Button>
 							<Button w={'100px'} onClick={logout} colorScheme="blue">

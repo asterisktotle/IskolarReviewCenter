@@ -54,12 +54,10 @@ const SignUpForm = () => {
 		// showConfirmPassword,
 		email,
 		setEmail,
-		password,
 		setPassword,
 		incorrectPassword,
 		noUserEmail,
-		// togglePassword,
-		// togglePasswordConfirm,
+
 		backendUrl,
 		getUserData,
 	} = useAuthStore();
@@ -455,7 +453,7 @@ const SignUpForm = () => {
 		});
 		const [otpMessageError, setOtpMessageError] = useState('');
 		const [otpMessage, setOtpMessage] = useState('');
-		const [successChangePass, setSuccessChangePass] = useState(true);
+		const [successChangePass, setSuccessChangePass] = useState(false);
 		const [togglePassword, setTogglePassword] = useState(false);
 
 		const handleOTP = async (userData) => {
