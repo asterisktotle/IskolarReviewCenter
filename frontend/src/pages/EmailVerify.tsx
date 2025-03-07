@@ -1,5 +1,5 @@
 import { Button, Img } from '@chakra-ui/react';
-import useAuthStore from '../store/store';
+import useAuthStore from '../store/authStore';
 import { useState } from 'react';
 
 const EmailVerify = () => {
@@ -32,7 +32,7 @@ const EmailVerify = () => {
 		}
 	};
 
-	if (userData?.isAccountVerified) {
+	if (!userData?.isAccountVerified) {
 		return (
 			<div className="flex w-full items-center flex-col mt-[15%] gap-4 ">
 				<Img

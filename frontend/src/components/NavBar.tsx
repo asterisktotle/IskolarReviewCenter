@@ -1,97 +1,93 @@
+// import { Button, Avatar, AvatarBadge } from '@chakra-ui/react';
+// import {
+// 	Popover,
+// 	PopoverTrigger,
+// 	PopoverContent,
+// 	PopoverBody,
+// 	PopoverArrow,
+// 	Portal,
+// 	Image,
+// 	Box,
+// 	Flex,
+// } from '@chakra-ui/react';
+import useAuthStore from '../store/authStore.ts';
+
+import { useState } from 'react';
 import {
-	Box,
-	Button,
-	Circle,
+	Image,
 	Avatar,
 	AvatarBadge,
-	List,
-	ListItem,
-	UnorderedList,
+	Box,
+	Flex,
+	IconButton,
+	Drawer,
+	DrawerOverlay,
+	DrawerContent,
+	DrawerCloseButton,
+	DrawerBody,
+	Button,
 } from '@chakra-ui/react';
-import {
-	Popover,
-	PopoverTrigger,
-	PopoverContent,
-	PopoverHeader,
-	PopoverBody,
-	PopoverFooter,
-	PopoverArrow,
-	PopoverCloseButton,
-	PopoverAnchor,
-	Portal,
-	Image,
-} from '@chakra-ui/react';
-import useAuthStore from '../store/store';
+import { FiMenu } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
 const NavBar = () => {
 	const navigate = useNavigate();
+	const [isOpen, setIsOpen] = useState(false);
+	const toggleSidebar = () => setIsOpen(!isOpen);
 	const { logout, userData } = useAuthStore();
 
 	return (
 		<div className="flex justify-between pt-4 ">
-			<Image
-				src="../../public/iskolar.png"
-				width={'150px'}
-				objectFit="contain"
-				alt="iskolar logo"
-				onClick={() => navigate('/')}
-			/>
-			<Popover trigger="hover">
-				<PopoverTrigger>
-					{/* <Circle bg={'white'} size={'47px'} color={'black'}>
-						{userData.name ? userData?.name[0] : 'Guest'}
-					</Circle> */}
-					<Avatar
-						name={userData?.name ? userData?.name[0] : 'Guest'}
-						bg="red.500"
+			<>
+				{/* Sidebar Toggle Button */}
+				<IconButton
+					aria-label="icon"
+					icon={<FiMenu />}
+					onClick={toggleSidebar}
+					position="fixed"
+					top="20px"
+					left="20px"
+					zIndex={10}
+					colorScheme="blue"
+				/>
 
-						// INSERT PROFILE PICTURE HERE
-						// src="https://bit.ly/broken-link"
-					>
-						{userData?.isAccountVerified && (
-							<AvatarBadge boxSize="1.2em" bg="yellow.300" />
-						)}
-					</Avatar>
-				</PopoverTrigger>
-				<Portal>
-					<PopoverContent w={'120px'} bg={'transparent'} alignItems={'center'}>
-						<PopoverArrow />
+				{/* Sidebar Drawer */}
+				<Drawer isOpen={isOpen} placement="left" onClose={toggleSidebar}>
+					<DrawerOverlay />
+					<DrawerContent bg="gray.800" color="white">
+						<DrawerCloseButton mt={2} color="white" />
 
-						{/* <PopoverCloseButton /> */}
-						<PopoverBody
-							flex={1}
-							display={'flex'}
-							flexDirection={'column'}
-							gap={2}
-						>
-							{/* <div className="flex flex-col"> */}
-							<Button
-								w={'100px'}
-								onClick={() => navigate('/account-settings')}
-								colorScheme="blue"
-							>
-								Account
-							</Button>
-							<Button w={'100px'} onClick={logout} colorScheme="blue">
-								Sign Out
-							</Button>
-
-							{userData?.isAccountVerified && (
+						<DrawerBody mt={10}>
+							<Flex flexDirection="column" gap={4}>
 								<Button
-									w={'100px'}
-									onClick={() => navigate('/email-verify')}
-									colorScheme="yellow"
+									onClick={() => navigate('/dashboard')}
+									colorScheme="blue"
 								>
-									Verify Email
+									Dashboard
 								</Button>
-							)}
-
-							{/* </div> */}
-						</PopoverBody>
-					</PopoverContent>
-				</Portal>
-			</Popover>
+								<Button
+									onClick={() => navigate('/account-settings')}
+									colorScheme="blue"
+								>
+									Account Settings
+								</Button>
+								<Button onClick={() => navigate('/quiz')} colorScheme="blue">
+									Quizzes
+								</Button>
+								<Button
+									onClick={() => navigate('/lectures')}
+									colorScheme="blue"
+								>
+									Lectures
+								</Button>
+								<Button onClick={logout} colorScheme="red">
+									Logout
+								</Button>
+							</Flex>
+						</DrawerBody>
+					</DrawerContent>
+				</Drawer>
+			</>
 		</div>
 	);
 };

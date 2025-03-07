@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+dotenv.config();
 
-// dotenv.config();
-const URI =
-	'mongodb+srv://barandajander:asterisktotle@cluster0.ajaoa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+const URI = process.env.URI;
+
 const connectDB = async () => {
 	try {
 		mongoose.connection.on('connected', () => console.log('MongoDB Connected'));

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import useAuthStore from '../store/store';
+import useAuthStore from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 

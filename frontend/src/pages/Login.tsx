@@ -28,18 +28,11 @@ import {
 	forgotPasswordSchema,
 	otpSchema,
 } from '../schema/formSchema';
-import useAuthStore from '../store/store';
+import useAuthStore from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
-// TODO
-//  refactor the state in showpassword
-// refactor formstate
-
 type FormValuesSignUp = z.infer<typeof signupSchema>;
-type FormValuesSignIn = z.infer<typeof signinSchema>;
-type FormValuesForgotPassword = z.infer<typeof forgotPasswordSchema>;
-type FormValuesOTP = z.infer<typeof otpSchema>;
 
 const SignUpForm = () => {
 	const navigate = useNavigate();
@@ -48,16 +41,11 @@ const SignUpForm = () => {
 		login,
 		isLogin,
 		setIsLogin,
-		// isRegister,
-		// setIsRegister,
-		// showPassword,
-		// showConfirmPassword,
 		email,
 		setEmail,
 		setPassword,
 		incorrectPassword,
 		noUserEmail,
-
 		backendUrl,
 		getUserData,
 	} = useAuthStore();
@@ -162,7 +150,7 @@ const SignUpForm = () => {
 										aria-label={
 											togglePassword ? 'Hide password' : 'Show password'
 										}
-										icon={togglePassword ? <ViewOffIcon /> : <ViewIcon />}
+										icon={togglePassword ? <ViewIcon /> : <ViewOffIcon />}
 										variant="ghost"
 										onClick={() => setTogglePassword(!togglePassword)}
 										size="sm"
@@ -186,7 +174,7 @@ const SignUpForm = () => {
 										aria-label={
 											toggleConfirmPass ? 'Hide password' : 'Show password'
 										}
-										icon={toggleConfirmPass ? <ViewOffIcon /> : <ViewIcon />}
+										icon={toggleConfirmPass ? <ViewIcon /> : <ViewOffIcon />}
 										variant="ghost"
 										onClick={() => setToggleConfirmPass(!toggleConfirmPass)}
 										size="sm"
@@ -282,7 +270,7 @@ const SignUpForm = () => {
 									aria-label={
 										togglePassword ? 'Hide password' : 'Show password'
 									}
-									icon={togglePassword ? <ViewOffIcon /> : <ViewIcon />}
+									icon={togglePassword ? <ViewIcon /> : <ViewOffIcon />}
 									variant="ghost"
 									onClick={() => setTogglePassword(!togglePassword)}
 									size="sm"
