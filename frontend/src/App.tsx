@@ -7,6 +7,8 @@ import SignUpForm from './pages/Login';
 import AuthenticatedRoute from './AuthRoute';
 import { useEffect } from 'react';
 import useAuthStore from './store/store';
+import AdminDashBoard from './pages/AdminDashBoard';
+import AccountSettings from './pages/AccountSettings';
 
 const App = () => {
 	const getAuth = useAuthStore((state) => state.getAuth);
@@ -24,8 +26,10 @@ const App = () => {
 				{/* Protected routes */}
 				<Route element={<AuthenticatedRoute />}>
 					<Route path="/" element={<Home />} />
+					<Route path="/admin" element={<AdminDashBoard />} />
 					<Route path="/email-verify" element={<EmailVerify />} />
 					<Route path="/reset-password" element={<ResetPassword />} />
+					<Route path="/account-settings" element={<AccountSettings />} />
 				</Route>
 			</Routes>
 		</div>

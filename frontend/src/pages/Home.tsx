@@ -1,7 +1,13 @@
 import { useAuth } from '../hooks/useAuth';
+import AdminDashBoard from './AdminDashBoard';
 
 const Home = () => {
 	const { userData } = useAuth();
+	console.log('userdata: ', userData);
+
+	if (userData?.isAdmin) {
+		return <AdminDashBoard />;
+	}
 
 	return (
 		<div className="text-white">
