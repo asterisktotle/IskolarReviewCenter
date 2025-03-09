@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import AdminStore from '../store/adminStore';
+import AdminStore from '../../store/adminStore';
 import {
 	Container,
 	Table,

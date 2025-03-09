@@ -55,7 +55,7 @@ const SignUpForm = () => {
 
 	useEffect(() => {
 		if (isLogin) {
-			navigate('/');
+			navigate('/dashboard');
 		}
 	}, [isLogin, navigate]);
 
