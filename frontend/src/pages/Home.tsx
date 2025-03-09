@@ -1,5 +1,5 @@
 import { useAuth } from '../hooks/useAuth';
-import AdminDashBoard from './AdminDashBoard';
+import AdminDashBoard from './Admin/AdminDashBoard';
 
 const Home = () => {
 	const { userData } = useAuth();

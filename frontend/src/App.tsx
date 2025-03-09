@@ -7,12 +7,18 @@ import SignUpForm from './pages/Login';
 import AuthenticatedRoute from './AuthRoute';
 import { useEffect } from 'react';
 import useAuthStore from './store/authStore';
-import AdminDashBoard from './pages/AdminDashBoard';
+import AdminDashBoard from './pages/Admin/AdminDashBoard';
 import AccountSettings from './pages/AccountSettings';
 import SimpleSidebar from './components/SideBar';
+import AdminLectures from './pages/Admin/AdminLectures';
+import UsersLecture from './pages/User/UserLecture';
+import AdminTests from './pages/Admin/AdminTests';
+import UserDashboard from './pages/User/UserDashboard';
+import UserTests from './pages/User/UserTests';
 
 const App = () => {
 	const getAuth = useAuthStore((state) => state.getAuth);
+	const { userData } = useAuthStore();
 
 	useEffect(() => {
 		getAuth();
@@ -27,11 +33,29 @@ const App = () => {
 
 				{/* Protected routes */}
 				<Route element={<AuthenticatedRoute />}>
-					<Route path="/" element={<Home />} />
-					<Route path="/admin" element={<AdminDashBoard />} />
+					<Route path="/dashboard" element={<Home />} />
 					<Route path="/email-verify" element={<EmailVerify />} />
 					<Route path="/reset-password" element={<ResetPassword />} />
 					<Route path="/account-settings" element={<AccountSettings />} />
+
+					{/* ADMIN */}
+					{userData?.isAdmin && (
+						<>
+							<Route path="/admin-dashboard" element={<AdminDashBoard />} />
+							<Route path="/admin-lectures" element={<AdminLectures />} />
+							<Route path="/admin-tests" element={<AdminTests />} />
+						</>
+					)}
+
+					{/* USER */}
+					{!userData?.isAdmin && (
+						<>
+							<Route path="/user-dashboard" element={<UserDashboard />} />
+							<Route path="/user-tests" element={<UserTests />} />
+							<Route path="/user-lectures" element={<UsersLecture />} />
+						</>
+					)}
+					{/* USERS */}
 				</Route>
 			</Routes>
 		</div>
