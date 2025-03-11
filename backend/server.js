@@ -7,7 +7,7 @@ import cookieParser from 'cookie-parser';
 import connectDB from './config/db.js';
 import authRouter from './routes/auth-route.js';
 import userRouter from './routes/user-route.js';
-import featuresRoute from './routes/features-route.js';
+import pdfRoute from './routes/pdf-route.js';
 // multer -------------------
 
 // const storage = multer.diskStorage({
@@ -47,4 +47,4 @@ app.listen(port, () =>
 app.get('/', (req, res) => res.send('<h1>API IS WORKING</h1>'));
 app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
-app.use('/api/pdf', featuresRoute);
+app.use('/api/pdf', pdfRoute);
