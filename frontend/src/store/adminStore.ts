@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
 
 axios.defaults.withCredentials = true;
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
@@ -12,11 +11,11 @@ interface UserData {
 	isAccountVerified: boolean;
 }
 
-interface UsersList {
-	success: boolean;
-	data: UserData[];
-	count: number;
-}
+// interface UsersList {
+// 	success: boolean;
+// 	data: UserData[];
+// 	count: number;
+// }
 
 interface AdminStore {
 	totalUser: number | null;
