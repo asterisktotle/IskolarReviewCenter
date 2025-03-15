@@ -10,6 +10,8 @@ export const uploadPdf = async (req, res) => {
 		}
 
 		const title = req.body.title || 'Untitled';
+		const subject = req.body.subject || 'mesl';
+		const category = req.body.category || 'lecture';
 		const uniqueFilename = Date.now() + '-' + req.file.originalname;
 
 		// Get GridFS bucket
@@ -21,7 +23,7 @@ export const uploadPdf = async (req, res) => {
 				// Create upload stream to GridFS
 				const uploadStream = pdfBucket.openUploadStream(uniqueFilename, {
 					contentType: req.file.mimetype,
-					metadata: { title },
+					metadata: { subject, category, title },
 				});
 
 				const fileId = uploadStream.id;
@@ -44,6 +46,8 @@ export const uploadPdf = async (req, res) => {
 
 		await pdfModel.create({
 			title: title,
+			subject: subject,
+			category: category,
 			pdf: uniqueFilename,
 			fileId: fileId,
 		});
@@ -52,6 +56,8 @@ export const uploadPdf = async (req, res) => {
 			message: 'PDF uploaded successfully',
 			fileId: fileId,
 			filename: uniqueFilename,
+			subject: subject,
+			category: category,
 		});
 	} catch (err) {
 		return res.json({ success: false, message: err.message });

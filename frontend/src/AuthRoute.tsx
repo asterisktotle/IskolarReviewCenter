@@ -7,7 +7,7 @@ const AuthenticatedRoute = () => {
 	console.log('AuthenticatedRoute isLogin:', isLogin); //debugging
 	if (!isLogin) {
 		console.log('Unauthorized! Redirecting to login...');
-		return <Navigate replace to={'/login'} />;
+		return <Navigate replace to={'/'} />;
 	}
 	return (
 		<div>

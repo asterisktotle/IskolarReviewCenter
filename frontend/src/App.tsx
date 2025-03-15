@@ -28,7 +28,7 @@ const App = () => {
 		<div className="text-white px-10">
 			<Routes>
 				{/* Public routes */}
-				<Route path="/login" element={<SignUpForm />} />
+				<Route path="/" element={<SignUpForm />} />
 				<Route path="/sidebar" element={<SimpleSidebar />} />
 
 				{/* Protected routes */}
