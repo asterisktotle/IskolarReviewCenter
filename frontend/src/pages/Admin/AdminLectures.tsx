@@ -8,23 +8,98 @@ import {
 	RadioGroup,
 	FormErrorMessage,
 	useToast,
+	Container,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { pdfjs } from 'react-pdf';
 
-// const ViewPdf = () => {
-// 	const [loading, setLoading] = useState(false)
-// 	const [pdfUrl, setPdfUrl] = useState(null)
-// 	const [error, setError] = useState(null)
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+	'pdfjs-dist/build/pdf.worker.min.mjs',
+	import.meta.url
+).toString();
 
-// 	const fetchPdf =  async() => {
-// 		setLoading(true)
-// 		try{
-// 			const pdfURl =
-// 		}
-// 	}
+import { Document, Page } from 'react-pdf';
 
-// }
+const ViewPdf = () => {
+	const [loading, setLoading] = useState(false);
+	const [pdfUrl, setPdfUrl] = useState(null);
+	const [error, setError] = useState(null);
+
+	const [numPages, setNumPages] = useState();
+	const [pageNumber, setPageNumber] = useState(1);
+	const [disableNext, setDisableNext] = useState(false);
+	const [disablePrevious, setDisablePrevious] = useState(false);
+
+	const fetchPdf = async () => {
+		setLoading(true);
+		try {
+			const response = await axios.get(
+				'http://localhost:3100/api/pdf/pdf-lectures/67d5781610fabc74ce1c64af',
+				{ responseType: 'blob' } // IMPORTANT WHEN GETTING A PDF, PDF IS BINARY BASED, NOT JSON TEXT
+			);
+
+			const pdfPath = window.URL.createObjectURL(new Blob([response.data]));
+			setPdfUrl(pdfPath);
+			setError(null);
+		} catch (err) {
+			console.error('view pdf error: ', err);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		fetchPdf();
+	}, []);
+
+	function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
+		setNumPages(numPages);
+	}
+
+	useEffect(() => {
+		setDisablePrevious(pageNumber === 1);
+		setDisableNext(numPages !== null && pageNumber === numPages);
+	}, [pageNumber, numPages]);
+
+	const handleNextPage = () => {
+		if (numPages && pageNumber < numPages) {
+			setPageNumber((prev) => prev + 1);
+		}
+	};
+
+	const handlePreviousPage = () => {
+		if (pageNumber > 1) {
+			setPageNumber((prev) => prev - 1);
+		}
+	};
+
+	return (
+		<div className="flex flex-col gap-2 ">
+			<Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
+				<div className="w-fit">
+					<Page
+						pageNumber={pageNumber}
+						renderAnnotationLayer={false}
+						renderTextLayer={false}
+					/>
+				</div>
+			</Document>
+			<p>
+				Page {pageNumber} of {numPages}
+			</p>
+
+			<div className=" flex gap-2">
+				<Button disabled={disablePrevious} onClick={handlePreviousPage}>
+					Previous
+				</Button>
+				<Button disabled={disableNext} onClick={handleNextPage}>
+					Next
+				</Button>
+			</div>
+		</div>
+	);
+};
 
 const UploadPdf = () => {
 	const [title, setTitle] = useState('');
@@ -133,7 +208,8 @@ const UploadPdf = () => {
 const AdminLectures = () => {
 	return (
 		<>
-			<UploadPdf />
+			{/* <UploadPdf /> */}
+			<ViewPdf />
 		</>
 	);
 };
