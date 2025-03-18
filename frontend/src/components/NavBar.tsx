@@ -1,6 +1,6 @@
 import useAuthStore from '../store/authStore.ts';
 
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import {
 	Box,
@@ -16,7 +16,6 @@ import {
 	MenuItem,
 	MenuDivider,
 	useDisclosure,
-	useColorModeValue,
 	Stack,
 	Image,
 } from '@chakra-ui/react';
@@ -35,20 +34,29 @@ const adminLinks = [
 
 const NavLink = ({ children }) => {
 	const navigate = useNavigate();
+	const location = useLocation();
+	const isActive = location.pathname === children.path;
+
+	const handleClick = (path) => {
+		navigate(path);
+		console.log('click btn: ', children.name);
+	};
+
 	return (
 		<Box
 			as="a"
 			px={2}
 			py={1}
+			cursor={'pointer'}
 			rounded={'md'}
 			_hover={{
 				textDecoration: 'none',
 				borderBottom: '2px',
-				// bg: useColorModeValue('gray.200', 'gray.700'),
 				borderBottomColor: 'white',
 			}}
-			// href={children.path}
-			onClick={() => navigate(children.path)}
+			onClick={() => handleClick(children.path)}
+			borderBottom={'2px solid'}
+			borderBottomColor={isActive ? 'white' : 'transparent'}
 		>
 			{children.name}
 		</Box>
@@ -81,7 +89,7 @@ export default function Simple() {
 						/>
 						<HStack
 							as={'nav'}
-							spacing={4}
+							spacing={5}
 							display={{ base: 'none', md: 'flex' }}
 						>
 							{adminLinks.map((name, path) => (

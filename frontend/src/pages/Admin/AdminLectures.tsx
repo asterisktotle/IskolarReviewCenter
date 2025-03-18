@@ -8,54 +8,62 @@ import {
 	RadioGroup,
 	FormErrorMessage,
 	useToast,
+	Spinner,
+	CloseButton,
+	Text,
 	Container,
+	VStack,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { pdfjs } from 'react-pdf';
+import { pdfjs, Document, Page } from 'react-pdf';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 	'pdfjs-dist/build/pdf.worker.min.mjs',
 	import.meta.url
 ).toString();
 
-import { Document, Page } from 'react-pdf';
-
 const ViewPdf = () => {
 	const [loading, setLoading] = useState(false);
 	const [pdfUrl, setPdfUrl] = useState('');
 	const [error, setError] = useState('');
+	const [view, setView] = useState(false);
+	const [isPreloaded, setIsPreloaded] = useState(false);
 
 	const [numPages, setNumPages] = useState();
 	const [pageNumber, setPageNumber] = useState(1);
 	const [disableNext, setDisableNext] = useState(false);
 	const [disablePrevious, setDisablePrevious] = useState(false);
 
-	const fetchPdf = async () => {
-		setLoading(true);
-		try {
-			const response = await axios.get(
-				'http://localhost:3100/api/pdf/pdf-lectures/67d5781610fabc74ce1c64af',
-				{ responseType: 'blob' } // IMPORTANT WHEN GETTING A PDF, PDF IS BINARY BASED, NOT JSON TEXT
-			);
+	// Preload the PDF on component mount
+	useEffect(() => {
+		fetchPdf();
+	}, []);
 
-			const pdfPath = window.URL.createObjectURL(new Blob([response.data]));
+	const fetchPdf = async () => {
+		if (!isPreloaded) {
+			setLoading(true);
+		}
+		try {
+			const response = await fetch(
+				'http://localhost:3100/api/pdf/pdf-lectures/67d5781610fabc74ce1c64af'
+			);
+			const blob = await response.blob();
+			const pdfPath = window.URL.createObjectURL(blob);
 			setPdfUrl(pdfPath);
-			setError(null);
+			setError('');
+			setIsPreloaded(true);
 		} catch (err) {
 			console.error('view pdf error: ', err);
+			setError('Failed to load PDF');
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	useEffect(() => {
-		fetchPdf();
-	}, []);
-
-	function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
+	const onDocumentLoadSuccess = ({ numPages }: { numPages: number }): void => {
 		setNumPages(numPages);
-	}
+	};
 
 	useEffect(() => {
 		setDisablePrevious(pageNumber === 1);
@@ -74,18 +82,52 @@ const ViewPdf = () => {
 		}
 	};
 
+	// Optional: Add preload functionality for hover
+	const handleButtonMouseEnter = () => {
+		if (!isPreloaded) {
+			fetchPdf();
+		}
+	};
+
+	if (!view) {
+		return (
+			<>
+				<Button
+					backgroundColor={loading ? 'whiteAlpha.800' : 'white'}
+					onClick={() => setView(!view)}
+					onMouseEnter={handleButtonMouseEnter}
+					isLoading={loading && !!isPreloaded}
+				>
+					View Pdf
+				</Button>
+			</>
+		);
+	}
 	return (
-		<div className="flex flex-col gap-2 ">
+		<div className="flex flex-col items-center gap-2 p-4 w-full max-w-md mx-auto">
 			<p>Lecture 1</p>
-			<Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
-				<div className="w-fit">
-					<Page
-						pageNumber={pageNumber}
-						renderAnnotationLayer={false}
-						renderTextLayer={false}
-					/>
+			<Button onClick={() => setView(!view)}>Close Pdf</Button>
+			{loading ? (
+				<Spinner
+					thickness="4px"
+					speed="0.65s"
+					emptyColor="gray.200"
+					color="blue.500"
+					size="xl"
+				/>
+			) : (
+				<div className="w-full overflow-auto">
+					<Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
+						{/* <div className="w-fit"> */}
+						<Page
+							pageNumber={pageNumber}
+							renderAnnotationLayer={false}
+							renderTextLayer={false}
+						/>
+						{/* </div> */}
+					</Document>
 				</div>
-			</Document>
+			)}
 			<p>
 				Page {pageNumber} of {numPages}
 			</p>
@@ -141,75 +183,94 @@ const UploadPdf = () => {
 	};
 
 	return (
-		<div className="flex flex-col ">
-			<div>Admin Lectures</div>
-			<form
-				className="flex justify-center items-center flex-col gap-2 border-2 border-white "
-				onSubmit={submitPDF}
-			>
-				<h4>Upload Lecture</h4>
+		<Container flexDirection={'column'}>
+			<Text fontSize="lg" textAlign={'center'} fontWeight={'bold'}>
+				UPLOAD NEW {category.toUpperCase()}
+			</Text>
+			<form onSubmit={submitPDF}>
+				<VStack spacing={2}>
+					<FormControl as="fieldset">
+						<FormLabel as="legend">Subject</FormLabel>
+						<RadioGroup value={subject} onChange={setSubject}>
+							<HStack spacing="24px">
+								<Radio value="mesl">MESL</Radio>
+								<Radio value="mdsp">MDSP</Radio>
+								<Radio value="pipe">PIPE</Radio>
+							</HStack>
+						</RadioGroup>
+					</FormControl>
+					<FormControl as="fieldset">
+						<FormLabel as="legend">Category</FormLabel>
+						<RadioGroup value={category} onChange={setCategory}>
+							<HStack spacing="24px">
+								<Radio value="lecture">Lecture</Radio>
+								<Radio value="terms">Terms</Radio>
+								<Radio value="quiz">Quiz</Radio>
+								<Radio value="solution">Solution</Radio>
+							</HStack>
+						</RadioGroup>
+					</FormControl>
 
-				<br />
-				<FormControl as="fieldset">
-					<FormLabel as="legend">Subject</FormLabel>
-					<RadioGroup value={subject} onChange={setSubject}>
-						<HStack spacing="24px">
-							<Radio value="mesl">MESL</Radio>
-							<Radio value="mdsp">MDSP</Radio>
-							<Radio value="pipe">PIPE</Radio>
+					<br />
+					<FormControl isRequired isInvalid={!title}>
+						{/* <FormLabel>Enter the File Name</FormLabel> */}
+						<Input
+							type="text"
+							placeholder="Enter File Name"
+							required
+							onChange={(e) => setTitle(e.target.value)}
+						/>
+						<FormErrorMessage>Please enter a title</FormErrorMessage>
+					</FormControl>
+
+					<br />
+
+					<FormControl isRequired isInvalid={!file}>
+						<FormLabel>Upload file</FormLabel>
+						<HStack spacing={2}>
+							<Input
+								type="file"
+								accept="application/pdf"
+								placeholder="Upload pdf"
+								hidden
+								id="file-upload"
+								onChange={(e) => setFile(e.target.files[0])}
+							/>
+							<Button
+								as="label"
+								htmlFor="file-upload"
+								colorScheme="blue"
+								cursor="pointer"
+							>
+								Choose File
+							</Button>
+							{file && <Text fontSize="sm">{file.name}</Text>}
 						</HStack>
-					</RadioGroup>
-				</FormControl>
-				<FormControl as="fieldset">
-					<FormLabel as="legend">Category</FormLabel>
-					<RadioGroup value={category} onChange={setCategory}>
-						<HStack spacing="24px">
-							<Radio value="lecture">Lecture</Radio>
-							<Radio value="terms">Terms</Radio>
-							<Radio value="quiz">Quiz</Radio>
-							<Radio value="solution">Solution</Radio>
-						</HStack>
-					</RadioGroup>
-				</FormControl>
+					</FormControl>
+					<br />
+				</VStack>
 
-				<br />
-				<FormControl isRequired isInvalid={!title}>
-					<FormLabel>Enter the title</FormLabel>
-					<Input
-						type="text"
-						placeholder="Title"
-						required
-						onChange={(e) => setTitle(e.target.value)}
-					/>
-					<FormErrorMessage>Please enter a title</FormErrorMessage>
-				</FormControl>
-
-				<br />
-
-				<FormControl isRequired isInvalid={!file}>
-					<FormLabel>Upload file</FormLabel>
-					<Input
-						type="file"
-						accept="application/pdf"
-						placeholder="Upload pdf"
-						required
-						onChange={(e) => setFile(e.target.files[0])}
-					/>
-				</FormControl>
-				<br />
-
-				<Button disabled={loading} type="submit">
+				<Button w={'full'} disabled={loading} type="submit">
 					Submit
 				</Button>
 			</form>
-		</div>
+		</Container>
 	);
 };
 
 const AdminLectures = () => {
+	const [openUploadForm, setOpenUploadForm] = useState(false);
 	return (
 		<>
-			{/* <UploadPdf /> */}
+			{openUploadForm ? (
+				<CloseButton onClick={() => setOpenUploadForm(!openUploadForm)} />
+			) : (
+				<Button onClick={() => setOpenUploadForm(!openUploadForm)}>
+					Upload PDF
+				</Button>
+			)}
+
+			{openUploadForm && <UploadPdf />}
 			<ViewPdf />
 		</>
 	);
