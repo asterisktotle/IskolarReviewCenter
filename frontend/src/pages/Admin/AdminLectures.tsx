@@ -23,8 +23,8 @@ import { Document, Page } from 'react-pdf';
 
 const ViewPdf = () => {
 	const [loading, setLoading] = useState(false);
-	const [pdfUrl, setPdfUrl] = useState(null);
-	const [error, setError] = useState(null);
+	const [pdfUrl, setPdfUrl] = useState('');
+	const [error, setError] = useState('');
 
 	const [numPages, setNumPages] = useState();
 	const [pageNumber, setPageNumber] = useState(1);
@@ -76,6 +76,7 @@ const ViewPdf = () => {
 
 	return (
 		<div className="flex flex-col gap-2 ">
+			<p>Lecture 1</p>
 			<Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
 				<div className="w-fit">
 					<Page
