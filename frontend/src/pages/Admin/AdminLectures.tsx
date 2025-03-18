@@ -8,11 +8,25 @@ import {
 	RadioGroup,
 	FormErrorMessage,
 	useToast,
-	useDisclosure,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import axios from 'axios';
-const AdminLectures = () => {
+
+// const ViewPdf = () => {
+// 	const [loading, setLoading] = useState(false)
+// 	const [pdfUrl, setPdfUrl] = useState(null)
+// 	const [error, setError] = useState(null)
+
+// 	const fetchPdf =  async() => {
+// 		setLoading(true)
+// 		try{
+// 			const pdfURl =
+// 		}
+// 	}
+
+// }
+
+const UploadPdf = () => {
 	const [title, setTitle] = useState('');
 	const [file, setFile] = useState('');
 	const [category, setCategory] = useState('lecture');
@@ -51,7 +65,7 @@ const AdminLectures = () => {
 	};
 
 	return (
-		<>
+		<div className="flex flex-col ">
 			<div>Admin Lectures</div>
 			<form
 				className="flex justify-center items-center flex-col gap-2 border-2 border-white "
@@ -112,6 +126,14 @@ const AdminLectures = () => {
 					Submit
 				</Button>
 			</form>
+		</div>
+	);
+};
+
+const AdminLectures = () => {
+	return (
+		<>
+			<UploadPdf />
 		</>
 	);
 };
