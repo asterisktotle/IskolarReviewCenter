@@ -26,6 +26,7 @@ interface AdminStore {
 const AdminStore = create<AdminStore>((set) => ({
 	totalUser: null,
 	usersList: [],
+
 	getUsersList: async () => {
 		try {
 			const { data } = await axios.get(BACKEND_URL + '/api/user/users-list');

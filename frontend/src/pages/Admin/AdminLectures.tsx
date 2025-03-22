@@ -13,136 +13,18 @@ import {
 	Text,
 	Container,
 	VStack,
+	Table,
+	Thead,
+	Tbody,
+	Tfoot,
+	Tr,
+	Th,
+	Td,
+	TableCaption,
+	TableContainer,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { pdfjs, Document, Page } from 'react-pdf';
-
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-	'pdfjs-dist/build/pdf.worker.min.mjs',
-	import.meta.url
-).toString();
-
-const ViewPdf = () => {
-	const [loading, setLoading] = useState(false);
-	const [pdfUrl, setPdfUrl] = useState('');
-	const [error, setError] = useState('');
-	const [view, setView] = useState(false);
-	const [isPreloaded, setIsPreloaded] = useState(false);
-
-	const [numPages, setNumPages] = useState();
-	const [pageNumber, setPageNumber] = useState(1);
-	const [disableNext, setDisableNext] = useState(false);
-	const [disablePrevious, setDisablePrevious] = useState(false);
-
-	// Preload the PDF on component mount
-	useEffect(() => {
-		fetchPdf();
-	}, []);
-
-	const fetchPdf = async () => {
-		if (!isPreloaded) {
-			setLoading(true);
-		}
-		try {
-			const response = await fetch(
-				'http://localhost:3100/api/pdf/pdf-lectures/67d5781610fabc74ce1c64af'
-			);
-			const blob = await response.blob();
-			const pdfPath = window.URL.createObjectURL(blob);
-			setPdfUrl(pdfPath);
-			setError('');
-			setIsPreloaded(true);
-		} catch (err) {
-			console.error('view pdf error: ', err);
-			setError('Failed to load PDF');
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const onDocumentLoadSuccess = ({ numPages }: { numPages: number }): void => {
-		setNumPages(numPages);
-	};
-
-	useEffect(() => {
-		setDisablePrevious(pageNumber === 1);
-		setDisableNext(numPages !== null && pageNumber === numPages);
-	}, [pageNumber, numPages]);
-
-	const handleNextPage = () => {
-		if (numPages && pageNumber < numPages) {
-			setPageNumber((prev) => prev + 1);
-		}
-	};
-
-	const handlePreviousPage = () => {
-		if (pageNumber > 1) {
-			setPageNumber((prev) => prev - 1);
-		}
-	};
-
-	// Optional: Add preload functionality for hover
-	const handleButtonMouseEnter = () => {
-		if (!isPreloaded) {
-			fetchPdf();
-		}
-	};
-
-	if (!view) {
-		return (
-			<>
-				<Button
-					backgroundColor={loading ? 'whiteAlpha.800' : 'white'}
-					onClick={() => setView(!view)}
-					onMouseEnter={handleButtonMouseEnter}
-					isLoading={loading && !!isPreloaded}
-				>
-					View Pdf
-				</Button>
-			</>
-		);
-	}
-	return (
-		<div className="flex flex-col items-center gap-2 p-4 w-full max-w-md mx-auto">
-			<p>Lecture 1</p>
-			<Button onClick={() => setView(!view)}>Close Pdf</Button>
-			{loading ? (
-				<Spinner
-					thickness="4px"
-					speed="0.65s"
-					emptyColor="gray.200"
-					color="blue.500"
-					size="xl"
-				/>
-			) : (
-				<div className="w-full overflow-auto">
-					<Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
-						{/* <div className="w-fit"> */}
-						<Page
-							pageNumber={pageNumber}
-							renderAnnotationLayer={false}
-							renderTextLayer={false}
-						/>
-						{/* </div> */}
-					</Document>
-				</div>
-			)}
-			<p>
-				Page {pageNumber} of {numPages}
-			</p>
-
-			<div className=" flex gap-2">
-				<Button disabled={disablePrevious} onClick={handlePreviousPage}>
-					Previous
-				</Button>
-				<Button disabled={disableNext} onClick={handleNextPage}>
-					Next
-				</Button>
-			</div>
-		</div>
-	);
-};
 
 const UploadPdf = () => {
 	const [title, setTitle] = useState('');
@@ -260,6 +142,25 @@ const UploadPdf = () => {
 
 const AdminLectures = () => {
 	const [openUploadForm, setOpenUploadForm] = useState(false);
+	const [files, setFiles] = useState([]);
+
+	const getPdfId = async () => {
+		try {
+			const { data } = await axios.get(
+				'http://localhost:3100/api/pdf/pdf-lectures'
+			);
+			const pdf = data.data;
+			console.log(pdf);
+			setFiles(pdf);
+		} catch (err) {
+			console.error('getPdf error: ', err);
+		}
+	};
+
+	useEffect(() => {
+		getPdfId();
+	}, []);
+
 	return (
 		<>
 			{openUploadForm ? (
@@ -271,7 +172,33 @@ const AdminLectures = () => {
 			)}
 
 			{openUploadForm && <UploadPdf />}
-			<ViewPdf />
+
+			{/* <ViewPdf /> */}
+
+			<TableContainer>
+				<Table variant="simple">
+					<Thead bgColor={'white'}>
+						<Tr>
+							<Th>Subject</Th>
+							<Th>Category</Th>
+							<Th>Title</Th>
+							<Th>File</Th>
+						</Tr>
+					</Thead>
+					<Tbody>
+						{files &&
+							files.map((pdf) => (
+								<Tr key={pdf.fileId}>
+									<Td>{pdf.subject.toUpperCase()}</Td>
+									<Td>{pdf.category.toUpperCase()}</Td>
+									<Td>{pdf.title}</Td>
+									<Td>View</Td>
+									{/* <ViewPdf id={pdf._id} /> */}
+								</Tr>
+							))}
+					</Tbody>
+				</Table>
+			</TableContainer>
 		</>
 	);
 };
