@@ -15,6 +15,7 @@ import UsersLecture from './pages/User/UserLecture';
 import AdminTests from './pages/Admin/AdminTests';
 import UserDashboard from './pages/User/UserDashboard';
 import UserTests from './pages/User/UserTests';
+import ViewPdf from './components/ViewPdf';
 
 const App = () => {
 	const getAuth = useAuthStore((state) => state.getAuth);
@@ -33,6 +34,7 @@ const App = () => {
 
 				{/* Protected routes */}
 				<Route element={<AuthenticatedRoute />}>
+					<Route path="/view-pdf" element={<ViewPdf />} />
 					<Route path="/dashboard" element={<Home />} />
 					<Route path="/email-verify" element={<EmailVerify />} />
 					<Route path="/reset-password" element={<ResetPassword />} />
