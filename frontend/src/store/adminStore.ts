@@ -11,22 +11,52 @@ interface UserData {
 	isAccountVerified: boolean;
 }
 
-// interface UsersList {
-// 	success: boolean;
-// 	data: UserData[];
-// 	count: number;
-// }
+interface PdfFiles {
+	_id: string;
+	fileId: string;
+	subject: string;
+	category: string;
+	title: string;
+	pdf: string;
+	uploadDate: string;
+}
 
 interface AdminStore {
 	totalUser: number | null;
 	usersList: UserData[];
+	pdfList: PdfFiles[];
+	setPdfList: (pdfList: { pdfList: [] }) => void;
 	getUsersList: () => Promise<void>;
+	getAllPdf: () => Promise<void>;
+	messageError: string | null;
+	setMessageError: (messageError: string) => void;
+
+	//Upload PDF
+	formData: {};
+	title: string;
+	file: null;
+	category: string;
+	subject: string;
+	loading: boolean;
+
+	//action to Uploading PDF
+	setTitle: (title: string) => void;
+	setFile: (file: string) => void;
+	setCategory: (category: string) => void;
+	setSubject: (subject: string) => void;
 }
 
-const AdminStore = create<AdminStore>((set) => ({
+const AdminStore = create<AdminStore>((set, get) => ({
+	// all list of data
 	totalUser: null,
 	usersList: [],
+	pdfList: [],
 
+	//message error
+	messageError: null,
+	setMessageError: (messageError) => set({ messageError }),
+
+	//Dashboard content
 	getUsersList: async () => {
 		try {
 			const { data } = await axios.get(BACKEND_URL + '/api/user/users-list');
@@ -44,6 +74,75 @@ const AdminStore = create<AdminStore>((set) => ({
 		} catch (err) {
 			console.log('getUserEmail error: ', err.message);
 		}
+	},
+	setPdfList: (pdfList) => set({ pdfList }),
+	getAllPdf: async () => {
+		const { setPdfList, setMessageError } = get();
+		try {
+			const { data } = await axios.get(BACKEND_URL + '/api/pdf/pdf-lectures');
+			const pdf = data.data;
+			setPdfList(pdf);
+		} catch (err) {
+			setMessageError(err.message);
+			console.error('getPdf error: ', err);
+		}
+	},
+
+	// Uploading PDF Files
+	// uploadPdf: async () => {
+	// 	const promise = new Promise()
+
+	// 	const {formData} = get();
+	// 	try{
+	// 		axios.post(BACKEND_URL + '/api/pdf/pdf-lectures', formData, {
+	// 			headers: {'Content-Type' : 'multipart/form-data'},
+	// 		})
+	// 	}
+	// 	return resolve
+
+	// }
+
+	//UPLOAD PDF
+
+	//Form state
+	title: '',
+	file: null,
+	category: 'lecture',
+	subject: 'mesl',
+	loading: false,
+	formData: new FormData(),
+
+	//actions to update form state
+	setTitle: (title) => set({ title }),
+	setFile: (file) => set({ file }),
+	setCategory: (category) => set({ category }),
+	setSubject: (subject) => set({ subject }),
+
+	// Reset form
+	resetForm: () =>
+		set({
+			title: '',
+			file: null,
+			loading: false,
+		}),
+
+	// Prepare form data before submission
+	prepareFormData: () => {
+		const { title, file, subject, category } = get();
+		const formData = new FormData();
+		formData.append('title', title);
+		formData.append('file', file);
+		formData.append('subject', subject);
+		formData.append('category', category);
+		set({ formData });
+	},
+
+	// Upload Function
+
+	uploadPdf: () => {
+		set({ loading: true });
+
+		const { formData } = get();
 	},
 }));
 

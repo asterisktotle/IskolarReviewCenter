@@ -62,14 +62,11 @@ export const uploadPdf = async (req, res) => {
 	} catch (err) {
 		return res.json({ success: false, message: err.message });
 	}
-
-	console.log(req.file);
 };
 
 export const getAllPdf = async (req, res) => {
 	try {
 		const pdf = await pdfModel.find().sort({ uploadDate: -1 });
-		console.log('pdf md:', pdf);
 		return res.json({ success: true, data: pdf, count: pdf.length });
 	} catch (err) {
 		console.log('get Pdf error: ', err.message);
@@ -160,17 +157,26 @@ export const deletePdfById = async (req, res) => {
 export const editPdfTitleById = async (req, res) => {
 	try {
 		const id = req.params.id;
-		const { title } = req.body;
+		const { title, subject, category } = req.body;
 
-		if (!title) {
-			return res.json({ success: false, message: 'No title found' });
+		if (!title && !subject && !category) {
+			return res.json({ success: false, message: 'No fields to update' });
 		}
 
-		const updatedPdf = await pdfModel.findByIdAndUpdate(
-			id,
-			{ title: title },
-			{ new: true }
-		);
+		const updatedFields = {};
+		if (title) {
+			updatedFields.title = title;
+		}
+		if (subject) {
+			updatedFields.subject = subject;
+		}
+		if (category) {
+			updatedFields.category = category;
+		}
+
+		const updatedPdf = await pdfModel.findByIdAndUpdate(id, updatedFields, {
+			new: true,
+		});
 
 		if (!updatedPdf) {
 			return res.status(404).json({ success: false, message: 'PDF not found' });
