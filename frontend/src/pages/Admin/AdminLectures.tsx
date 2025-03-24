@@ -25,6 +25,7 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import AdminStore from '../../store/adminStore';
 
 const UploadPdf = () => {
 	const [title, setTitle] = useState('');
@@ -35,9 +36,38 @@ const UploadPdf = () => {
 
 	const toast = useToast();
 
+	// const submitPDF = async (e) => {
+	// 	e.preventDefault();
+	// 	const formData = new FormData();
+	// 	formData.append('title', title);
+	// 	formData.append('file', file);
+	// 	formData.append('subject', subject);
+	// 	formData.append('category', category);
+
+	// 	setLoading(true);
+
+	// 	toast.promise(
+	// 		axios.post('http://localhost:3100/api/pdf/pdf-lectures', formData, {
+	// 			headers: { 'Content-Type': 'multipart/form-data' },
+	// 		}),
+	// 		{
+	// 			success: { title: 'File uploaded', description: 'Looks great!' },
+	// 			error: {
+	// 				title: 'File failed to upload',
+	// 				description: 'Something wrong',
+	// 			},
+	// 			loading: { title: 'File uploading', description: 'Please wait' },
+	// 		}
+	// 	);
+
+	// 	setLoading(false);
+	// 	setTitle('');
+	// 	setFile('');
+	// };
+
 	const submitPDF = async (e) => {
-		e.preventDefault();
-		const formData = new FormData();
+		const { formData, uploadPdf } = AdminStore();
+
 		formData.append('title', title);
 		formData.append('file', file);
 		formData.append('subject', subject);
@@ -142,23 +172,11 @@ const UploadPdf = () => {
 
 const AdminLectures = () => {
 	const [openUploadForm, setOpenUploadForm] = useState(false);
-	const [files, setFiles] = useState([]);
 
-	const getPdfId = async () => {
-		try {
-			const { data } = await axios.get(
-				'http://localhost:3100/api/pdf/pdf-lectures'
-			);
-			const pdf = data.data;
-			console.log(pdf);
-			setFiles(pdf);
-		} catch (err) {
-			console.error('getPdf error: ', err);
-		}
-	};
+	const { getAllPdf, pdfList, messageError } = AdminStore();
 
 	useEffect(() => {
-		getPdfId();
+		getAllPdf();
 	}, []);
 
 	return (
@@ -186,8 +204,8 @@ const AdminLectures = () => {
 						</Tr>
 					</Thead>
 					<Tbody>
-						{files &&
-							files.map((pdf) => (
+						{pdfList &&
+							pdfList.map((pdf) => (
 								<Tr key={pdf.fileId}>
 									<Td>{pdf.subject.toUpperCase()}</Td>
 									<Td>{pdf.category.toUpperCase()}</Td>
@@ -196,6 +214,7 @@ const AdminLectures = () => {
 									{/* <ViewPdf id={pdf._id} /> */}
 								</Tr>
 							))}
+						{messageError && <p>{messageError}</p>}
 					</Tbody>
 				</Table>
 			</TableContainer>
