@@ -32,18 +32,21 @@ interface AdminStore {
 	setMessageError: (messageError: string) => void;
 
 	//Upload PDF
-	formData: {};
+
 	title: string;
 	file: null;
 	category: string;
 	subject: string;
 	loading: boolean;
+	setLoading: (loading: boolean) => void;
+	resetForm: () => void;
 
 	//action to Uploading PDF
 	setTitle: (title: string) => void;
 	setFile: (file: string) => void;
 	setCategory: (category: string) => void;
 	setSubject: (subject: string) => void;
+	uploadPdfFile: () => Promise<void>;
 }
 
 const AdminStore = create<AdminStore>((set, get) => ({
@@ -88,35 +91,19 @@ const AdminStore = create<AdminStore>((set, get) => ({
 		}
 	},
 
-	// Uploading PDF Files
-	// uploadPdf: async () => {
-	// 	const promise = new Promise()
-
-	// 	const {formData} = get();
-	// 	try{
-	// 		axios.post(BACKEND_URL + '/api/pdf/pdf-lectures', formData, {
-	// 			headers: {'Content-Type' : 'multipart/form-data'},
-	// 		})
-	// 	}
-	// 	return resolve
-
-	// }
-
-	//UPLOAD PDF
-
 	//Form state
 	title: '',
 	file: null,
 	category: 'lecture',
 	subject: 'mesl',
 	loading: false,
-	formData: new FormData(),
 
 	//actions to update form state
 	setTitle: (title) => set({ title }),
 	setFile: (file) => set({ file }),
 	setCategory: (category) => set({ category }),
 	setSubject: (subject) => set({ subject }),
+	setLoading: (loading) => set({ loading }),
 
 	// Reset form
 	resetForm: () =>
@@ -127,23 +114,39 @@ const AdminStore = create<AdminStore>((set, get) => ({
 		}),
 
 	// Prepare form data before submission
-	prepareFormData: () => {
-		const { title, file, subject, category } = get();
+	uploadPdfFile: async () => {
+		const { title, file, subject, category, resetForm } = get();
+
+		set({ loading: true });
+
 		const formData = new FormData();
 		formData.append('title', title);
 		formData.append('file', file);
 		formData.append('subject', subject);
 		formData.append('category', category);
-		set({ formData });
+
+		// Uploading PDF
+		try {
+			const result = await axios.post(
+				BACKEND_URL + '/api/pdf/pdf-lectures',
+				formData,
+				{
+					headers: {
+						'Content-Type': 'multipart/form-data',
+					},
+				}
+			);
+			resetForm();
+			set({ loading: false });
+			return result;
+		} catch (err) {
+			set({ loading: false });
+			console.error('Upload error: ', err);
+			throw err;
+		}
 	},
 
 	// Upload Function
-
-	uploadPdf: () => {
-		set({ loading: true });
-
-		const { formData } = get();
-	},
 }));
 
 export default AdminStore;
