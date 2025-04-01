@@ -28,70 +28,32 @@ import axios from 'axios';
 import AdminStore from '../../store/adminStore';
 
 const UploadPdf = () => {
-	const [title, setTitle] = useState('');
-	const [file, setFile] = useState('');
-	const [category, setCategory] = useState('lecture');
-	const [subject, setSubject] = useState('mesl');
-	const [loading, setLoading] = useState(false);
-
 	const toast = useToast();
 
-	// const submitPDF = async (e) => {
-	// 	e.preventDefault();
-	// 	const formData = new FormData();
-	// 	formData.append('title', title);
-	// 	formData.append('file', file);
-	// 	formData.append('subject', subject);
-	// 	formData.append('category', category);
+	const {
+		uploadPdfFile,
+		setTitle,
+		setCategory,
+		setSubject,
+		setFile,
+		loading,
+		title,
+		subject,
+		category,
+		file,
+	} = AdminStore();
 
-	// 	setLoading(true);
+	const handleSubmit = (e) => {
+		e.preventDefault();
 
-	// 	toast.promise(
-	// 		axios.post('http://localhost:3100/api/pdf/pdf-lectures', formData, {
-	// 			headers: { 'Content-Type': 'multipart/form-data' },
-	// 		}),
-	// 		{
-	// 			success: { title: 'File uploaded', description: 'Looks great!' },
-	// 			error: {
-	// 				title: 'File failed to upload',
-	// 				description: 'Something wrong',
-	// 			},
-	// 			loading: { title: 'File uploading', description: 'Please wait' },
-	// 		}
-	// 	);
-
-	// 	setLoading(false);
-	// 	setTitle('');
-	// 	setFile('');
-	// };
-
-	const submitPDF = async (e) => {
-		const { formData, uploadPdf } = AdminStore();
-
-		formData.append('title', title);
-		formData.append('file', file);
-		formData.append('subject', subject);
-		formData.append('category', category);
-
-		setLoading(true);
-
-		toast.promise(
-			axios.post('http://localhost:3100/api/pdf/pdf-lectures', formData, {
-				headers: { 'Content-Type': 'multipart/form-data' },
-			}),
-			{
-				success: { title: 'File uploaded', description: 'Looks great!' },
-				error: {
-					title: 'File failed to upload',
-					description: 'Something wrong',
-				},
-				loading: { title: 'File uploading', description: 'Please wait' },
-			}
-		);
-
-		setLoading(false);
-		setTitle('');
-		setFile('');
+		toast.promise(uploadPdfFile(), {
+			success: { title: 'File uploaded', description: 'Looks great!' },
+			error: {
+				title: 'File failed to upload',
+				description: 'Something wrong',
+			},
+			loading: { title: 'File uploading', description: 'Please wait' },
+		});
 	};
 
 	return (
@@ -99,7 +61,7 @@ const UploadPdf = () => {
 			<Text fontSize="lg" textAlign={'center'} fontWeight={'bold'}>
 				UPLOAD NEW {category.toUpperCase()}
 			</Text>
-			<form onSubmit={submitPDF}>
+			<form onSubmit={handleSubmit}>
 				<VStack spacing={2}>
 					<FormControl as="fieldset">
 						<FormLabel as="legend">Subject</FormLabel>
