@@ -46,7 +46,7 @@ interface AdminStore {
 	setFile: (file: string) => void;
 	setCategory: (category: string) => void;
 	setSubject: (subject: string) => void;
-	uploadPdfFile: () => Promise<void>;
+	uploadPdfFile: () => Promise<any>;
 }
 
 const AdminStore = create<AdminStore>((set, get) => ({
@@ -99,6 +99,7 @@ const AdminStore = create<AdminStore>((set, get) => ({
 	loading: false,
 
 	//actions to update form state
+
 	setTitle: (title) => set({ title }),
 	setFile: (file) => set({ file }),
 	setCategory: (category) => set({ category }),

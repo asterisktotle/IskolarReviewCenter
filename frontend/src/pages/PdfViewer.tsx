@@ -2,14 +2,15 @@ import { Button, Spinner } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { pdfjs, Document, Page } from 'react-pdf';
 import usePdfViewer from '../hooks/usePdfViewer.ts';
+import { useParams } from 'react-router-dom';
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 	'pdfjs-dist/build/pdf.worker.min.mjs',
 	import.meta.url
 ).toString();
 
 const ViewPdf = () => {
+	const { pdfId } = useParams();
 	// const [loading, setLoading] = useState(false);
-
 	const [view, setView] = useState(false);
 	const [isPreloaded, setIsPreloaded] = useState(false);
 
@@ -20,8 +21,16 @@ const ViewPdf = () => {
 
 	const { setSelectedPdf, pdfUrl, errorMessage, loading } = usePdfViewer();
 
+	// useEffect(() => {
+	// 	setSelectedPdf('67d5781610fabc74ce1c64af');
+	// }, []);
+
 	useEffect(() => {
-		setSelectedPdf('67d5781610fabc74ce1c64af');
+		if (!pdfId) {
+			console.log('no pdf selected');
+			return;
+		}
+		setSelectedPdf(pdfId);
 	}, []);
 
 	const onDocumentLoadSuccess = ({ numPages }: { numPages: number }): void => {
@@ -48,28 +57,28 @@ const ViewPdf = () => {
 	// Optional: Add preload functionality for hover
 	const handleButtonMouseEnter = () => {
 		if (!isPreloaded) {
-			setSelectedPdf('67d5781610fabc74ce1c64af');
+			setSelectedPdf(pdfId);
 		}
 	};
 
-	if (!view) {
-		return (
-			<>
-				<Button
-					backgroundColor={loading ? 'whiteAlpha.800' : 'white'}
-					onClick={() => setView(!view)}
-					onMouseEnter={handleButtonMouseEnter}
-					isLoading={loading && !!isPreloaded}
-				>
-					View Pdf
-				</Button>
-			</>
-		);
-	}
+	// if (!view) {
+	// 	return (
+	// 		<>
+	// 			<Button
+	// 				backgroundColor={loading ? 'whiteAlpha.800' : 'white'}
+	// 				onClick={() => setView(!view)}
+	// 				onMouseEnter={handleButtonMouseEnter}
+	// 				isLoading={loading && !!isPreloaded}
+	// 			>
+	// 				View Pdf
+	// 			</Button>
+	// 		</>
+	// 	);
+	// }
 	return (
-		<div className="flex flex-col items-center gap-2 p-4 w-full max-w-md mx-auto">
+		<div className="flex flex-col items-center gap-2 p-4 w-full mx-auto">
 			<p>Lecture 1</p>
-			<Button onClick={() => setView(!view)}>Close Pdf</Button>
+			{/* <Button onClick={() => setView(!view)}>Close Pdf</Button> */}
 			{loading ? (
 				<Spinner
 					thickness="4px"

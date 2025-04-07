@@ -24,8 +24,9 @@ import {
 	TableContainer,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import AdminStore from '../../store/adminStore';
+import ViewPdf from '../PdfViewer';
+import { useNavigate } from 'react-router-dom';
 
 const UploadPdf = () => {
 	const toast = useToast();
@@ -57,7 +58,16 @@ const UploadPdf = () => {
 	};
 
 	return (
-		<Container flexDirection={'column'}>
+		<Container
+			flexDirection={'column'}
+			mb={'5'}
+			maxW={'full'}
+			border={'1px'}
+			p={5}
+			borderColor={'gray.500'}
+			borderRadius={'md'}
+			bgColor={'whiteAlpha.50'}
+		>
 			<Text fontSize="lg" textAlign={'center'} fontWeight={'bold'}>
 				UPLOAD NEW {category.toUpperCase()}
 			</Text>
@@ -133,20 +143,29 @@ const UploadPdf = () => {
 };
 
 const AdminLectures = () => {
+	const navigate = useNavigate();
 	const [openUploadForm, setOpenUploadForm] = useState(false);
-
-	const { getAllPdf, pdfList, messageError } = AdminStore();
+	const { getAllPdf, pdfList, messageError, loading } = AdminStore();
 
 	useEffect(() => {
 		getAllPdf();
-	}, []);
+	}, [loading]);
+
+	const handleViewPdf = (pdfId) => {
+		//insert dynamic url
+		navigate(`/view-pdf/${pdfId}`);
+	};
 
 	return (
 		<>
 			{openUploadForm ? (
 				<CloseButton onClick={() => setOpenUploadForm(!openUploadForm)} />
 			) : (
-				<Button onClick={() => setOpenUploadForm(!openUploadForm)}>
+				<Button
+					w={'full'}
+					mb={'5'}
+					onClick={() => setOpenUploadForm(!openUploadForm)}
+				>
 					Upload PDF
 				</Button>
 			)}
@@ -172,8 +191,13 @@ const AdminLectures = () => {
 									<Td>{pdf.subject.toUpperCase()}</Td>
 									<Td>{pdf.category.toUpperCase()}</Td>
 									<Td>{pdf.title}</Td>
-									<Td>View</Td>
-									{/* <ViewPdf id={pdf._id} /> */}
+									<Td
+										cursor={'pointer'}
+										_hover={{ color: 'blue.500' }}
+										onClick={() => handleViewPdf(pdf._id)}
+									>
+										View
+									</Td>
 								</Tr>
 							))}
 						{messageError && <p>{messageError}</p>}
