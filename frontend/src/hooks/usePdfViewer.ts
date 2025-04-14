@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const usePdfViewer = () => {
 	const [selectedPdf, setSelectedPdf] = useState(null);
@@ -8,18 +9,18 @@ const usePdfViewer = () => {
 
 	const fetchPdf = useCallback(async () => {
 		if (!selectedPdf) {
-			console.log('selected pdf error: ', selectedPdf);
+			setErrorMessage('No PDF Selected');
 			return;
 		}
 
 		setLoading(true);
 		try {
 			const response = await fetch(
-				`http://localhost:3100/api/pdf/pdf-lectures/${selectedPdf}`
+				`${BACKEND_URL}/api/pdf/pdf-lectures/${selectedPdf}`
 			);
 
 			if (!response.ok) {
-				setErrorMessage('fetching pdf error');
+				setErrorMessage(`Fetching data error: ${response.statusText}`);
 				return;
 			}
 
@@ -28,7 +29,7 @@ const usePdfViewer = () => {
 			setPdfUrl(pdfPath);
 			setErrorMessage('');
 		} catch (error) {
-			setErrorMessage('usePdfViewer error: ', error.message);
+			setErrorMessage(error.message);
 			setPdfUrl(null);
 			console.log('usePdfViewer error', error);
 		} finally {
@@ -37,14 +38,11 @@ const usePdfViewer = () => {
 	}, [selectedPdf]);
 
 	useEffect(() => {
-		let isMounted = true;
 		if (selectedPdf) {
 			fetchPdf();
 		}
 
 		return () => {
-			isMounted = false;
-			// Revoke object URL to prevent memory leaks
 			if (pdfUrl) {
 				window.URL.revokeObjectURL(pdfUrl);
 			}
