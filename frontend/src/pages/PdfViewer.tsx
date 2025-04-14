@@ -10,20 +10,13 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 const ViewPdf = () => {
 	const { pdfId } = useParams();
-	// const [loading, setLoading] = useState(false);
-	const [view, setView] = useState(false);
-	const [isPreloaded, setIsPreloaded] = useState(false);
 
-	const [numPages, setNumPages] = useState();
+	const [numPages, setNumPages] = useState(null);
 	const [pageNumber, setPageNumber] = useState(1);
 	const [disableNext, setDisableNext] = useState(false);
 	const [disablePrevious, setDisablePrevious] = useState(false);
 
 	const { setSelectedPdf, pdfUrl, errorMessage, loading } = usePdfViewer();
-
-	// useEffect(() => {
-	// 	setSelectedPdf('67d5781610fabc74ce1c64af');
-	// }, []);
 
 	useEffect(() => {
 		if (!pdfId) {
@@ -54,31 +47,16 @@ const ViewPdf = () => {
 		}
 	};
 
-	// Optional: Add preload functionality for hover
-	const handleButtonMouseEnter = () => {
-		if (!isPreloaded) {
-			setSelectedPdf(pdfId);
-		}
-	};
+	if (errorMessage) {
+		<div className="flex flex-col items-center ">
+			return <h1 className="text-white text-2xl font-bold ">{errorMessage}</h1>;
+		</div>;
+	}
 
-	// if (!view) {
-	// 	return (
-	// 		<>
-	// 			<Button
-	// 				backgroundColor={loading ? 'whiteAlpha.800' : 'white'}
-	// 				onClick={() => setView(!view)}
-	// 				onMouseEnter={handleButtonMouseEnter}
-	// 				isLoading={loading && !!isPreloaded}
-	// 			>
-	// 				View Pdf
-	// 			</Button>
-	// 		</>
-	// 	);
-	// }
 	return (
-		<div className="flex flex-col items-center gap-2 p-4 w-full mx-auto">
-			<p>Lecture 1</p>
-			{/* <Button onClick={() => setView(!view)}>Close Pdf</Button> */}
+		<div className="flex flex-col items-center gap-4 w-full">
+			<h2 className="text-lg font-medium">Lecture 1</h2>
+
 			{loading ? (
 				<Spinner
 					thickness="4px"
@@ -88,29 +66,36 @@ const ViewPdf = () => {
 					size="xl"
 				/>
 			) : (
-				<div className="w-full overflow-auto">
+				<div className="w-full flex justify-center">
 					<Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
-						{/* <div className="w-fit"> */}
 						<Page
 							pageNumber={pageNumber}
 							renderAnnotationLayer={false}
 							renderTextLayer={false}
+							width={Math.min(window.innerWidth - 32, 800)}
+							scale={1}
 						/>
-						{/* </div> */}
 					</Document>
 				</div>
 			)}
-			<p>
-				Page {pageNumber} of {numPages}
-			</p>
 
-			<div className=" flex gap-2">
-				<Button disabled={disablePrevious} onClick={handlePreviousPage}>
-					Previous
-				</Button>
-				<Button disabled={disableNext} onClick={handleNextPage}>
-					Next
-				</Button>
+			<div className="flex flex-col sm:flex-row items-center justify-between w-full gap-2">
+				<span className="text-sm">
+					Page {pageNumber} of {numPages}
+				</span>
+
+				<div className="flex gap-2">
+					<Button
+						disabled={disablePrevious}
+						onClick={handlePreviousPage}
+						size="sm"
+					>
+						Previous
+					</Button>
+					<Button disabled={disableNext} onClick={handleNextPage} size="sm">
+						Next
+					</Button>
+				</div>
 			</div>
 		</div>
 	);
