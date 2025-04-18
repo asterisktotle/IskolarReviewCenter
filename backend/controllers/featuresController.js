@@ -1,5 +1,8 @@
 import { getGridFSBucket } from '../config/db.js';
 import pdfModel from '../models/pdfSchema.js';
+import { Quiz, QuizAttempt } from '../models/quizSchema.js';
+
+// PDF GET AND UPLOAD
 
 export const uploadPdf = async (req, res) => {
 	try {
@@ -88,7 +91,6 @@ export const findPdfByTitle = async (req, res) => {
 	}
 };
 
-// DOWNLOAD PDF
 export const downloadPdfById = async (req, res) => {
 	try {
 		const id = req.params.id;
@@ -189,6 +191,130 @@ export const editPdfTitleById = async (req, res) => {
 		});
 	} catch (err) {
 		console.log('editPdf title api error: ', err.message);
+		return res.json({ success: false, message: err.message });
+	}
+};
+
+// QUIZ MAKER
+export const createQuiz = async (req, res) => {
+	const {
+		title,
+		subject,
+		category,
+		questions,
+		totalPoints,
+		passingScore,
+		timeLimit,
+	} = req.body;
+
+	if ((!title || !subject || !questions, !category)) {
+		return res.json({ success: false, message: 'Provide all the fields' });
+	}
+
+	if (questions.length < 1) {
+		return res.json({
+			success: false,
+			message: 'At least one question is required',
+		});
+	}
+
+	try {
+		const quiz = new Quiz({
+			title,
+			subject,
+			category,
+			questions,
+			totalPoints: totalPoints || 0,
+			passingScore: passingScore || 70,
+			timeLimit: timeLimit || 240, //minutes
+		});
+
+		await quiz.save();
+		return res.json({
+			success: true,
+			message: 'Quiz created successfully',
+			quizId: quiz._id,
+		});
+	} catch (err) {
+		return res.json({ success: false, message: err.message });
+	}
+};
+
+export const getAllQuizzes = async (req, res) => {
+	try {
+		const filter = {};
+
+		if (req.query.subject) {
+			filter.subject = req.query.subject;
+		}
+
+		if (req.query.category) {
+			filter.category = req.query.category;
+		}
+
+		if (req.query.title) {
+			filter.title = { $regex: req.query.search, $options: 'i' }; // case-insensitive
+		}
+
+		const quizzes = await Quiz.find(filter);
+
+		return res.json({ success: true, data: quizzes });
+	} catch (err) {
+		return res.json({
+			success: false,
+			message: 'Failed to retrieve quizzes',
+			error: err.message,
+		});
+	}
+};
+
+export const submitAndEvaluateQuiz = async (req, res) => {
+	const { quizId, answers, userId } = req.body;
+	if (!quizId || !answers) {
+		return res.json({
+			success: false,
+			message: 'Provide the Quiz ID and answers',
+		});
+	}
+
+	const quiz = await Quiz.findById(quizId);
+	if (!quiz) {
+		return res.json({ success: false, message: 'Quiz not found' });
+	}
+
+	let score = 0;
+
+	for (let userAnswer of answers) {
+		const question = quiz.questions.id(userAnswer.questionId);
+		if (!question) continue; // skip question not found
+
+		let isCorrect = false;
+		let pointsEarned = 0;
+
+		if (question.type === 'multiple-choice' || question.type === 'true-false') {
+			// CONTINUE HERE EVALUATING THE ANSWER
+		}
+	}
+};
+
+export const getUserQuizHistory = async (req, res) => {
+	try {
+		const { userId, quizId, answers, score, percentageScore, passed } =
+			req.body;
+
+		if (!userId || !quizId || !answers) {
+			return res.json({ success: false, message: 'Provide all the fields' });
+		}
+
+		const quizAttempt = new QuizAttempt({
+			user: userId,
+			quiz: quizId,
+			answers,
+			score,
+			percentageScore,
+			passed,
+		});
+	} catch (err) {
 		return res.json({ success: false, message: err.message });
 	}
 };
