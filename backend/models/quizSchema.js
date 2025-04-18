@@ -33,6 +33,10 @@ const QuizSchema = new Schema({
 		type: String,
 		required: true,
 	},
+	category: {
+		type: String,
+		enum: ['terms', 'weekly-test', 'take-home-test', 'pre-board-exam'],
+	},
 	questions: [QuestionSchema],
 	totalPoints: {
 		type: Number,
@@ -69,8 +73,8 @@ const QuizAttemptSchema = new Schema({
 	},
 	answers: [
 		{
-			questionIndex: {
-				type: Number,
+			questionId: {
+				type: Schema.Types.ObjectId,
 				required: true,
 			},
 			questionText: String, // optional: store the actual question for record-keeping
