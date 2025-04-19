@@ -2,6 +2,10 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const QuestionSchema = new Schema({
+	questionText: {
+		type: String,
+		required: true,
+	},
 	type: {
 		type: String,
 		enum: ['multiple-choice', 'true-false', 'fill-in-the-blank'],
@@ -24,34 +28,36 @@ const QuestionSchema = new Schema({
 	},
 });
 
-const QuizSchema = new Schema({
-	title: {
-		type: String,
-		required: true,
+const QuizSchema = new Schema(
+	{
+		title: {
+			type: String,
+			required: true,
+		},
+		subject: {
+			type: String,
+			required: true,
+		},
+		category: {
+			type: String,
+			enum: ['terms', 'weekly-test', 'take-home-test', 'pre-board-exam'],
+		},
+		questions: [QuestionSchema],
+		totalPoints: {
+			type: Number,
+			default: 0,
+		},
+		passingScore: {
+			type: Number,
+			default: 70,
+		},
+		timeLimit: {
+			type: Number,
+			default: 240, // in minutes
+		},
 	},
-	subject: {
-		type: String,
-		required: true,
-	},
-	category: {
-		type: String,
-		enum: ['terms', 'weekly-test', 'take-home-test', 'pre-board-exam'],
-	},
-	questions: [QuestionSchema],
-	totalPoints: {
-		type: Number,
-		default: 0,
-	},
-	passingScore: {
-		type: Number,
-		default: 70,
-	},
-	timeLimit: {
-		type: Number,
-		default: 240, // in minutes
-	},
-	createdDate: { timestamps: true },
-});
+	{ timestamps: true }
+);
 
 const QuizAttemptSchema = new Schema({
 	quiz: {

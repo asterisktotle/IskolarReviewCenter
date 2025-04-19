@@ -269,31 +269,88 @@ export const getAllQuizzes = async (req, res) => {
 };
 
 export const submitAndEvaluateQuiz = async (req, res) => {
-	const { quizId, answers, userId } = req.body;
-	if (!quizId || !answers) {
+	try {
+		const { quizId, answers, userId } = req.body;
+		if (!quizId || !answers) {
+			return res.json({
+				success: false,
+				message: 'Provide the Quiz ID and answers',
+			});
+		}
+
+		if (!userId) {
+			return res.json({ success: false, message: 'Provide the user ID' });
+		}
+
+		const quiz = await Quiz.findById(quizId);
+		if (!quiz) {
+			return res.json({ success: false, message: 'Quiz not found' });
+		}
+
+		let score = 0;
+		let percentageScore = 0;
+		const evaluatedAnswers = [];
+		let totalPoints = 0;
+		const passingScore = quiz.passingScore || 70;
+
+		for (let userAnswer of answers) {
+			const question = quiz.questions.id(userAnswer.questionId);
+			if (!question) continue; // skip question not found
+
+			let isCorrect = false;
+			let pointsEarned = 0;
+
+			// Evaluate based on type
+			if (
+				question.type === 'multiple-choice' ||
+				question.type === 'true-false'
+			) {
+				const correctOptions = question.options
+					.filter((option) => option.isCorrect)
+					.map((option) => option.text);
+
+				isCorrect = arraysEqual(correctOptions, userAnswer.selectedOptions);
+			} else if (question.type === 'fill-in-the-blank') {
+				isCorrect =
+					question.correctAnswer.trim().toLowerCase() ===
+					userAnswer.textAnswer.trim().toLowerCase();
+			}
+
+			if (isCorrect) {
+				pointsEarned = question.points || 0;
+				totalPoints += pointsEarned;
+			}
+
+			evaluatedAnswers.push({
+				questionId: userAnswer.questionId,
+				questionText: question.questionText,
+				userAnswer: userAnswer.selectedOptions || userAnswer.textAnswer,
+				isCorrect,
+				pointsEarned,
+			});
+		}
+
+		score = totalPoints;
+		percentageScore = quiz.totalPoints ? 0 (score / quiz.totalPoints) * 100;
+		const passed = percentageScore >= passingScore;
+
+		const quizAttempt = new QuizAttempt({
+			quiz: quizId,
+			user: userId,
+			answers: evaluatedAnswers,
+			score,
+			percentageScore,
+			passed,
+			completedAt: new Date(),
+		});
+
+		await quizAttempt.save();
+		res.json({ success: true, attempt: quizAttempt });
+	} catch (err) {
 		return res.json({
 			success: false,
-			message: 'Provide the Quiz ID and answers',
+			message: 'Submission error: ' + err.message,
 		});
-	}
-
-	const quiz = await Quiz.findById(quizId);
-	if (!quiz) {
-		return res.json({ success: false, message: 'Quiz not found' });
-	}
-
-	let score = 0;
-
-	for (let userAnswer of answers) {
-		const question = quiz.questions.id(userAnswer.questionId);
-		if (!question) continue; // skip question not found
-
-		let isCorrect = false;
-		let pointsEarned = 0;
-
-		if (question.type === 'multiple-choice' || question.type === 'true-false') {
-			// CONTINUE HERE EVALUATING THE ANSWER
-		}
 	}
 };
 
