@@ -288,7 +288,7 @@ export const submitAndEvaluateQuiz = async (req, res) => {
 		}
 
 		let score = 0;
-		let percentageScore = 0;
+
 		const evaluatedAnswers = [];
 		let totalPoints = 0;
 		const passingScore = quiz.passingScore || 70;
@@ -331,7 +331,9 @@ export const submitAndEvaluateQuiz = async (req, res) => {
 		}
 
 		score = totalPoints;
-		percentageScore = quiz.totalPoints ? 0 (score / quiz.totalPoints) * 100;
+		percentageScore = quiz.totalPoints
+			? 0 && (score / quiz.totalPoints) * 100
+			: 0;
 		const passed = percentageScore >= passingScore;
 
 		const quizAttempt = new QuizAttempt({
@@ -356,20 +358,126 @@ export const submitAndEvaluateQuiz = async (req, res) => {
 
 export const getUserQuizHistory = async (req, res) => {
 	try {
-		const { userId, quizId, answers, score, percentageScore, passed } =
-			req.body;
+		const { userId, quizId } = req.body;
 
-		if (!userId || !quizId || !answers) {
+		if (!userId || !quizId) {
 			return res.json({ success: false, message: 'Provide all the fields' });
 		}
 
-		const quizAttempt = new QuizAttempt({
+		const userAttemptQuiz = await QuizAttempt.findOne({
 			user: userId,
 			quiz: quizId,
-			answers,
-			score,
-			percentageScore,
-			passed,
+		})
+			.sort({ completedAt: -1 })
+			.select('score percentageScore passed completedAt answers');
+
+		if (!userAttemptQuiz) {
+			return res.json({
+				success: false,
+				message: 'User did not take the quiz',
+			});
+		}
+
+		return res.json({
+			success: true,
+			data: userAttemptQuiz,
+		});
+	} catch (err) {
+		return res.json({ success: false, message: err.message });
+	}
+};
+
+export const deleteQuiz = async (req, res) => {
+	try {
+		const { quizId } = req.params;
+		if (!quizId) {
+			return res.json({ success: false, message: 'NO Quiz ID provided' });
+		}
+		const quiz = await Quiz.findByIdAndDelete(quizId);
+		if (!quiz) {
+			return res.json({ success: false, message: 'Quiz not found' });
+		}
+		return res.json({ success: true, message: 'Quiz deleted successfully' });
+	} catch (err) {
+		return res.json({ success: false, message: err.message });
+	}
+};
+
+export const updateQuiz = async (req, res) => {
+	try {
+		const { quizId } = req.params;
+		const updates = req.body;
+
+		if (!quizId) {
+			return res.json({ success: false, message: 'NO Quiz ID provided' });
+		}
+
+		const quiz = await Quiz.findById(quizId);
+		if (!quiz) {
+			return res.json({ success: false, message: 'Quiz not found' });
+		}
+
+		// UPDATE QUIZ FIELDS
+		if (updates.title) quiz.title = updates.title;
+		if (updates.subject) quiz.subject = updates.subject;
+		if (updates.timeLimit !== undefined) quiz.timeLimit = updates.timeLimit;
+		if (updates.passingScore !== undefined)
+			quiz.passingScore = updates.passingScore;
+
+		if (updates.category) {
+			const validCategories = [
+				'terms',
+				'weekly-test',
+				'take-home-test',
+				'pre-board-exam',
+			];
+			if (validCategories.includes(updates.category)) {
+				quiz.category = updates.category;
+			} else {
+				return res.json({
+					success: false,
+					message: 'Invalid category provided',
+				});
+			}
+		}
+
+		if (updates.totalPoints)
+			if (updates.questions && Array.isArray(updates.questions)) {
+				//UPDATE QUESTIONS
+				quiz.questions = updates.questions.map((questions) => {
+					const validatedQuestion = {
+						questionText: questions.questionText,
+						type: questions.type,
+						points: questions.points || 1,
+					};
+
+					if (
+						questions.type === 'multiple-choice' ||
+						questions.type === 'true-false'
+					) {
+						validatedQuestion.options =
+							questions.options?.map((option) => {
+								return {
+									text: option.text,
+									isCorrect: option.isCorrect,
+								};
+							}) || [];
+					} else if (questions.type === 'fill-in-the-blank') {
+						validatedQuestion.correctAnswer = questions.correctAnswer;
+					}
+					return validatedQuestion;
+				});
+
+				quiz.totalPoints = quiz.questions.reduce(
+					(sum, q) => sum + (q.points || 1),
+					0
+				);
+			}
+		await quiz.save();
+		return res.json({
+			success: true,
+			message: 'Quiz updated successfully',
+			quiz: quiz,
 		});
 	} catch (err) {
 		return res.json({ success: false, message: err.message });

@@ -8,30 +8,10 @@ import connectDB from './config/db.js';
 import authRouter from './routes/auth-route.js';
 import userRouter from './routes/user-route.js';
 import pdfRoute from './routes/pdf-route.js';
-// multer -------------------
-
-// const storage = multer.diskStorage({
-// 	destination: function (req, file, cb) {
-// 		cb(null, './files');
-// 	},
-// 	filename: function (req, file, cb) {
-// 		const uniqueSuffix = Date.now();
-// 		cb(null, uniqueSuffix + file.originalname);
-// 	},
-// });
-
-// const upload = multer({ storage: storage });
-
-// ---------------
-
+import quizRouter from './routes/quiz-route.js';
 const app = express();
 const port = process.env.PORT || 3001;
 connectDB();
-
-// //multer
-// app.post('/upload-files', upload.single('file'), async (req, res) => {
-// 	console.log(req.file);
-// });
 
 const allowedOrigins = ['http://localhost:5173'];
 
@@ -48,3 +28,4 @@ app.get('/', (req, res) => res.send('<h1>API IS WORKING</h1>'));
 app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
 app.use('/api/pdf', pdfRoute);
+app.use('/api/quiz', quizRouter);
