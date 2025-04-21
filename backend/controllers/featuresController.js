@@ -301,16 +301,13 @@ export const submitAndEvaluateQuiz = async (req, res) => {
 			let pointsEarned = 0;
 
 			// Evaluate based on type
-			if (
-				question.type === 'multiple-choice' ||
-				question.type === 'true-false'
-			) {
+			if (question.type === 'multiple-choice') {
 				const correctOptions = question.options
 					.filter((option) => option.isCorrect)
 					.map((option) => option.text);
 
 				isCorrect = arraysEqual(correctOptions, userAnswer.selectedOptions);
-			} else if (question.type === 'fill-in-the-blank') {
+			} else if (question.type === 'short-answer') {
 				isCorrect =
 					question.correctAnswer.trim().toLowerCase() ===
 					userAnswer.textAnswer.trim().toLowerCase();
@@ -451,10 +448,7 @@ export const updateQuiz = async (req, res) => {
 						points: questions.points || 1,
 					};
 
-					if (
-						questions.type === 'multiple-choice' ||
-						questions.type === 'true-false'
-					) {
+					if (questions.type === 'multiple-choice') {
 						validatedQuestion.options =
 							questions.options?.map((option) => {
 								return {
@@ -462,7 +456,7 @@ export const updateQuiz = async (req, res) => {
 									isCorrect: option.isCorrect,
 								};
 							}) || [];
-					} else if (questions.type === 'fill-in-the-blank') {
+					} else if (questions.type === 'short-answer') {
 						validatedQuestion.correctAnswer = questions.correctAnswer;
 					}
 					return validatedQuestion;

@@ -81,7 +81,7 @@ export default function Simple() {
 					/>
 					<HStack spacing={8} alignItems={'center'}>
 						<Image
-							src="../../public/iskolar.png"
+							src="/iskolar.png"
 							alt="iskolar logo"
 							w={'10rem'}
 							// display={{ sm: 'none' }}
