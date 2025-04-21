@@ -26,7 +26,7 @@ const App = () => {
 	}, []);
 
 	return (
-		<div className="text-white px-10">
+		<div className="text-white px-5">
 			<Routes>
 				{/* Public routes */}
 				<Route path="/" element={<SignUpForm />} />

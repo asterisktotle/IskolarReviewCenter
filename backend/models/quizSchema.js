@@ -8,7 +8,7 @@ const QuestionSchema = new Schema({
 	},
 	type: {
 		type: String,
-		enum: ['multiple-choice', 'true-false', 'fill-in-the-blank'],
+		enum: ['multiple-choice', 'short-answer'],
 		required: true,
 	},
 	options: [
@@ -18,7 +18,7 @@ const QuestionSchema = new Schema({
 		},
 	],
 
-	//for fill-in-the-blank
+	//for short-answer
 	correctAnswer: {
 		type: String,
 	},
@@ -85,7 +85,7 @@ const QuizAttemptSchema = new Schema({
 			},
 			questionText: String, // optional: store the actual question for record-keeping
 			selectedOptions: [String], // for multiple-choice or true/false
-			textAnswer: String, // for fill-in-the-blank
+			textAnswer: String, // for short-answer
 			isCorrect: Boolean,
 			pointsEarned: Number,
 		},

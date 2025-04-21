@@ -8,7 +8,6 @@ import {
 	RadioGroup,
 	FormErrorMessage,
 	useToast,
-	Spinner,
 	CloseButton,
 	Text,
 	Container,
@@ -16,16 +15,15 @@ import {
 	Table,
 	Thead,
 	Tbody,
-	Tfoot,
 	Tr,
 	Th,
 	Td,
-	TableCaption,
 	TableContainer,
+	Heading,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import AdminStore from '../../store/adminStore';
-import ViewPdf from '../PdfViewer';
+
 import { useNavigate } from 'react-router-dom';
 
 const UploadPdf = () => {
@@ -68,9 +66,9 @@ const UploadPdf = () => {
 			borderRadius={'md'}
 			bgColor={'whiteAlpha.50'}
 		>
-			<Text fontSize="lg" textAlign={'center'} fontWeight={'bold'}>
+			<Heading fontSize="lg" textAlign={'center'} fontWeight={'bold'}>
 				UPLOAD NEW {category.toUpperCase()}
-			</Text>
+			</Heading>
 			<form onSubmit={handleSubmit}>
 				<VStack spacing={2}>
 					<FormControl as="fieldset">
