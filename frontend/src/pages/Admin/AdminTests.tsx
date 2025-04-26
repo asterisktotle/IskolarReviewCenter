@@ -5,6 +5,7 @@ import {
 	Editable,
 	EditableInput,
 	EditablePreview,
+	EditableTextarea,
 	FormLabel,
 	RadioGroup,
 	Stack,
@@ -13,14 +14,17 @@ import {
 	Select,
 	HStack,
 	Button,
+	Flex,
+	IconButton,
 } from '@chakra-ui/react';
-import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
+import { AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
 import useQuestionMaker from '../../hooks/useQuestionMaker';
 import { QuestionData } from '../../hooks/useQuestionMaker';
 
 const AdminTests = () => {
 	const [testType, setTestType] = useState('multiple-choice');
+	const [newOption, setNewOption] = useState('');
 
 	const [options, setOptions] = useState([
 		{ text: 'hypotenuse', isCorrect: true },
@@ -45,7 +49,29 @@ const AdminTests = () => {
 		addQuestion(questionData);
 	};
 
-	// const handleDeletQuestionButton;
+	const handleAddOption = () => {
+		setOptions([...options, { text: 'Option 1', isCorrect: false }]);
+	};
+
+	const handleRemoveChoices = (index) => {
+		const updatedOptions = [...options];
+		updatedOptions.splice(index, 1);
+		setOptions(updatedOptions);
+	};
+
+	const handleCorrectOption = (index) => {
+		const updatedOption = options.map((option, i) => ({
+			...option,
+			isCorrect: i === index,
+		}));
+		setOptions(updatedOption);
+	};
+
+	const handleTextChange = (index, optionText) => {
+		const updatedOption = [...options];
+		updatedOption[index].text = optionText;
+		setOptions(updatedOption);
+	};
 
 	return (
 		<Container
@@ -152,48 +178,116 @@ const AdminTests = () => {
 					</form>
 				))}
 
-			<form>
+			<form
+				style={{
+					backgroundColor: '#0C638D',
+					padding: '1rem',
+					borderRadius: '0.5rem',
+				}}
+			>
 				{/* Select Test Categories */}
-				<HStack spacing={1}>
-					{' '}
-					{/* spacing is the gap */}
-					<FormControl w={'150%'}>
-						<Input border="none" borderBottom="1px" />
+				<Stack spacing={1} direction={{ base: 'column', md: 'row' }}>
+					{/* Editable input area */}
+					<FormControl w={{ base: '100%', md: '150%' }}>
+						<Editable defaultValue="Untitled question">
+							<EditablePreview />
+							<EditableTextarea
+								resize="none" // disables manual resizing
+								overflow="hidden"
+								onInput={(e) => {
+									e.target.style.height = 'auto';
+									e.target.style.height = e.target.scrollHeight + 'px';
+								}}
+							/>
+						</Editable>
 					</FormControl>
-					<FormControl>
-						<Select
-							onChange={(e) => setTestType(e.target.value)}
-							bg="gray.100"
-							color="black"
-						>
-							<option value="multiple-choice" style={{ color: 'black' }}>
-								Multiple choice
-							</option>
-							<option value="short-answer" style={{ color: 'black' }}>
-								Short answer
-							</option>
-						</Select>
-					</FormControl>
-					{/* <AddIcon /> */}
-					<Button leftIcon={<DeleteIcon />} iconSpacing={'-0.5'} />
-					<Button
-						onClick={handleAddQuestionButton}
-						leftIcon={<AddIcon />}
-						iconSpacing={'-0.5'}
-						// defaultValue="multiple-choice"
-					/>
-				</HStack>
+
+					{/* Row of Select + Buttons, always horizontal */}
+					<HStack spacing={1} w="100%">
+						<FormControl>
+							<Select
+								onChange={(e) => setTestType(e.target.value)}
+								bg="gray.100"
+								color="black"
+								w={'auto'}
+							>
+								<option value="multiple-choice" style={{ color: 'black' }}>
+									Multiple choice
+								</option>
+								<option value="short-answer" style={{ color: 'black' }}>
+									Short answer
+								</option>
+							</Select>
+						</FormControl>
+
+						<Button
+							w={{ base: 'auto', md: '5rem' }}
+							leftIcon={<DeleteIcon />}
+							iconSpacing="-0.5"
+						/>
+						<Button
+							w={{ base: 'auto', md: '5rem' }}
+							onClick={handleAddQuestionButton}
+							leftIcon={<AddIcon />}
+							iconSpacing="-0.5"
+						/>
+					</HStack>
+				</Stack>
 
 				{/* {handleCreateQuestion} */}
 
 				<FormControl as={'fieldset'}>
 					{/* Multiple choice */}
 					{testType === 'multiple-choice' && (
-						<RadioGroup defaultValue="mesl">
-							<Stack direction={'column'} spacing={4}>
-								<Radio value="mesl">MESL</Radio>
-								<Radio value="pipe">PIPE</Radio>
-								<Radio value="mdsp">MDSP</Radio>
+						<RadioGroup defaultValue={options[0].text}>
+							<Stack pt={4} direction={'column'} spacing={1}>
+								{options.map((choice, index) => (
+									<Flex key={index} alignItems={'center'}>
+										<Radio
+											// w={'full'}
+											value={choice.text}
+											isChecked={choice.isCorrect}
+											onChange={() => handleCorrectOption(index)}
+										/>
+
+										<Input
+											value={choice.text}
+											onChange={(e) => handleTextChange(index, e.target.value)}
+											placeholder="Enter option text"
+											mr={2}
+											borderColor={'transparent'}
+											outline={'none'}
+											_focus={{
+												borderBottom: '2px solid',
+												outline: 'none,',
+												boxShadow: 'none',
+												border: 'none',
+												borderColor: 'blue.500',
+											}}
+											_hover={{
+												outline: 'none,',
+												boxShadow: 'none',
+												border: 'none',
+												borderBottom: '2px solid',
+												borderColor: 'blue.500',
+											}}
+										/>
+										<IconButton
+											size="sm"
+											ml={2}
+											icon={<CloseIcon />}
+											aria-label="Remove option"
+											onClick={() => handleRemoveChoices(index)}
+										/>
+									</Flex>
+								))}
+								<IconButton
+									size="sm"
+									ml={'auto'}
+									icon={<AddIcon />}
+									aria-label="Add Option"
+									onClick={handleAddOption}
+								/>
 							</Stack>
 						</RadioGroup>
 					)}
