@@ -16,6 +16,8 @@ import {
 	Button,
 	Flex,
 	IconButton,
+	NumberInput,
+	NumberInputField,
 } from '@chakra-ui/react';
 import { AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
@@ -24,14 +26,41 @@ import { QuestionData } from '../../hooks/useQuestionMaker';
 
 const AdminTests = () => {
 	const [testType, setTestType] = useState('multiple-choice');
-	const [newOption, setNewOption] = useState('');
 
+	const [quizProfile, setQuizProfile] = useState({
+		title: 'Quiz Title',
+		subject: 'mesl',
+		category: 'terms',
+		timeLimit: 0,
+		passingScore: 0,
+		totalPoints: 0,
+	});
+
+	const [questionContent, setQuestionContent] = useState([
+		{
+			id: 0,
+			questionText: 'Untitled question',
+			type: 'multiple-choice',
+			options: [
+				{ id: 1, text: 'hypotenuse', isCorrect: true },
+				{ id: 2, text: 'centroid', isCorrect: false },
+				{ id: 3, text: 'vertex', isCorrect: false },
+				{ id: 4, text: 'height', isCorrect: false },
+			],
+			correctAnswer: '', //for short-answer
+			points: 1,
+		},
+	]);
+
+	// REMOVE THIS AND USE THE OPTIONS FROM QUESTIONCONTENT
 	const [options, setOptions] = useState([
 		{ text: 'hypotenuse', isCorrect: true },
 		{ text: 'centroid', isCorrect: false },
 		{ text: 'vertex', isCorrect: false },
 		{ text: 'height', isCorrect: false },
 	]);
+
+	// REMOVE THIS AND USE THE HANDLEQUESTIONCONTENT
 	const [formData, setFormData] = useState<QuestionData>({
 		type: 'multiple-choice',
 		questionText: 'What is the longest side of the triangle',
@@ -40,6 +69,40 @@ const AdminTests = () => {
 		points: 1,
 	});
 	const { addQuestion, questions, removeQuestion } = useQuestionMaker();
+
+	const handleChangeQuizProfile = (field, value) => {
+		setQuizProfile({
+			...quizProfile,
+			[field]: value,
+		});
+	};
+	//START AT THIS AND REPLACE IT WITH setForm
+	const handleQuestionContent = (questionId, optionId, updatedOption) => {
+		const content = questionContent.map((quest) => {
+			if (quest.id === questionId) {
+				if (quest.type === 'multiple-choice') {
+					return {
+						...quest,
+						options: quest.options.map((option) => {
+							if (option.id === optionId) {
+								return { ...option, text: updatedOption };
+							}
+							return option;
+						}),
+					};
+				}
+				if (quest.type === 'short-answer') {
+					return {
+						...quest,
+						correctAnswer: updatedOption,
+					};
+				}
+			}
+			return quest;
+		});
+
+		setQuestionContent(content);
+	};
 
 	const handleAddQuestionButton = (e) => {
 		e.preventDefault();
@@ -52,6 +115,11 @@ const AdminTests = () => {
 	const handleAddOption = () => {
 		setOptions([...options, { text: 'Option 1', isCorrect: false }]);
 	};
+
+	// const handleOptionChange = (index, value) => {
+	// 	const textOption = value;
+
+	// }
 
 	const handleRemoveChoices = (index) => {
 		const updatedOptions = [...options];
@@ -73,6 +141,10 @@ const AdminTests = () => {
 		setOptions(updatedOption);
 	};
 
+	// const handleShortAnswer = (index, shortAns) => {
+	// 	setFormData();
+	// };
+
 	return (
 		<Container
 			flexDirection={'column'}
@@ -86,7 +158,12 @@ const AdminTests = () => {
 			<form>
 				<VStack spacing="3">
 					<FormControl>
-						<Editable defaultValue="Quiz Title" borderBottom={'1px'}>
+						<Editable
+							defaultValue={quizProfile.title}
+							borderBottom={'1px'}
+							w={'full'}
+							onChange={(value) => handleChangeQuizProfile('title', value)}
+						>
 							<EditablePreview />
 							<EditableInput />
 						</Editable>
@@ -94,7 +171,10 @@ const AdminTests = () => {
 
 					<FormControl as={'fieldset'}>
 						<FormLabel>Subject</FormLabel>
-						<RadioGroup defaultValue="mesl">
+						<RadioGroup
+							onChange={(value) => handleChangeQuizProfile('subject', value)}
+							defaultValue="mesl"
+						>
 							<Stack direction={'row'} spacing={4}>
 								<Radio value="mesl">MESL</Radio>
 								<Radio value="pipe">PIPE</Radio>
@@ -105,7 +185,10 @@ const AdminTests = () => {
 
 					<FormControl as={'fieldset'}>
 						<FormLabel>Test Category</FormLabel>
-						<RadioGroup defaultValue="terms">
+						<RadioGroup
+							defaultValue="terms"
+							onChange={(value) => handleChangeQuizProfile('category', value)}
+						>
 							<Stack
 								direction={{ base: 'column', md: 'row' }}
 								spacing={{ base: 2, md: 4 }}
@@ -117,6 +200,19 @@ const AdminTests = () => {
 							</Stack>
 						</RadioGroup>
 					</FormControl>
+					<FormControl as={'fieldset'}>
+						<FormLabel>Time Limit (minutes)</FormLabel>
+						<NumberInput
+							onChange={(value) => handleChangeQuizProfile('timeLimit', value)}
+						>
+							<NumberInputField
+								placeholder="0"
+								defaultValue={0}
+								w={'fit-content'}
+							/>
+						</NumberInput>
+					</FormControl>
+					<Button>Publish</Button>
 				</VStack>
 			</form>
 
