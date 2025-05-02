@@ -6,24 +6,24 @@ export interface QuestionOption {
 }
 
 export interface QuestionData {
-	type: 'multiple-choice' | 'short-answer';
+	id: number;
 	questionText: string;
+	type: 'multiple-choice' | 'short-answer';
 	options?: QuestionOption[];
 	correctAnswer?: string;
 	points: number;
 }
 
-export interface Question extends QuestionData {
-	id: number;
-}
+// export interface Question extends QuestionData {
+// 	id: number;
+// }
 
 const useQuestionMaker = (initialQuestions = []) => {
-	const [questions, setQuestions] = useState<Question[]>(initialQuestions);
+	const [questions, setQuestions] = useState<QuestionData[]>(initialQuestions);
 
 	// Add new question of the current type
 	const addQuestion = (questionData: QuestionData) => {
-		const newQuestion: Question = {
-			id: Date.now() * Math.random() * 100,
+		const newQuestion: QuestionData = {
 			...questionData,
 		};
 		setQuestions((prevQuestions) => [...prevQuestions, newQuestion]);

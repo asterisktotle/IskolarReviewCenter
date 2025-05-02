@@ -18,6 +18,7 @@ import {
 	IconButton,
 	NumberInput,
 	NumberInputField,
+	typography,
 } from '@chakra-ui/react';
 import { AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
@@ -53,21 +54,21 @@ const AdminTests = () => {
 	]);
 
 	// REMOVE THIS AND USE THE OPTIONS FROM QUESTIONCONTENT
-	const [options, setOptions] = useState([
-		{ text: 'hypotenuse', isCorrect: true },
-		{ text: 'centroid', isCorrect: false },
-		{ text: 'vertex', isCorrect: false },
-		{ text: 'height', isCorrect: false },
-	]);
+	// const [options, setOptions] = useState([
+	// 	{ text: 'hypotenuse', isCorrect: true },
+	// 	{ text: 'centroid', isCorrect: false },
+	// 	{ text: 'vertex', isCorrect: false },
+	// 	{ text: 'height', isCorrect: false },
+	// ]);
 
 	// REMOVE THIS AND USE THE HANDLEQUESTIONCONTENT
-	const [formData, setFormData] = useState<QuestionData>({
-		type: 'multiple-choice',
-		questionText: 'What is the longest side of the triangle',
-		options: options,
-		correctAnswer: '',
-		points: 1,
-	});
+	// const [formData, setFormData] = useState<QuestionData>({
+	// 	type: 'multiple-choice',
+	// 	questionText: 'What is the longest side of the triangle',
+	// 	options: options,
+	// 	correctAnswer: '',
+	// 	points: 1,
+	// });
 	const { addQuestion, questions, removeQuestion } = useQuestionMaker();
 
 	const handleChangeQuizProfile = (field, value) => {
@@ -76,8 +77,8 @@ const AdminTests = () => {
 			[field]: value,
 		});
 	};
-	//START AT THIS AND REPLACE IT WITH setForm
-	const handleQuestionContent = (questionId, optionId, updatedOption) => {
+	//START AT THIS AND REPLACE setForm - updating the option or short answer
+	const handleUpdateOptions = (questionId, optionId, updatedOption) => {
 		const content = questionContent.map((quest) => {
 			if (quest.id === questionId) {
 				if (quest.type === 'multiple-choice') {
@@ -104,24 +105,46 @@ const AdminTests = () => {
 		setQuestionContent(content);
 	};
 
-	const handleAddQuestionButton = (e) => {
-		e.preventDefault();
-		const questionData = {
-			...formData,
-		};
-		addQuestion(questionData);
+	// DONE, DON NOT TOUCH
+	const handleQuestionType = (questionId, type) => {
+		const updatedQuestionType = questionContent.map((quest) => {
+			if (quest.id === questionId) {
+				return {
+					...quest,
+					type,
+				};
+			}
+			return quest;
+		});
+		setQuestionContent(updatedQuestionType);
 	};
 
+	// DONE
+	const handleAddQuestionButton = (e) => {
+		e.preventDefault();
+
+		const baseQuestion: QuestionData = {
+			id: Date.now(),
+			questionText: 'Untitled question',
+			type: 'multiple-choice', // or 'short-answer'
+			options: [{ text: `Option 1`, isCorrect: true }], // required if type is 'multiple-choice'
+			points: 1,
+		};
+
+		addQuestion(baseQuestion);
+	};
+
+	// UPDATE THIS TO SIMILAR TO HANDLEADDQUESTION BUTTON
 	const handleAddOption = () => {
-		setOptions([...options, { text: 'Option 1', isCorrect: false }]);
+		// setOptions([...options, { text: 'Option 1', isCorrect: false }]);
 	};
 
 	// const handleOptionChange = (index, value) => {
 	// 	const textOption = value;
 
 	// }
-
-	const handleRemoveChoices = (index) => {
+	// UPDATE THIS, USE OPTIONS FROM ARRAY QUESTIONCONTENT
+	const handleRemoveChoices = (questionId, optionId) => {
 		const updatedOptions = [...options];
 		updatedOptions.splice(index, 1);
 		setOptions(updatedOptions);
@@ -218,9 +241,9 @@ const AdminTests = () => {
 
 			<br />
 
-			{questions &&
-				questions.length > 0 &&
-				questions.map((question) => (
+			{questionContent &&
+				questionContent.length > 0 &&
+				questionContent.map((question) => (
 					<form>
 						{/* Select Test Categories */}
 						<HStack spacing={1}>
@@ -232,10 +255,13 @@ const AdminTests = () => {
 							<FormControl>
 								<Select
 									value={question.type}
-									onChange={(e) => setTestType(e.target.value)}
+									onChange={(e) =>
+										handleQuestionType(question.id, e.target.value)
+									}
 									bg="gray.100"
 									color="black"
 								>
+									{/* THIS ONE IS HARDCODED */}
 									<option style={{ color: 'black' }} value={'multiple-choice'}>
 										Multiple choices
 									</option>
@@ -249,12 +275,13 @@ const AdminTests = () => {
 								onClick={() => removeQuestion(question.id)}
 								leftIcon={<DeleteIcon />}
 								iconSpacing={'-0.5'}
+								w={{ base: 'auto', md: '5rem' }}
 							/>
 							<Button
 								onClick={handleAddQuestionButton}
 								leftIcon={<AddIcon />}
 								iconSpacing={'-0.5'}
-								// defaultValue="multiple-choice"
+								w={{ base: 'auto', md: '5rem' }}
 							/>
 						</HStack>
 
@@ -263,9 +290,62 @@ const AdminTests = () => {
 							{testType === 'multiple-choice' && (
 								<RadioGroup>
 									<Stack direction={'column'} spacing={4}>
-										{question.options?.map((option) => (
-											<Radio value={option.text}>{option.text}</Radio>
+										{question.options.map((choice, index) => (
+											<Flex key={index} alignItems={'center'}>
+												<Radio
+													// w={'full'}
+													value={choice.text}
+													isChecked={choice.isCorrect}
+													onChange={() => handleCorrectOption(index)}
+												/>
+
+												<Input
+													value={choice.text}
+													// onChange={(e) =>
+													// 	handleTextChange(index, e.target.value)
+													// }
+													onChange={(e) =>
+														handleUpdateOptions(
+															question.id,
+															choice.id,
+															e.target.value
+														)
+													}
+													placeholder="Enter option text"
+													mr={2}
+													borderColor={'transparent'}
+													outline={'none'}
+													_focus={{
+														borderBottom: '2px solid',
+														outline: 'none,',
+														boxShadow: 'none',
+														border: 'none',
+														borderColor: 'blue.500',
+													}}
+													_hover={{
+														outline: 'none,',
+														boxShadow: 'none',
+														border: 'none',
+														borderBottom: '2px solid',
+														borderColor: 'blue.500',
+													}}
+												/>
+												<IconButton
+													size="sm"
+													ml={2}
+													icon={<CloseIcon />}
+													aria-label="Remove option"
+													onClick={() => handleRemoveChoices(choice.id)}
+												/>
+											</Flex>
 										))}
+										<IconButton
+											size="sm"
+											ml={'auto'}
+											icon={<AddIcon />}
+											aria-label="Add Option"
+											onClick={handleAddOption}
+										/>
 									</Stack>
 								</RadioGroup>
 							)}
@@ -274,16 +354,17 @@ const AdminTests = () => {
 					</form>
 				))}
 
-			<form
+			{/* FIXED FORM */}
+			{/* <form
 				style={{
 					backgroundColor: '#0C638D',
 					padding: '1rem',
 					borderRadius: '0.5rem',
 				}}
 			>
-				{/* Select Test Categories */}
+			
 				<Stack spacing={1} direction={{ base: 'column', md: 'row' }}>
-					{/* Editable input area */}
+				
 					<FormControl w={{ base: '100%', md: '150%' }}>
 						<Editable defaultValue="Untitled question">
 							<EditablePreview />
@@ -298,7 +379,6 @@ const AdminTests = () => {
 						</Editable>
 					</FormControl>
 
-					{/* Row of Select + Buttons, always horizontal */}
 					<HStack spacing={1} w="100%">
 						<FormControl>
 							<Select
@@ -330,10 +410,10 @@ const AdminTests = () => {
 					</HStack>
 				</Stack>
 
-				{/* {handleCreateQuestion} */}
+	
 
 				<FormControl as={'fieldset'}>
-					{/* Multiple choice */}
+			
 					{testType === 'multiple-choice' && (
 						<RadioGroup defaultValue={options[0].text}>
 							<Stack pt={4} direction={'column'} spacing={1}>
@@ -349,6 +429,7 @@ const AdminTests = () => {
 										<Input
 											value={choice.text}
 											onChange={(e) => handleTextChange(index, e.target.value)}
+											// onChange={(e) => handleUpdateOptions( , index, e.target.value)}
 											placeholder="Enter option text"
 											mr={2}
 											borderColor={'transparent'}
@@ -389,7 +470,7 @@ const AdminTests = () => {
 					)}
 					{testType === 'short-answer' && <Input placeholder="Answer" />}
 				</FormControl>
-			</form>
+			</form> */}
 		</Container>
 	);
 };
