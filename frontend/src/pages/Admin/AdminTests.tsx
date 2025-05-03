@@ -21,13 +21,11 @@ import {
 	typography,
 } from '@chakra-ui/react';
 import { AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useQuestionMaker from '../../hooks/useQuestionMaker';
 import { QuestionData } from '../../hooks/useQuestionMaker';
 
 const AdminTests = () => {
-	const [testType, setTestType] = useState('multiple-choice');
-
 	const [quizProfile, setQuizProfile] = useState({
 		title: 'Quiz Title',
 		subject: 'mesl',
@@ -43,33 +41,127 @@ const AdminTests = () => {
 			questionText: 'Untitled question',
 			type: 'multiple-choice',
 			options: [
-				{ id: 1, text: 'hypotenuse', isCorrect: true },
-				{ id: 2, text: 'centroid', isCorrect: false },
-				{ id: 3, text: 'vertex', isCorrect: false },
-				{ id: 4, text: 'height', isCorrect: false },
+				{ id: 1, text: 'Option 1', isCorrect: true },
+				{ id: 2, text: 'Option 2', isCorrect: false },
 			],
 			correctAnswer: '', //for short-answer
 			points: 1,
 		},
 	]);
 
-	// REMOVE THIS AND USE THE OPTIONS FROM QUESTIONCONTENT
-	// const [options, setOptions] = useState([
-	// 	{ text: 'hypotenuse', isCorrect: true },
-	// 	{ text: 'centroid', isCorrect: false },
-	// 	{ text: 'vertex', isCorrect: false },
-	// 	{ text: 'height', isCorrect: false },
-	// ]);
+	const QuestionFormat = (question) => {
+		return (
+			<form key={question.id}>
+				{/* Select Test Categories */}
+				<HStack spacing={1}>
+					{' '}
+					{/* spacing is the gap */}
+					<FormControl w={'150%'}>
+						<Input border="none" borderBottom="1px" />
+					</FormControl>
+					<FormControl>
+						<Select
+							value={question.type}
+							onChange={(e) => handleQuestionType(question.id, e.target.value)}
+							bg="gray.100"
+							color="black"
+						>
+							{/* THIS ONE IS HARDCODED */}
+							<option style={{ color: 'black' }} value={'multiple-choice'}>
+								Multiple choices
+							</option>
+							<option style={{ color: 'black' }} value={'short-answer'}>
+								Short answer
+							</option>
+						</Select>
+					</FormControl>
+					<Button
+						onClick={() => removeQuestion(question.id)}
+						leftIcon={<DeleteIcon />}
+						iconSpacing={'-0.5'}
+						w={{ base: 'auto', md: '5rem' }}
+					/>
+					<Button
+						onClick={handleAddQuestionButton}
+						leftIcon={<AddIcon />}
+						iconSpacing={'-0.5'}
+						w={{ base: 'auto', md: '5rem' }}
+					/>
+				</HStack>
 
-	// REMOVE THIS AND USE THE HANDLEQUESTIONCONTENT
-	// const [formData, setFormData] = useState<QuestionData>({
-	// 	type: 'multiple-choice',
-	// 	questionText: 'What is the longest side of the triangle',
-	// 	options: options,
-	// 	correctAnswer: '',
-	// 	points: 1,
-	// });
-	const { addQuestion, questions, removeQuestion } = useQuestionMaker();
+				<FormControl as={'fieldset'}>
+					{/* Multiple choice */}
+					{question.type === 'multiple-choice' && (
+						<RadioGroup>
+							<Stack direction={'column'} spacing={4}>
+								{question.options?.map((choice, index) => (
+									<Flex key={index} alignItems={'center'}>
+										<Radio
+											// w={'full'}
+											value={choice.text}
+											isChecked={choice.isCorrect}
+											onChange={() =>
+												handleCorrectOption(question.id, choice.id)
+											}
+										/>
+
+										<Input
+											value={choice.text}
+											onChange={(e) =>
+												handleUpdateOptions(
+													question.id,
+													choice.id,
+													e.target.value
+												)
+											}
+											placeholder="Enter option text"
+											mr={2}
+											borderColor={'transparent'}
+											outline={'none'}
+											_focus={{
+												borderBottom: '2px solid',
+												outline: 'none,',
+												boxShadow: 'none',
+												border: 'none',
+												borderColor: 'blue.500',
+											}}
+											_hover={{
+												outline: 'none,',
+												boxShadow: 'none',
+												border: 'none',
+												borderBottom: '2px solid',
+												borderColor: 'blue.500',
+											}}
+										/>
+										<IconButton
+											size="sm"
+											ml={2}
+											icon={<CloseIcon />}
+											aria-label="Remove option"
+											onClick={() =>
+												handleRemoveChoices(question.id, choice.id)
+											}
+										/>
+									</Flex>
+								))}
+								<IconButton
+									size="sm"
+									ml={'auto'}
+									icon={<AddIcon />}
+									aria-label="Add Option"
+									onClick={handleAddOption}
+								/>
+							</Stack>
+						</RadioGroup>
+					)}
+					{question.type === 'short-answer' && <Input placeholder="Answer" />}
+				</FormControl>
+			</form>
+		);
+	};
+
+	const { addQuestion, questions, removeQuestion, updateQuestion } =
+		useQuestionMaker();
 
 	const handleChangeQuizProfile = (field, value) => {
 		setQuizProfile({
@@ -78,7 +170,11 @@ const AdminTests = () => {
 		});
 	};
 	//START AT THIS AND REPLACE setForm - updating the option or short answer
-	const handleUpdateOptions = (questionId, optionId, updatedOption) => {
+	const handleUpdateOptions = (
+		questionId: number,
+		optionId: number,
+		updatedOption: string
+	) => {
 		const content = questionContent.map((quest) => {
 			if (quest.id === questionId) {
 				if (quest.type === 'multiple-choice') {
@@ -105,24 +201,29 @@ const AdminTests = () => {
 		setQuestionContent(content);
 	};
 
+	// TODO
+	// 1. Refactor removequestion, addnewoption
+	// 2. the default quiz form question type does not update its short answer and multiplechoice
+	// this is because it uses the question array from custom hook
+	//  and default quiz id does not exist on the custom hook
 	// DONE, DON NOT TOUCH
-	const handleQuestionType = (questionId, type) => {
-		const updatedQuestionType = questionContent.map((quest) => {
-			if (quest.id === questionId) {
-				return {
-					...quest,
-					type,
-				};
-			}
-			return quest;
-		});
-		setQuestionContent(updatedQuestionType);
+	const handleQuestionType = (questionId: number, questionType: string) => {
+		const currentQuestion = questions.find((q) => q.id === questionId);
+
+		if (!currentQuestion) {
+			return console.log(`Question with ID ${questionId} does not exist`);
+		}
+
+		const updatedQuestion: QuestionData = {
+			...currentQuestion,
+			type: questionType as 'multiple-choice' | 'short-answer',
+		};
+
+		updateQuestion(questionId, updatedQuestion);
 	};
 
 	// DONE
-	const handleAddQuestionButton = (e) => {
-		e.preventDefault();
-
+	const handleAddQuestionButton = () => {
 		const baseQuestion: QuestionData = {
 			id: Date.now(),
 			questionText: 'Untitled question',
@@ -144,30 +245,48 @@ const AdminTests = () => {
 
 	// }
 	// UPDATE THIS, USE OPTIONS FROM ARRAY QUESTIONCONTENT
-	const handleRemoveChoices = (questionId, optionId) => {
-		const updatedOptions = [...options];
-		updatedOptions.splice(index, 1);
-		setOptions(updatedOptions);
+	const handleRemoveChoices = (questionId: number, optionId: number) => {
+		const updatedOptions = questionContent.map((quest) => {
+			if (quest.id === questionId) {
+				return {
+					...quest,
+					options: quest.options.filter((option) => option.id !== optionId),
+				};
+			}
+			return quest;
+		});
+		setQuestionContent(updatedOptions);
 	};
 
-	const handleCorrectOption = (index) => {
-		const updatedOption = options.map((option, i) => ({
-			...option,
-			isCorrect: i === index,
-		}));
-		setOptions(updatedOption);
+	const handleCorrectOption = (questionId: number, optionId: number) => {
+		const updatedOption = questionContent.map((quest) => {
+			if (quest.id === questionId) {
+				return {
+					...quest,
+					options: quest.options.map((option) => {
+						if (option.id === optionId) {
+							return { ...option, isCorrect: true };
+						} else
+							return {
+								...option,
+								isCorrect: false,
+							};
+					}),
+				};
+			}
+			return quest;
+		});
+		setQuestionContent(updatedOption);
 	};
 
-	const handleTextChange = (index, optionText) => {
-		const updatedOption = [...options];
-		updatedOption[index].text = optionText;
-		setOptions(updatedOption);
-	};
+	// useEffect(() => {
+	// 	const correctAnswer = questionContent.map((quest) => {
+	// 		return console.log('choices: ', quest.options);
+	// 	});
 
-	// const handleShortAnswer = (index, shortAns) => {
-	// 	setFormData();
-	// };
-
+	// 	console.log(correctAnswer);
+	// 	// console.log(questionContent)
+	// }, [questionContent]);
 	return (
 		<Container
 			flexDirection={'column'}
@@ -241,236 +360,9 @@ const AdminTests = () => {
 
 			<br />
 
-			{questionContent &&
-				questionContent.length > 0 &&
-				questionContent.map((question) => (
-					<form>
-						{/* Select Test Categories */}
-						<HStack spacing={1}>
-							{' '}
-							{/* spacing is the gap */}
-							<FormControl w={'150%'}>
-								<Input border="none" borderBottom="1px" />
-							</FormControl>
-							<FormControl>
-								<Select
-									value={question.type}
-									onChange={(e) =>
-										handleQuestionType(question.id, e.target.value)
-									}
-									bg="gray.100"
-									color="black"
-								>
-									{/* THIS ONE IS HARDCODED */}
-									<option style={{ color: 'black' }} value={'multiple-choice'}>
-										Multiple choices
-									</option>
-									<option style={{ color: 'black' }} value={'short-answer'}>
-										Short answer
-									</option>
-								</Select>
-							</FormControl>
-							{/* <AddIcon /> */}
-							<Button
-								onClick={() => removeQuestion(question.id)}
-								leftIcon={<DeleteIcon />}
-								iconSpacing={'-0.5'}
-								w={{ base: 'auto', md: '5rem' }}
-							/>
-							<Button
-								onClick={handleAddQuestionButton}
-								leftIcon={<AddIcon />}
-								iconSpacing={'-0.5'}
-								w={{ base: 'auto', md: '5rem' }}
-							/>
-						</HStack>
-
-						<FormControl as={'fieldset'}>
-							{/* Multiple choice */}
-							{testType === 'multiple-choice' && (
-								<RadioGroup>
-									<Stack direction={'column'} spacing={4}>
-										{question.options.map((choice, index) => (
-											<Flex key={index} alignItems={'center'}>
-												<Radio
-													// w={'full'}
-													value={choice.text}
-													isChecked={choice.isCorrect}
-													onChange={() => handleCorrectOption(index)}
-												/>
-
-												<Input
-													value={choice.text}
-													// onChange={(e) =>
-													// 	handleTextChange(index, e.target.value)
-													// }
-													onChange={(e) =>
-														handleUpdateOptions(
-															question.id,
-															choice.id,
-															e.target.value
-														)
-													}
-													placeholder="Enter option text"
-													mr={2}
-													borderColor={'transparent'}
-													outline={'none'}
-													_focus={{
-														borderBottom: '2px solid',
-														outline: 'none,',
-														boxShadow: 'none',
-														border: 'none',
-														borderColor: 'blue.500',
-													}}
-													_hover={{
-														outline: 'none,',
-														boxShadow: 'none',
-														border: 'none',
-														borderBottom: '2px solid',
-														borderColor: 'blue.500',
-													}}
-												/>
-												<IconButton
-													size="sm"
-													ml={2}
-													icon={<CloseIcon />}
-													aria-label="Remove option"
-													onClick={() => handleRemoveChoices(choice.id)}
-												/>
-											</Flex>
-										))}
-										<IconButton
-											size="sm"
-											ml={'auto'}
-											icon={<AddIcon />}
-											aria-label="Add Option"
-											onClick={handleAddOption}
-										/>
-									</Stack>
-								</RadioGroup>
-							)}
-							{testType === 'short-answer' && <Input placeholder="Answer" />}
-						</FormControl>
-					</form>
-				))}
-
-			{/* FIXED FORM */}
-			{/* <form
-				style={{
-					backgroundColor: '#0C638D',
-					padding: '1rem',
-					borderRadius: '0.5rem',
-				}}
-			>
-			
-				<Stack spacing={1} direction={{ base: 'column', md: 'row' }}>
-				
-					<FormControl w={{ base: '100%', md: '150%' }}>
-						<Editable defaultValue="Untitled question">
-							<EditablePreview />
-							<EditableTextarea
-								resize="none" // disables manual resizing
-								overflow="hidden"
-								onInput={(e) => {
-									e.target.style.height = 'auto';
-									e.target.style.height = e.target.scrollHeight + 'px';
-								}}
-							/>
-						</Editable>
-					</FormControl>
-
-					<HStack spacing={1} w="100%">
-						<FormControl>
-							<Select
-								onChange={(e) => setTestType(e.target.value)}
-								bg="gray.100"
-								color="black"
-								w={'auto'}
-							>
-								<option value="multiple-choice" style={{ color: 'black' }}>
-									Multiple choice
-								</option>
-								<option value="short-answer" style={{ color: 'black' }}>
-									Short answer
-								</option>
-							</Select>
-						</FormControl>
-
-						<Button
-							w={{ base: 'auto', md: '5rem' }}
-							leftIcon={<DeleteIcon />}
-							iconSpacing="-0.5"
-						/>
-						<Button
-							w={{ base: 'auto', md: '5rem' }}
-							onClick={handleAddQuestionButton}
-							leftIcon={<AddIcon />}
-							iconSpacing="-0.5"
-						/>
-					</HStack>
-				</Stack>
-
-	
-
-				<FormControl as={'fieldset'}>
-			
-					{testType === 'multiple-choice' && (
-						<RadioGroup defaultValue={options[0].text}>
-							<Stack pt={4} direction={'column'} spacing={1}>
-								{options.map((choice, index) => (
-									<Flex key={index} alignItems={'center'}>
-										<Radio
-											// w={'full'}
-											value={choice.text}
-											isChecked={choice.isCorrect}
-											onChange={() => handleCorrectOption(index)}
-										/>
-
-										<Input
-											value={choice.text}
-											onChange={(e) => handleTextChange(index, e.target.value)}
-											// onChange={(e) => handleUpdateOptions( , index, e.target.value)}
-											placeholder="Enter option text"
-											mr={2}
-											borderColor={'transparent'}
-											outline={'none'}
-											_focus={{
-												borderBottom: '2px solid',
-												outline: 'none,',
-												boxShadow: 'none',
-												border: 'none',
-												borderColor: 'blue.500',
-											}}
-											_hover={{
-												outline: 'none,',
-												boxShadow: 'none',
-												border: 'none',
-												borderBottom: '2px solid',
-												borderColor: 'blue.500',
-											}}
-										/>
-										<IconButton
-											size="sm"
-											ml={2}
-											icon={<CloseIcon />}
-											aria-label="Remove option"
-											onClick={() => handleRemoveChoices(index)}
-										/>
-									</Flex>
-								))}
-								<IconButton
-									size="sm"
-									ml={'auto'}
-									icon={<AddIcon />}
-									aria-label="Add Option"
-									onClick={handleAddOption}
-								/>
-							</Stack>
-						</RadioGroup>
-					)}
-					{testType === 'short-answer' && <Input placeholder="Answer" />}
-				</FormControl>
-			</form> */}
+			{questions && questions.length > 0
+				? questions.map((question) => QuestionFormat(question))
+				: QuestionFormat(questionContent[0])}
 		</Container>
 	);
 };
