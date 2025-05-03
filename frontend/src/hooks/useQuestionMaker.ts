@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 export interface QuestionOption {
+	id: number;
 	text: string;
 	isCorrect: boolean;
 }
@@ -13,10 +14,6 @@ export interface QuestionData {
 	correctAnswer?: string;
 	points: number;
 }
-
-// export interface Question extends QuestionData {
-// 	id: number;
-// }
 
 const useQuestionMaker = (initialQuestions = []) => {
 	const [questions, setQuestions] = useState<QuestionData[]>(initialQuestions);
