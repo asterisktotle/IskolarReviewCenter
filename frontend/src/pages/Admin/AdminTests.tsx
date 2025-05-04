@@ -49,7 +49,7 @@ const AdminTests = () => {
 		},
 	]);
 
-	const QuestionFormat = (question) => {
+	const QuestionFormat = (question: QuestionData) => {
 		return (
 			<form key={question.id}>
 				{/* Select Test Categories */}
@@ -149,7 +149,7 @@ const AdminTests = () => {
 									ml={'auto'}
 									icon={<AddIcon />}
 									aria-label="Add Option"
-									onClick={handleAddOption}
+									onClick={() => handleAddOption(question.id)}
 								/>
 							</Stack>
 						</RadioGroup>
@@ -207,17 +207,34 @@ const AdminTests = () => {
 	// this is because it uses the question array from custom hook
 	//  and default quiz id does not exist on the custom hook
 	// DONE, DON NOT TOUCH
-	const handleQuestionType = (questionId: number, questionType: string) => {
+	const handleQuestionType = (
+		questionId: number,
+		questionType: 'multiple-choice' | 'short-answer'
+	) => {
 		const currentQuestion = questions.find((q) => q.id === questionId);
 
 		if (!currentQuestion) {
 			return console.log(`Question with ID ${questionId} does not exist`);
 		}
 
-		const updatedQuestion: QuestionData = {
-			...currentQuestion,
-			type: questionType as 'multiple-choice' | 'short-answer',
+		const baseQuestion = {
+			id: currentQuestion.id,
+			questionText: currentQuestion.questionText,
+			points: currentQuestion.points,
 		};
+
+		const updatedQuestion: QuestionData =
+			questionType === 'multiple-choice'
+				? {
+						...baseQuestion,
+						type: 'multiple-choice',
+						options: [{ id: 1, text: 'Option 1', isCorrect: true }],
+				  }
+				: {
+						...baseQuestion,
+						type: 'short-answer',
+						correctAnswer: '',
+				  };
 
 		updateQuestion(questionId, updatedQuestion);
 	};
@@ -228,16 +245,39 @@ const AdminTests = () => {
 			id: Date.now(),
 			questionText: 'Untitled question',
 			type: 'multiple-choice', // or 'short-answer'
-			options: [{ text: `Option 1`, isCorrect: true }], // required if type is 'multiple-choice'
+			options: [{ text: `Option 1`, isCorrect: true, id: 1 }], // required if type is 'multiple-choice'
 			points: 1,
 		};
 
 		addQuestion(baseQuestion);
 	};
 
-	// UPDATE THIS TO SIMILAR TO HANDLEADDQUESTION BUTTON
-	const handleAddOption = () => {
-		// setOptions([...options, { text: 'Option 1', isCorrect: false }]);
+	// DONE
+	const handleAddOption = (questionId: number) => {
+		const currentQuestion = questions.find((q) => q.id === questionId);
+		if (!currentQuestion) {
+			return console.log(`Question with ID ${questionId} does not exist`);
+		}
+		if (currentQuestion.type !== 'multiple-choice') {
+			return console.log(
+				`Question with ID ${questionId} is not multiple-choice`
+			);
+		}
+
+		const optionLength = currentQuestion.options.length;
+
+		const newOption = {
+			id: optionLength + 1,
+			text: `Option ${optionLength + 1}`,
+			isCorrect: false,
+		};
+
+		const updatedQuestion: QuestionData = {
+			...currentQuestion,
+			options: [...currentQuestion.options, newOption],
+		};
+
+		updateQuestion(questionId, updatedQuestion);
 	};
 
 	// const handleOptionChange = (index, value) => {
@@ -246,16 +286,25 @@ const AdminTests = () => {
 	// }
 	// UPDATE THIS, USE OPTIONS FROM ARRAY QUESTIONCONTENT
 	const handleRemoveChoices = (questionId: number, optionId: number) => {
-		const updatedOptions = questionContent.map((quest) => {
-			if (quest.id === questionId) {
-				return {
-					...quest,
-					options: quest.options.filter((option) => option.id !== optionId),
-				};
-			}
-			return quest;
-		});
-		setQuestionContent(updatedOptions);
+		const updatedQuestion = questions.find((q) => q.id === questionId);
+		if (!updatedQuestion) {
+			return console.log(`Question with ID ${questionId} does not exist`);
+		}
+
+		if (updatedQuestion.type !== 'multiple-choice') {
+			return console.log(
+				`Question with ID ${questionId} is not multiple-choice`
+			);
+		}
+
+		const newOptions = updatedQuestion.options.filter((q) => q.id !== optionId);
+
+		const question = {
+			...updatedQuestion,
+			options: [...newOptions],
+		};
+
+		updateQuestion(questionId, question);
 	};
 
 	const handleCorrectOption = (questionId: number, optionId: number) => {
