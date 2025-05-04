@@ -299,7 +299,9 @@ const AdminTests = () => {
 			);
 		}
 
-		const newOptions = updatedQuestion.options.filter((q) => q.id !== optionId);
+		const newOptions = updatedQuestion.options.filter(
+			(option) => option.id !== optionId
+		);
 
 		const question = {
 			...updatedQuestion,
@@ -310,24 +312,35 @@ const AdminTests = () => {
 	};
 
 	const handleCorrectOption = (questionId: number, optionId: number) => {
-		const updatedOption = questionContent.map((quest) => {
-			if (quest.id === questionId) {
+		const currentQuestion = questions.find((q) => q.id === questionId);
+
+		if (!currentQuestion) {
+			return console.log(`Question with ID ${questionId} does not exist`);
+		}
+		if (currentQuestion.type !== 'multiple-choice') {
+			return console.log(
+				`Question with ID ${questionId} is not multiple-choice`
+			);
+		}
+
+		const correctOption = currentQuestion.options.map((option) => {
+			if (option.id === optionId) {
 				return {
-					...quest,
-					options: quest.options.map((option) => {
-						if (option.id === optionId) {
-							return { ...option, isCorrect: true };
-						} else
-							return {
-								...option,
-								isCorrect: false,
-							};
-					}),
+					...option,
+					isCorrect: true,
 				};
-			}
-			return quest;
+			} else
+				return {
+					...option,
+					isCorrect: false,
+				};
 		});
-		setQuestionContent(updatedOption);
+
+		const updatedQuestion: QuestionData = {
+			...currentQuestion,
+			options: [...correctOption],
+		};
+		updateQuestion(questionId, updatedQuestion);
 	};
 
 	useEffect(() => {
