@@ -154,7 +154,14 @@ const AdminTests = () => {
 							</Stack>
 						</RadioGroup>
 					)}
-					{question.type === 'short-answer' && <Input placeholder="Answer" />}
+					{question.type === 'short-answer' && (
+						<Input
+							onChange={(e) => {
+								handleUpdateShortAnswer(question.id, e.target.value);
+							}}
+							placeholder="Answer"
+						/>
+					)}
 				</FormControl>
 			</form>
 		);
@@ -200,6 +207,28 @@ const AdminTests = () => {
 			...currentQuestion,
 			options: [...updatedChoices],
 		};
+		updateQuestion(questionId, updatedQuestion);
+	};
+
+	const handleUpdateShortAnswer = (
+		questionId: number,
+		shortAnswerValue: string
+	) => {
+		const currentQuestion = questions.find((q) => q.id === questionId);
+
+		if (!currentQuestion) {
+			return console.log(`Question with ID ${questionId} does not exist`);
+		}
+
+		if (currentQuestion.type !== 'short-answer') {
+			return console.log(`Question with ID ${questionId} is not short-answer`);
+		}
+
+		const updatedQuestion = {
+			...currentQuestion,
+			correctAnswer: shortAnswerValue,
+		};
+
 		updateQuestion(questionId, updatedQuestion);
 	};
 
@@ -344,11 +373,11 @@ const AdminTests = () => {
 	};
 
 	useEffect(() => {
-		const correctAnswer = questions.map((quest) => {
-			return console.log('choices: ', quest.options);
+		questions.map((quest) => {
+			console.log('correct answer', quest.correctAnswer);
+			console.log('options', quest.options);
 		});
 
-		console.log(correctAnswer);
 		// console.log(questionContent)
 	}, [questions]);
 	return (
