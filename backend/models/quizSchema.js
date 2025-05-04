@@ -11,21 +11,47 @@ const QuestionSchema = new Schema({
 		enum: ['multiple-choice', 'short-answer'],
 		required: true,
 	},
+	points: {
+		type: Number,
+		default: 1,
+	},
+
 	options: [
 		{
+			id: Number,
 			text: String,
 			isCorrect: Boolean,
 		},
 	],
 
-	//for short-answer
 	correctAnswer: {
 		type: String,
 	},
-	points: {
-		type: Number,
-		default: 1,
-	},
+});
+// Validate fields that is populated
+QuestionSchema.pre('save', function (next) {
+	if (this.type === 'multiple-choice') {
+		if (!Array.isArray(this.options) || this.options.length === 0) {
+			return next(new Error('Multiple-choice must have options'));
+		}
+
+		const correctOption = this.options.filter(
+			(option) => option.isCorrect
+		).length;
+
+		if (correctOption === 0) {
+			return next(new Error('Question must have correct answer'));
+		}
+
+		this.correctAnswer = undefined;
+	}
+	if (this.type === 'short-answer') {
+		this.options = undefined;
+		if (!this.correctAnswer || this.correctAnswer.trim() === '') {
+			return next(new Error('Short-answer must have a correctAnswer.'));
+		}
+	}
+	next();
 });
 
 const QuizSchema = new Schema(
@@ -49,15 +75,23 @@ const QuizSchema = new Schema(
 		},
 		passingScore: {
 			type: Number,
-			default: 70,
+			default: 50,
 		},
 		timeLimit: {
 			type: Number,
-			default: 240, // in minutes
+			default: 0, // in minutes
 		},
 	},
 	{ timestamps: true }
 );
+
+QuizSchema.pre('save', function (next) {
+	this.totalPoints = this.questions.reduce(
+		(sum, questions) => sum + questions.points,
+		0
+	);
+	next();
+});
 
 const QuizAttemptSchema = new Schema({
 	quiz: {

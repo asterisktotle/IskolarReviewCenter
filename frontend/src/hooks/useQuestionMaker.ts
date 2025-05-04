@@ -67,8 +67,6 @@ const useQuestionMaker = (initialQuestions = []) => {
 			} else {
 				return [...prevQuestions, updatedQuestion];
 			}
-
-			prevQuestions.map((q) => (q.id === questionId ? updatedQuestion : q));
 		});
 	};
 
