@@ -35,23 +35,234 @@ const AdminTests = () => {
 		totalPoints: 0,
 	});
 
-	const [questionContent, setQuestionContent] = useState([
-		{
-			id: 0,
-			questionText: 'Untitled question',
-			type: 'multiple-choice',
-			options: [
-				{ id: 1, text: 'Option 1', isCorrect: true },
-				{ id: 2, text: 'Option 2', isCorrect: false },
-			],
-			correctAnswer: '', //for short-answer
-			points: 1,
-		},
-	]);
+	const { addQuestion, questions, removeQuestion, updateQuestion } =
+		useQuestionMaker();
+	//DONE
+	const handleChangeQuizProfile = (field, value) => {
+		setQuizProfile({
+			...quizProfile,
+			[field]: value,
+		});
+	};
+	//DONE
+	const handleUpdateOptions = (
+		questionId: number,
+		optionId: number,
+		updatedOption: string
+	) => {
+		const currentQuestion = questions.find((q) => q.id === questionId);
+		if (!currentQuestion) {
+			return console.log(`Question with ID ${questionId} does not exist`);
+		}
 
+		if (currentQuestion.type !== 'multiple-choice') {
+			return console.log(
+				`Question with ID ${questionId} is not multiple-choice`
+			);
+		}
+
+		const updatedChoices = currentQuestion.options.map((option) => {
+			if (option.id === optionId) {
+				return {
+					...option,
+					text: updatedOption,
+				};
+			}
+			return option;
+		});
+
+		const updatedQuestion: QuestionData = {
+			...currentQuestion,
+			options: [...updatedChoices],
+		};
+		updateQuestion(questionId, updatedQuestion);
+	};
+	//DONE
+	const handleUpdateShortAnswer = (
+		questionId: number,
+		shortAnswerValue: string
+	) => {
+		const currentQuestion = questions.find((q) => q.id === questionId);
+
+		if (!currentQuestion) {
+			return console.log(`Question with ID ${questionId} does not exist`);
+		}
+
+		if (currentQuestion.type !== 'short-answer') {
+			return console.log(`Question with ID ${questionId} is not short-answer`);
+		}
+
+		const updatedQuestion = {
+			...currentQuestion,
+			correctAnswer: shortAnswerValue,
+		};
+
+		updateQuestion(questionId, updatedQuestion);
+	};
+	//DONE
+	const handleQuestionType = (
+		questionId: number,
+		questionType: 'multiple-choice' | 'short-answer'
+	) => {
+		const currentQuestion = questions.find((q) => q.id === questionId);
+
+		if (!currentQuestion) {
+			return console.log(`Question with ID ${questionId} does not exist`);
+		}
+
+		const baseQuestion = {
+			id: currentQuestion.id,
+			questionText: currentQuestion.questionText,
+			points: currentQuestion.points,
+		};
+
+		const updatedQuestion: QuestionData =
+			questionType === 'multiple-choice'
+				? {
+						...baseQuestion,
+						type: 'multiple-choice',
+						options: [{ id: 1, text: 'Option 1', isCorrect: true }],
+				  }
+				: {
+						...baseQuestion,
+						type: 'short-answer',
+						correctAnswer: '',
+				  };
+
+		updateQuestion(questionId, updatedQuestion);
+	};
+	// DONE
+	const handleAddQuestionButton = () => {
+		const baseQuestion: QuestionData = {
+			id: Date.now(),
+			questionText: 'Untitled question',
+			type: 'multiple-choice', // or 'short-answer'
+			options: [{ text: `Option 1`, isCorrect: true, id: 1 }], // required if type is 'multiple-choice'
+			points: 1,
+		};
+
+		addQuestion(baseQuestion);
+	};
+
+	const handleRemoveQuestion = (questionId: number) => {
+		if (questions.length === 0) {
+			return null;
+		} else {
+			removeQuestion(questionId);
+		}
+	};
+
+	// DONE
+	const handleAddOption = (questionId: number) => {
+		const currentQuestion = questions.find((q) => q.id === questionId);
+		if (!currentQuestion) {
+			return console.log(`Question with ID ${questionId} does not exist`);
+		}
+		if (currentQuestion.type !== 'multiple-choice') {
+			return console.log(
+				`Question with ID ${questionId} is not multiple-choice`
+			);
+		}
+
+		const optionLength = currentQuestion.options.length;
+
+		const newOption = {
+			id: optionLength + 1,
+			text: `Option ${optionLength + 1}`,
+			isCorrect: false,
+		};
+
+		const updatedQuestion: QuestionData = {
+			...currentQuestion,
+			options: [...currentQuestion.options, newOption],
+		};
+
+		updateQuestion(questionId, updatedQuestion);
+	};
+
+	const handleRemoveChoices = (questionId: number, optionId: number) => {
+		const updatedQuestion = questions.find((q) => q.id === questionId);
+		if (!updatedQuestion) {
+			return console.log(`Question with ID ${questionId} does not exist`);
+		}
+
+		if (updatedQuestion.type !== 'multiple-choice') {
+			return console.log(
+				`Question with ID ${questionId} is not multiple-choice`
+			);
+		}
+
+		const newOptions = updatedQuestion.options.filter(
+			(option) => option.id !== optionId
+		);
+
+		const question = {
+			...updatedQuestion,
+			options: [...newOptions],
+		};
+
+		updateQuestion(questionId, question);
+	};
+
+	const handleCorrectOption = (questionId: number, optionId: number) => {
+		const currentQuestion = questions.find((q) => q.id === questionId);
+
+		if (!currentQuestion) {
+			return console.log(`Question with ID ${questionId} does not exist`);
+		}
+		if (currentQuestion.type !== 'multiple-choice') {
+			return console.log(
+				`Question with ID ${questionId} is not multiple-choice`
+			);
+		}
+
+		const correctOption = currentQuestion.options.map((option) => {
+			if (option.id === optionId) {
+				return {
+					...option,
+					isCorrect: true,
+				};
+			} else
+				return {
+					...option,
+					isCorrect: false,
+				};
+		});
+
+		const updatedQuestion: QuestionData = {
+			...currentQuestion,
+			options: [...correctOption],
+		};
+		updateQuestion(questionId, updatedQuestion);
+	};
+
+	useEffect(() => {
+		if (questions.length === 0) {
+			const defaultQuizForm: QuestionData = {
+				id: Date.now(),
+				questionText: 'Untitled question',
+				type: 'multiple-choice',
+				options: [
+					{ id: 1, text: 'Option 1', isCorrect: true },
+					{ id: 2, text: 'Option 2', isCorrect: false },
+				],
+				points: 1,
+			};
+
+			addQuestion(defaultQuizForm);
+		}
+	}, []);
+
+	// DEBUGGER, REMOVE THIS BEFORE SHIPPING
+	// useEffect(() => {
+	// 	questions.map((quest) => {
+	// 		console.log('correct answer', quest.correctAnswer);
+	// 		console.log('options', quest.options);
+	// 	});
+	// }, [questions]);
 	const QuestionFormat = (question: QuestionData) => {
 		return (
-			<form key={question.id}>
+			<form key={question.id} style={{ marginBottom: '20px', width: '100%' }}>
 				{/* Select Test Categories */}
 				<HStack spacing={1}>
 					{' '}
@@ -76,7 +287,7 @@ const AdminTests = () => {
 						</Select>
 					</FormControl>
 					<Button
-						onClick={() => removeQuestion(question.id)}
+						onClick={() => handleRemoveQuestion(question.id)}
 						leftIcon={<DeleteIcon />}
 						iconSpacing={'-0.5'}
 						w={{ base: 'auto', md: '5rem' }}
@@ -97,7 +308,7 @@ const AdminTests = () => {
 								{question.options?.map((choice, index) => (
 									<Flex key={index} alignItems={'center'}>
 										<Radio
-											value={choice.text}
+											value={choice.id.toString()}
 											isChecked={choice.isCorrect}
 											onChange={() =>
 												handleCorrectOption(question.id, choice.id)
@@ -166,220 +377,6 @@ const AdminTests = () => {
 			</form>
 		);
 	};
-
-	const { addQuestion, questions, removeQuestion, updateQuestion } =
-		useQuestionMaker();
-
-	const handleChangeQuizProfile = (field, value) => {
-		setQuizProfile({
-			...quizProfile,
-			[field]: value,
-		});
-	};
-	//START AT THIS AND REPLACE setForm - updating the option or short answer
-	const handleUpdateOptions = (
-		questionId: number,
-		optionId: number,
-		updatedOption: string
-	) => {
-		const currentQuestion = questions.find((q) => q.id === questionId);
-		if (!currentQuestion) {
-			return console.log(`Question with ID ${questionId} does not exist`);
-		}
-
-		if (currentQuestion.type !== 'multiple-choice') {
-			return console.log(
-				`Question with ID ${questionId} is not multiple-choice`
-			);
-		}
-
-		const updatedChoices = currentQuestion.options.map((option) => {
-			if (option.id === optionId) {
-				return {
-					...option,
-					text: updatedOption,
-				};
-			}
-			return option;
-		});
-
-		const updatedQuestion: QuestionData = {
-			...currentQuestion,
-			options: [...updatedChoices],
-		};
-		updateQuestion(questionId, updatedQuestion);
-	};
-
-	const handleUpdateShortAnswer = (
-		questionId: number,
-		shortAnswerValue: string
-	) => {
-		const currentQuestion = questions.find((q) => q.id === questionId);
-
-		if (!currentQuestion) {
-			return console.log(`Question with ID ${questionId} does not exist`);
-		}
-
-		if (currentQuestion.type !== 'short-answer') {
-			return console.log(`Question with ID ${questionId} is not short-answer`);
-		}
-
-		const updatedQuestion = {
-			...currentQuestion,
-			correctAnswer: shortAnswerValue,
-		};
-
-		updateQuestion(questionId, updatedQuestion);
-	};
-
-	// TODO
-	// 1. Refactor removequestion, addnewoption
-	// 2. the default quiz form question type does not update its short answer and multiplechoice
-	// this is because it uses the question array from custom hook
-	//  and default quiz id does not exist on the custom hook
-	// DONE, DON NOT TOUCH
-	const handleQuestionType = (
-		questionId: number,
-		questionType: 'multiple-choice' | 'short-answer'
-	) => {
-		const currentQuestion = questions.find((q) => q.id === questionId);
-
-		if (!currentQuestion) {
-			return console.log(`Question with ID ${questionId} does not exist`);
-		}
-
-		const baseQuestion = {
-			id: currentQuestion.id,
-			questionText: currentQuestion.questionText,
-			points: currentQuestion.points,
-		};
-
-		const updatedQuestion: QuestionData =
-			questionType === 'multiple-choice'
-				? {
-						...baseQuestion,
-						type: 'multiple-choice',
-						options: [{ id: 1, text: 'Option 1', isCorrect: true }],
-				  }
-				: {
-						...baseQuestion,
-						type: 'short-answer',
-						correctAnswer: '',
-				  };
-
-		updateQuestion(questionId, updatedQuestion);
-	};
-
-	// DONE
-	const handleAddQuestionButton = () => {
-		const baseQuestion: QuestionData = {
-			id: Date.now(),
-			questionText: 'Untitled question',
-			type: 'multiple-choice', // or 'short-answer'
-			options: [{ text: `Option 1`, isCorrect: true, id: 1 }], // required if type is 'multiple-choice'
-			points: 1,
-		};
-
-		addQuestion(baseQuestion);
-	};
-
-	// DONE
-	const handleAddOption = (questionId: number) => {
-		const currentQuestion = questions.find((q) => q.id === questionId);
-		if (!currentQuestion) {
-			return console.log(`Question with ID ${questionId} does not exist`);
-		}
-		if (currentQuestion.type !== 'multiple-choice') {
-			return console.log(
-				`Question with ID ${questionId} is not multiple-choice`
-			);
-		}
-
-		const optionLength = currentQuestion.options.length;
-
-		const newOption = {
-			id: optionLength + 1,
-			text: `Option ${optionLength + 1}`,
-			isCorrect: false,
-		};
-
-		const updatedQuestion: QuestionData = {
-			...currentQuestion,
-			options: [...currentQuestion.options, newOption],
-		};
-
-		updateQuestion(questionId, updatedQuestion);
-	};
-
-	// const handleOptionChange = (index, value) => {
-	// 	const textOption = value;
-
-	// }
-	// UPDATE THIS, USE OPTIONS FROM ARRAY QUESTIONCONTENT
-	const handleRemoveChoices = (questionId: number, optionId: number) => {
-		const updatedQuestion = questions.find((q) => q.id === questionId);
-		if (!updatedQuestion) {
-			return console.log(`Question with ID ${questionId} does not exist`);
-		}
-
-		if (updatedQuestion.type !== 'multiple-choice') {
-			return console.log(
-				`Question with ID ${questionId} is not multiple-choice`
-			);
-		}
-
-		const newOptions = updatedQuestion.options.filter(
-			(option) => option.id !== optionId
-		);
-
-		const question = {
-			...updatedQuestion,
-			options: [...newOptions],
-		};
-
-		updateQuestion(questionId, question);
-	};
-
-	const handleCorrectOption = (questionId: number, optionId: number) => {
-		const currentQuestion = questions.find((q) => q.id === questionId);
-
-		if (!currentQuestion) {
-			return console.log(`Question with ID ${questionId} does not exist`);
-		}
-		if (currentQuestion.type !== 'multiple-choice') {
-			return console.log(
-				`Question with ID ${questionId} is not multiple-choice`
-			);
-		}
-
-		const correctOption = currentQuestion.options.map((option) => {
-			if (option.id === optionId) {
-				return {
-					...option,
-					isCorrect: true,
-				};
-			} else
-				return {
-					...option,
-					isCorrect: false,
-				};
-		});
-
-		const updatedQuestion: QuestionData = {
-			...currentQuestion,
-			options: [...correctOption],
-		};
-		updateQuestion(questionId, updatedQuestion);
-	};
-
-	useEffect(() => {
-		questions.map((quest) => {
-			console.log('correct answer', quest.correctAnswer);
-			console.log('options', quest.options);
-		});
-
-		// console.log(questionContent)
-	}, [questions]);
 	return (
 		<Container
 			flexDirection={'column'}
@@ -389,6 +386,8 @@ const AdminTests = () => {
 			borderColor={'gray.500'}
 			borderRadius={'md'}
 			bgColor={'whiteAlpha.50'}
+			minH={'100vh'} // Add minimum height to ensure background extends
+			pb={'10'}
 		>
 			<form>
 				<VStack spacing="3">
@@ -452,10 +451,22 @@ const AdminTests = () => {
 			</form>
 
 			<br />
+			{questions.length === 0 && (
+				<Button
+					onClick={handleAddQuestionButton}
+					leftIcon={<AddIcon />}
+					iconSpacing="2"
+					px={{ base: 4, md: 6 }}
+					minW={{ base: 'auto', md: '8rem' }}
+					size="md"
+				>
+					Add Question
+				</Button>
+			)}
 
-			{questions && questions.length > 0
-				? questions.map((question) => QuestionFormat(question))
-				: QuestionFormat(questionContent[0])}
+			<VStack spacing={4} width="100%" align="stretch" pb={8}>
+				{questions.map((q) => QuestionFormat(q))}
+			</VStack>
 		</Container>
 	);
 };

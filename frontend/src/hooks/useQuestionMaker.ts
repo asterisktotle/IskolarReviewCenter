@@ -39,6 +39,9 @@ const useQuestionMaker = (initialQuestions = []) => {
 
 	// Remove a question by	 ID
 	const removeQuestion = (questionId: number) => {
+		if (questions.length === 0) {
+			return;
+		}
 		setQuestions((prevQuestions) =>
 			prevQuestions.filter((question) => question.id !== questionId)
 		);
@@ -49,9 +52,24 @@ const useQuestionMaker = (initialQuestions = []) => {
 		questionId: number,
 		updatedQuestion: QuestionData
 	) => {
-		setQuestions((prevQuestions) =>
-			prevQuestions.map((q) => (q.id === questionId ? updatedQuestion : q))
-		);
+		setQuestions((prevQuestions) => {
+			if (prevQuestions.length === 0) {
+				return [updatedQuestion];
+			}
+
+			//check if question exist
+			const questionExist = prevQuestions.some((q) => q.id === questionId);
+
+			if (questionExist) {
+				return prevQuestions.map((q) =>
+					q.id === questionId ? updatedQuestion : q
+				);
+			} else {
+				return [...prevQuestions, updatedQuestion];
+			}
+
+			prevQuestions.map((q) => (q.id === questionId ? updatedQuestion : q));
+		});
 	};
 
 	return {
