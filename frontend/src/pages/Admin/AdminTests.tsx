@@ -97,7 +97,6 @@ const AdminTests = () => {
 								{question.options?.map((choice, index) => (
 									<Flex key={index} alignItems={'center'}>
 										<Radio
-											// w={'full'}
 											value={choice.text}
 											isChecked={choice.isCorrect}
 											onChange={() =>
@@ -107,13 +106,14 @@ const AdminTests = () => {
 
 										<Input
 											value={choice.text}
-											onChange={(e) =>
+											onChange={(e) => {
 												handleUpdateOptions(
 													question.id,
 													choice.id,
 													e.target.value
-												)
-											}
+												);
+												console.log(e.target.value);
+											}}
 											placeholder="Enter option text"
 											mr={2}
 											borderColor={'transparent'}
@@ -175,30 +175,32 @@ const AdminTests = () => {
 		optionId: number,
 		updatedOption: string
 	) => {
-		const content = questionContent.map((quest) => {
-			if (quest.id === questionId) {
-				if (quest.type === 'multiple-choice') {
-					return {
-						...quest,
-						options: quest.options.map((option) => {
-							if (option.id === optionId) {
-								return { ...option, text: updatedOption };
-							}
-							return option;
-						}),
-					};
-				}
-				if (quest.type === 'short-answer') {
-					return {
-						...quest,
-						correctAnswer: updatedOption,
-					};
-				}
+		const currentQuestion = questions.find((q) => q.id === questionId);
+		if (!currentQuestion) {
+			return console.log(`Question with ID ${questionId} does not exist`);
+		}
+
+		if (currentQuestion.type !== 'multiple-choice') {
+			return console.log(
+				`Question with ID ${questionId} is not multiple-choice`
+			);
+		}
+
+		const updatedChoices = currentQuestion.options.map((option) => {
+			if (option.id === optionId) {
+				return {
+					...option,
+					text: updatedOption,
+				};
 			}
-			return quest;
+			return option;
 		});
 
-		setQuestionContent(content);
+		const updatedQuestion: QuestionData = {
+			...currentQuestion,
+			options: [...updatedChoices],
+		};
+		updateQuestion(questionId, updatedQuestion);
 	};
 
 	// TODO
@@ -328,14 +330,14 @@ const AdminTests = () => {
 		setQuestionContent(updatedOption);
 	};
 
-	// useEffect(() => {
-	// 	const correctAnswer = questionContent.map((quest) => {
-	// 		return console.log('choices: ', quest.options);
-	// 	});
+	useEffect(() => {
+		const correctAnswer = questions.map((quest) => {
+			return console.log('choices: ', quest.options);
+		});
 
-	// 	console.log(correctAnswer);
-	// 	// console.log(questionContent)
-	// }, [questionContent]);
+		console.log(correctAnswer);
+		// console.log(questionContent)
+	}, [questions]);
 	return (
 		<Container
 			flexDirection={'column'}
