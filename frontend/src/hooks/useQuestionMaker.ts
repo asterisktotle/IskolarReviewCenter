@@ -6,14 +6,24 @@ export interface QuestionOption {
 	isCorrect: boolean;
 }
 
-export interface QuestionData {
+interface BaseQuestionData {
 	id: number;
 	questionText: string;
-	type: 'multiple-choice' | 'short-answer';
-	options?: QuestionOption[];
-	correctAnswer?: string;
 	points: number;
 }
+
+interface MultipleChoiceQuestion extends BaseQuestionData {
+	type: 'multiple-choice';
+	options: QuestionOption[];
+	correctAnswer?: never;
+}
+interface ShortAnswerQuestion extends BaseQuestionData {
+	type: 'short-answer';
+	correctAnswer: string;
+	options?: never;
+}
+
+export type QuestionData = MultipleChoiceQuestion | ShortAnswerQuestion;
 
 const useQuestionMaker = (initialQuestions = []) => {
 	const [questions, setQuestions] = useState<QuestionData[]>(initialQuestions);
@@ -27,7 +37,7 @@ const useQuestionMaker = (initialQuestions = []) => {
 		return newQuestion.id;
 	};
 
-	// Remove a question by ID
+	// Remove a question by	 ID
 	const removeQuestion = (questionId: number) => {
 		setQuestions((prevQuestions) =>
 			prevQuestions.filter((question) => question.id !== questionId)
@@ -40,11 +50,7 @@ const useQuestionMaker = (initialQuestions = []) => {
 		updatedQuestion: QuestionData
 	) => {
 		setQuestions((prevQuestions) =>
-			prevQuestions.map((question) =>
-				question.id === questionId
-					? { ...question, ...updatedQuestion }
-					: question
-			)
+			prevQuestions.map((q) => (q.id === questionId ? updatedQuestion : q))
 		);
 	};
 
