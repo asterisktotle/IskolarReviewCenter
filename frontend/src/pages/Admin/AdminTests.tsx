@@ -5,7 +5,6 @@ import {
 	Editable,
 	EditableInput,
 	EditablePreview,
-	EditableTextarea,
 	FormLabel,
 	RadioGroup,
 	Stack,
@@ -18,11 +17,13 @@ import {
 	IconButton,
 	NumberInput,
 	NumberInputField,
-	typography,
 } from '@chakra-ui/react';
 import { AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
 import { useEffect, useState } from 'react';
-import useQuestionMaker from '../../hooks/useQuestionMaker';
+import useQuestionMaker, {
+	MultipleChoiceQuestion,
+	QuestionOption,
+} from '../../hooks/useQuestionMaker';
 import { QuestionData } from '../../hooks/useQuestionMaker';
 
 const AdminTests = () => {
@@ -44,6 +45,23 @@ const AdminTests = () => {
 			[field]: value,
 		});
 	};
+	// Parse the input text into separate options
+	const parseOptions = (text: string) => {
+		if (!text.trim()) return [];
+
+		const line = text.split('\n').filter((line) => line.trim() !== '');
+
+		const options: QuestionOption[] = line.map((option, index) => {
+			return {
+				id: index + 1,
+				text: option.trim(),
+				isCorrect: false,
+			};
+		});
+
+		console.log('parsed options: ', options);
+		return options;
+	};
 	//DONE
 	const handleUpdateOptions = (
 		questionId: number,
@@ -61,22 +79,25 @@ const AdminTests = () => {
 			);
 		}
 
-		const updatedChoices = currentQuestion.options.map((option) => {
-			if (option.id === optionId) {
-				return {
-					...option,
-					text: updatedOption,
-				};
-			}
-			return option;
-		});
+		let formattedOptions: QuestionOption[];
+
+		if (updatedOption.match(/[\n\r]+/)) {
+			formattedOptions = parseOptions(updatedOption);
+			console.log('it detects line break: ', formattedOptions);
+		} else {
+			console.log('it doesnt detect line break: ', formattedOptions);
+			formattedOptions = currentQuestion.options.map((option) =>
+				option.id === optionId ? { ...option, text: updatedOption } : option
+			);
+		}
 
 		const updatedQuestion: QuestionData = {
 			...currentQuestion,
-			options: [...updatedChoices],
+			options: formattedOptions,
 		};
 		updateQuestion(questionId, updatedQuestion);
 	};
+
 	//DONE
 	const handleUpdateShortAnswer = (
 		questionId: number,
@@ -236,6 +257,7 @@ const AdminTests = () => {
 		updateQuestion(questionId, updatedQuestion);
 	};
 
+	// Creates default quiz form
 	useEffect(() => {
 		if (questions.length === 0) {
 			const defaultQuizForm: QuestionData = {
@@ -317,32 +339,40 @@ const AdminTests = () => {
 
 										<Input
 											value={choice.text}
-											onChange={(e) => {
+											onChange={(e) =>
 												handleUpdateOptions(
 													question.id,
 													choice.id,
 													e.target.value
-												);
-												console.log(e.target.value);
+												)
+											}
+											onPaste={(e) => {
+												// Prevent default to stop the normal paste behavior
+												e.preventDefault();
+
+												// Get pasted text from clipboard
+												const pastedText = e.clipboardData.getData('text');
+
+												// Check if pasted text contains line breaks
+												if (pastedText.match(/[\n\r]+/)) {
+													// Handle multi-line paste
+													handleUpdateOptions(
+														question.id,
+														choice.id,
+														pastedText
+													);
+												} else {
+													// Normal single-line paste, update just this field
+													handleUpdateOptions(
+														question.id,
+														choice.id,
+														pastedText
+													);
+												}
 											}}
 											placeholder="Enter option text"
 											mr={2}
-											borderColor={'transparent'}
-											outline={'none'}
-											_focus={{
-												borderBottom: '2px solid',
-												outline: 'none,',
-												boxShadow: 'none',
-												border: 'none',
-												borderColor: 'blue.500',
-											}}
-											_hover={{
-												outline: 'none,',
-												boxShadow: 'none',
-												border: 'none',
-												borderBottom: '2px solid',
-												borderColor: 'blue.500',
-											}}
+											// ...rest of your styling props
 										/>
 										<IconButton
 											size="sm"

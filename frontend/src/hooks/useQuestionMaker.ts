@@ -12,7 +12,7 @@ interface BaseQuestionData {
 	points: number;
 }
 
-interface MultipleChoiceQuestion extends BaseQuestionData {
+export interface MultipleChoiceQuestion extends BaseQuestionData {
 	type: 'multiple-choice';
 	options: QuestionOption[];
 	correctAnswer?: never;
