@@ -1,5 +1,5 @@
 import { useState } from 'react';
-
+//refactor this to zustand
 export interface QuestionOption {
 	id: number;
 	text: string;
@@ -27,6 +27,14 @@ export type QuestionData = MultipleChoiceQuestion | ShortAnswerQuestion;
 
 const useQuestionMaker = (initialQuestions = []) => {
 	const [questions, setQuestions] = useState<QuestionData[]>(initialQuestions);
+	const [quizProfile, setQuizProfile] = useState({
+		title: 'Quiz Title',
+		subject: 'mesl',
+		category: 'terms',
+		timeLimit: 0,
+		passingScore: 0,
+		totalPoints: 0,
+	});
 
 	// Add new question of the current type
 	const addQuestion = (questionData: QuestionData) => {
@@ -70,11 +78,20 @@ const useQuestionMaker = (initialQuestions = []) => {
 		});
 	};
 
+	// const publishQuiz = (profile) ==> {
+	// 	const quizData = {
+	// 		title: ,
+	// 		subject: ,
+	// 	}
+	// }
+
 	return {
 		questions,
 		addQuestion,
 		removeQuestion,
 		updateQuestion,
+		setQuizProfile,
+		quizProfile,
 	};
 };
 

@@ -27,19 +27,26 @@ import useQuestionMaker, {
 import { QuestionData } from '../../hooks/useQuestionMaker';
 
 const AdminTests = () => {
-	const [quizProfile, setQuizProfile] = useState({
-		title: 'Quiz Title',
-		subject: 'mesl',
-		category: 'terms',
-		timeLimit: 0,
-		passingScore: 0,
-		totalPoints: 0,
-	});
+	// const [quizProfile, setQuizProfile] = useState({
+	// 	title: 'Quiz Title',
+	// 	subject: 'mesl',
+	// 	category: 'terms',
+	// 	timeLimit: 0,
+	// 	passingScore: 0,
+	// 	totalPoints: 0,
+	// });
 
-	const { addQuestion, questions, removeQuestion, updateQuestion } =
-		useQuestionMaker();
+	const {
+		addQuestion,
+		questions,
+		removeQuestion,
+		updateQuestion,
+		quizProfile,
+		setQuizProfile,
+	} = useQuestionMaker();
+
 	//DONE
-	const handleChangeQuizProfile = (field, value) => {
+	const handleChangeQuizProfile = (field: string, value: string) => {
 		setQuizProfile({
 			...quizProfile,
 			[field]: value,
@@ -276,12 +283,12 @@ const AdminTests = () => {
 	}, []);
 
 	// DEBUGGER, REMOVE THIS BEFORE SHIPPING
-	// useEffect(() => {
-	// 	questions.map((quest) => {
-	// 		console.log('correct answer', quest.correctAnswer);
-	// 		console.log('options', quest.options);
-	// 	});
-	// }, [questions]);
+	useEffect(() => {
+		questions.map((quest) => {
+			console.log('correct answer', quest.correctAnswer);
+			console.log('options', quest.options);
+		});
+	}, [questions]);
 	const QuestionFormat = (question: QuestionData) => {
 		return (
 			<form key={question.id} style={{ marginBottom: '20px', width: '100%' }}>
