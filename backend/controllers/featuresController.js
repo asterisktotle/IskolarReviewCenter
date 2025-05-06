@@ -226,7 +226,7 @@ export const createQuiz = async (req, res) => {
 			questions,
 			totalPoints: totalPoints || 0,
 			passingScore: passingScore || 70,
-			timeLimit: timeLimit || 240, //minutes
+			timeLimit: timeLimit || 0, //minutes
 		});
 
 		await quiz.save();
