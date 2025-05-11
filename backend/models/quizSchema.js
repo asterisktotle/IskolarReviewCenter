@@ -62,6 +62,7 @@ const QuizSchema = new Schema(
 		},
 		subject: {
 			type: String,
+			enum: ['mesl', 'mdsp', 'pipe'],
 			required: true,
 		},
 		category: {

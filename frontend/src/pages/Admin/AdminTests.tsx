@@ -20,22 +20,10 @@ import {
 } from '@chakra-ui/react';
 import { AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
 import { useEffect, useState } from 'react';
-import useQuestionMaker, {
-	MultipleChoiceQuestion,
-	QuestionOption,
-} from '../../hooks/useQuestionMaker';
+import useQuestionMaker, { QuestionOption } from '../../hooks/useQuestionMaker';
 import { QuestionData } from '../../hooks/useQuestionMaker';
 
 const AdminTests = () => {
-	// const [quizProfile, setQuizProfile] = useState({
-	// 	title: 'Quiz Title',
-	// 	subject: 'mesl',
-	// 	category: 'terms',
-	// 	timeLimit: 0,
-	// 	passingScore: 0,
-	// 	totalPoints: 0,
-	// });
-
 	const {
 		addQuestion,
 		questions,

@@ -207,7 +207,7 @@ export const createQuiz = async (req, res) => {
 		timeLimit,
 	} = req.body;
 
-	if ((!title || !subject || !questions, !category)) {
+	if (!title || !subject || !questions || !category) {
 		return res.json({ success: false, message: 'Provide all the fields' });
 	}
 
@@ -239,7 +239,7 @@ export const createQuiz = async (req, res) => {
 		return res.json({ success: false, message: err.message });
 	}
 };
-
+//GET ALL OR SEARCH QUIZZES
 export const getAllQuizzes = async (req, res) => {
 	try {
 		const filter = {};
@@ -253,10 +253,13 @@ export const getAllQuizzes = async (req, res) => {
 		}
 
 		if (req.query.title) {
-			filter.title = { $regex: req.query.search, $options: 'i' }; // case-insensitive
+			filter.title = { $regex: req.query.title, $options: 'i' }; // case-insensitive
 		}
 
 		const quizzes = await Quiz.find(filter);
+		if (quizzes.length === 0) {
+			return res.json({ success: true, message: 'No quizzes found' });
+		}
 
 		return res.json({ success: true, data: quizzes });
 	} catch (err) {
@@ -291,7 +294,7 @@ export const submitAndEvaluateQuiz = async (req, res) => {
 
 		const evaluatedAnswers = [];
 		let totalPoints = 0;
-		const passingScore = quiz.passingScore || 70;
+		const passingScore = quiz.passingScore || 0;
 
 		for (let userAnswer of answers) {
 			const question = quiz.questions.id(userAnswer.questionId);
@@ -302,11 +305,18 @@ export const submitAndEvaluateQuiz = async (req, res) => {
 
 			// Evaluate based on type
 			if (question.type === 'multiple-choice') {
-				const correctOptions = question.options
-					.filter((option) => option.isCorrect)
-					.map((option) => option.text);
+				const correctOption = question.options.find(
+					(option) => option.isCorrect
+				);
 
-				isCorrect = arraysEqual(correctOptions, userAnswer.selectedOptions);
+				if (
+					correctOption &&
+					correctOption._id.toString() === userAnswer.selectedOption
+				) {
+					isCorrect = true;
+					pointsEarned = question.points || 0;
+					totalPoints += pointsEarned;
+				}
 			} else if (question.type === 'short-answer') {
 				isCorrect =
 					question.correctAnswer.trim().toLowerCase() ===
@@ -328,9 +338,7 @@ export const submitAndEvaluateQuiz = async (req, res) => {
 		}
 
 		score = totalPoints;
-		percentageScore = quiz.totalPoints
-			? 0 && (score / quiz.totalPoints) * 100
-			: 0;
+		percentageScore = quiz.totalPoints ? (score / quiz.totalPoints) * 100 : 0;
 		const passed = percentageScore >= passingScore;
 
 		const quizAttempt = new QuizAttempt({

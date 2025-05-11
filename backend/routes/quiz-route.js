@@ -12,7 +12,7 @@ import {
 const quizRouter = express.Router();
 
 quizRouter.post('/create-quiz', userAuth, createQuiz);
-quizRouter.post('/submit-quiz', userAuth, submitAndEvaluateQuiz);
+quizRouter.post('/submit-quiz', submitAndEvaluateQuiz);
 quizRouter.delete('/delete-quiz/:id', userAuth, deleteQuiz);
 quizRouter.put('/update-quiz/:id', userAuth, updateQuiz);
 quizRouter.get('/get-all-quizzes', userAuth, getAllQuizzes);
