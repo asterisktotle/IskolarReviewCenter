@@ -1,0 +1,55 @@
+   ### Create Quiz
+   POSThttp://localhost:3100/api/quiz/create-quiz
+   Content-Type: application/json
+
+   {
+     "title": "Test Quiz",
+     "subject": "mesl",
+     "category": "terms",
+     "questions": [
+       {
+         "questionText": "What is 2+2?",
+         "type": "multiple-choice",
+         "points": 1,
+         "options": [
+           {
+             "id": 1,
+             "text": "3",
+             "isCorrect": false
+           },
+           {
+             "id": 2,
+             "text": "4",
+             "isCorrect": true
+           }
+         ]
+       }
+     ],
+     "totalPoints": 1,
+     "passingScore": 70,
+     "timeLimit": 30
+   }
+
+  ### Get all the quizzes (no authentication required)
+  GET http://localhost:3100/api/quiz/get-all-quizzes
+  Content-Type: application/json
+
+  ### Get all quizzes with filters (optional)
+  GET http://localhost:3100/api/quiz/get-all-quizzes?subject=mesl&category=terms
+  Content-Type: application/json
+
+
+  ### Submit Quiz
+  POST http://localhost:3100/api/quiz/submit-quiz
+  Content-Type: application/json
+
+  {
+    "quizId": "681fed269681064c4eb4c8ba",
+    "userId": "67afec8ee98a8c4c6feaffae",
+    "answers": [
+      {
+        "questionId": "681fed269681064c4eb4c8bb",
+        "selectedOption": "681fed269681064c4eb4c8bd"
+      }
+    ]
+  }

@@ -42,7 +42,6 @@ const useQuestionMaker = (initialQuestions = []) => {
 			...questionData,
 		};
 		setQuestions((prevQuestions) => [...prevQuestions, newQuestion]);
-		return newQuestion.id;
 	};
 
 	// Remove a question by	 ID
