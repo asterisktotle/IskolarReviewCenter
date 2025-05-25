@@ -1,6 +1,9 @@
 import { getGridFSBucket } from '../config/db.js';
 import pdfModel from '../models/pdfSchema.js';
 import { Quiz, QuizAttempt } from '../models/quizSchema.js';
+import { parseQuestionsFromText } from '../utils/questionParser.js';
+import fs from 'fs';
+import path from 'path';
 
 // PDF GET AND UPLOAD
 
@@ -305,24 +308,21 @@ export const submitAndEvaluateQuiz = async (req, res) => {
 
 			// Evaluate based on type
 			if (question.type === 'multiple-choice') {
+				// find the the element in array with true value of isCorrect
 				const correctOption = question.options.find(
 					(option) => option.isCorrect
 				);
 
-				if (
+				isCorrect =
 					correctOption &&
-					correctOption._id.toString() === userAnswer.selectedOption
-				) {
-					isCorrect = true;
-					pointsEarned = question.points || 0;
-					totalPoints += pointsEarned;
-				}
+					correctOption._id.toString() === userAnswer.selectedOption;
 			} else if (question.type === 'short-answer') {
 				isCorrect =
 					question.correctAnswer.trim().toLowerCase() ===
 					userAnswer.textAnswer.trim().toLowerCase();
 			}
 
+			//add points
 			if (isCorrect) {
 				pointsEarned = question.points || 0;
 				totalPoints += pointsEarned;
@@ -338,11 +338,14 @@ export const submitAndEvaluateQuiz = async (req, res) => {
 		}
 
 		score = totalPoints;
-		percentageScore = quiz.totalPoints ? (score / quiz.totalPoints) * 100 : 0;
+		const percentageScore = quiz.totalPoints
+			? (score / quiz.totalPoints) * 100
+			: 0;
 		const passed = percentageScore >= passingScore;
 
 		const quizAttempt = new QuizAttempt({
 			quiz: quizId,
+			quizTitle: quiz.title,
 			user: userId,
 			answers: evaluatedAnswers,
 			score,
@@ -410,14 +413,14 @@ export const deleteQuiz = async (req, res) => {
 
 export const updateQuiz = async (req, res) => {
 	try {
-		const { quizId } = req.params;
+		const { id } = req.params;
 		const updates = req.body;
 
-		if (!quizId) {
+		if (!id) {
 			return res.json({ success: false, message: 'NO Quiz ID provided' });
 		}
 
-		const quiz = await Quiz.findById(quizId);
+		const quiz = await Quiz.findById(id);
 		if (!quiz) {
 			return res.json({ success: false, message: 'Quiz not found' });
 		}
@@ -482,6 +485,33 @@ export const updateQuiz = async (req, res) => {
 			quiz: quiz,
 		});
 	} catch (err) {
+		return res.json({ success: false, message: err.message });
+	}
+};
+
+export const parseQuestionsFromFile = async (req, res) => {
+	try {
+		// Path to your questions file - using absolute path
+		const filePath = path.join(
+			process.cwd(),
+			'..',
+			'pdf_extractor',
+			'MESL_ELEMENTS_9_questions.txt'
+		);
+
+		// Read the file
+		const text = fs.readFileSync(filePath, 'utf-8');
+
+		// Parse the questions
+		const questions = parseQuestionsFromText(text);
+
+		return res.json({
+			success: true,
+			message: 'Questions parsed successfully',
+			questions,
+		});
+	} catch (err) {
+		console.error('Error reading file:', err);
 		return res.json({ success: false, message: err.message });
 	}
 };
