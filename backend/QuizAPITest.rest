@@ -1,6 +1,9 @@
-   ### Create Quiz
-   POSThttp://localhost:3100/api/quiz/create-quiz
-   Content-Type: application/json
+### CREATE QUIZ
+GET http://localhost:3100/api/qui/get-all-quizzes
+   
+### Upload a quiz with multiple-choices and short-answer DONE CHECKING
+POST http://localhost:3100/api/quiz/create-quiz
+Content-Type: application/json
 
    {
      "title": "Test Quiz",
@@ -8,48 +11,132 @@
      "category": "terms",
      "questions": [
        {
-         "questionText": "What is 2+2?",
+         "questionText": "The locus of a point which moves at a constant distance from a fixed point called its center.",
          "type": "multiple-choice",
          "points": 1,
          "options": [
            {
              "id": 1,
-             "text": "3",
-             "isCorrect": false
+             "text": "Circle",
+             "isCorrect": true
            },
            {
              "id": 2,
-             "text": "4",
-             "isCorrect": true
+             "text": "Ellipse",
+             "isCorrect": false
+           },
+           {
+            "id": 3,
+            "text": "Parabola",
+            "isCorrect": false
+           },
+           {
+            "id": 4,
+            "text": "Hyperbola",
+            "isCorrect": false
            }
          ]
+       },{
+        "questionText" : "What is the smallest country in the world?",
+        "type" : "short-answer",
+        "correctAnswer" : "Vatican",
+        "points" : 1
        }
+
      ],
      "totalPoints": 1,
      "passingScore": 70,
-     "timeLimit": 30
+     "timeLimit": 0
    }
 
-  ### Get all the quizzes (no authentication required)
-  GET http://localhost:3100/api/quiz/get-all-quizzes
-  Content-Type: application/json
+### Get all the quizzes (no authentication required)
+GET http://localhost:3100/api/quiz/get-all-quizzes 
 
-  ### Get all quizzes with filters (optional)
-  GET http://localhost:3100/api/quiz/get-all-quizzes?subject=mesl&category=terms
-  Content-Type: application/json
+### Get all quizzes with filters (optional)
+GET http://localhost:3100/api/quiz/get-all-quizzes?subject=mesl&title=""
+
+### Evaluate quiz for multiple-choices  DONE CHECKING
+POST http://localhost:3100/api/quiz/submit-quiz
+Content-Type: application/json
+
+{ 
+  "quizId": "683307c964abaa93cb1087dd",
+   "userId": "67afec8ee98a8c4c6feaffae",
+  "answers":
+  [
+    { 
+      //for multiple-choice 
+      "questionId": "683307c964abaa93cb1087de",
+      "selectedOption": "683307c964abaa93cb1087df"
+     },{
+      // for short-answer
+      "questionId": "683307c964abaa93cb1087e3",
+      "textAnswer": "Vatican"
+     }
+
+  ]
+}
+
+### GET users attempts history DONE CHECKING
+POST http://localhost:3100/api/quiz/get-user-quiz-history
+Content-Type: application/json
+
+{
+  "userId": "67afec8ee98a8c4c6feaffae",
+  "quizId": "683307c964abaa93cb1087dd"
+}
+
+### Delete a quiz DONE CHECKING
+DELETE http://localhost:3100/api/quiz/delete-quiz/683307c964abaa93cb1087dd
+
+### Update a quiz DONE CHECKING
+PUT http://localhost:3100/api/quiz/update-quiz/683307c964abaa93cb1087dd
+Content-Type: application/json
+
+{
+  "title": "Updated Test Quiz",
+  "subject": "mesl",
+  "category": "weekly-test",
+  "timeLimit": 30,
+  "passingScore": 75,
+  "questions": [
+    {
+      "questionText": "The locus of a point which moves at a constant distance from a fixed point called its center.",
+      "type": "multiple-choice",
+      "points": 2,
+      "options": [
+        {
+          "id": 1,
+          "text": "Circle",
+          "isCorrect": true
+        },
+        {
+          "id": 2,
+          "text": "Ellipse",
+          "isCorrect": false
+        },
+        {
+          "id": 3,
+          "text": "Parabola",
+          "isCorrect": false
+        },
+        {
+          "id": 4,
+          "text": "Hyperbola",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "questionText": "What is the smallest country in the world?",
+      "type": "short-answer",
+      "correctAnswer": "Vatican City",
+      "points": 2
+    }
+  ]
+}
+
+### Parse questions from text file
+GET http://localhost:3100/api/quiz/parse-questions
 
 
-  ### Submit Quiz
-  POST http://localhost:3100/api/quiz/submit-quiz
-  Content-Type: application/json
-
-  {
-    "quizId": "681fed269681064c4eb4c8ba",
-    "userId": "67afec8ee98a8c4c6feaffae",
-    "answers": [
-      {
-        "questionId": "681fed269681064c4eb4c8bb",
-        "selectedOption": "681fed269681064c4eb4c8bd"
-      }
-    ]
-  }

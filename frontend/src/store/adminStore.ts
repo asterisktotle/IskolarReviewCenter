@@ -25,16 +25,16 @@ interface AdminStore {
 	totalUser: number | null;
 	usersList: UserData[];
 	pdfList: PdfFiles[];
-	setPdfList: (pdfList: { pdfList: [] }) => void;
+	setPdfList: (pdfList: PdfFiles[]) => void;
 	getUsersList: () => Promise<void>;
 	getAllPdf: () => Promise<void>;
 	messageError: string | null;
-	setMessageError: (messageError: string) => void;
+	setMessageError: (messageError: string | null) => void;
 
 	//Upload PDF
 
 	title: string;
-	file: null;
+	file: File | null;
 	category: string;
 	subject: string;
 	loading: boolean;
@@ -43,7 +43,7 @@ interface AdminStore {
 
 	//action to Uploading PDF
 	setTitle: (title: string) => void;
-	setFile: (file: string) => void;
+	setFile: (file: File) => void;
 	setCategory: (category: string) => void;
 	setSubject: (subject: string) => void;
 	uploadPdfFile: () => Promise<any>;
@@ -117,6 +117,12 @@ const AdminStore = create<AdminStore>((set, get) => ({
 	// Prepare form data before submission
 	uploadPdfFile: async () => {
 		const { title, file, subject, category, resetForm } = get();
+
+		// Validation check
+		if (!title || !file || !subject || !category) {
+			set({ messageError: 'All fields are required' });
+			return { success: false, message: 'All fields are required' };
+		}
 
 		set({ loading: true });
 

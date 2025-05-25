@@ -100,6 +100,10 @@ const QuizAttemptSchema = new Schema({
 		ref: 'Quiz',
 		required: true,
 	},
+	quizTitle: {
+		type: String,
+		required: true,
+	},
 	user: {
 		type: Schema.Types.ObjectId,
 		ref: 'user',
