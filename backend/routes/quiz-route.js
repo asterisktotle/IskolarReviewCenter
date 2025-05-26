@@ -20,6 +20,6 @@ quizRouter.delete('/delete-quiz/:id', deleteQuiz); // deleted userauth
 quizRouter.put('/update-quiz/:id', updateQuiz); // deleted userauth
 quizRouter.get('/get-all-quizzes', getAllQuizzes);
 quizRouter.post('/get-user-quiz-history', getUserQuizHistory);
-quizRouter.get('/parse-questions', parseQuestionsFromFile);
+quizRouter.get('/parse-questions', parseQuestionsFromFile); // this parse the txt fle from pdf extractor
 
 export default quizRouter;

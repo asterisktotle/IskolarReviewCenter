@@ -9,7 +9,12 @@ export const parseQuestionsFromText = (text) => {
 			if (!questionMatch) return null;
 
 			const questionNumber = questionMatch[1];
-			const questionText = questionMatch[2].trim();
+			// Clean up question text by replacing multiple spaces and line breaks with a single space
+			const questionText = questionMatch[2]
+				.trim()
+				.replace(/\r\n/g, ' ') // Replace \r\n with space
+				.replace(/\n/g, ' ') // Replace \n with space
+				.replace(/\s+/g, ' '); // Replace multiple spaces with single space
 
 			// Extract options
 			const optionsMatch = block.match(
