@@ -1,43 +1,10 @@
-import PyPDF2
 import pdfplumber
 import re
 from typing import List, Dict, Tuple
 
-# # Method 1: Using PyPDF2 (Basic Text Extraction)
-# def extract_text_pypdf2(pdf_path: str) -> str:
-#     """
-#     Basic PDF text extraction using PyPDF2
-#     Good for simple PDFs but may struggle with formatting
-#     """
-#     text = ""
-#     with open(pdf_path, 'rb') as file:
-#         pdf_reader = PyPDF2.PdfReader(file)
-#         for page in pdf_reader.pages:
-#             text += page.extract_text() + "\n"
-#     return text
 
+pdf_file_path: str = "pdf_extractor/BEF_PIPE.pdf"
 
-# # print(extract_text_pypdf2("SamplePDf.pdf"))
-
-# # Method 2: Using pdfplumber (Better for Complex Layouts)
-# def extract_text_pdfplumber(pdf_path: str) -> str:
-#     """
-#     Advanced PDF text extraction using pdfplumber
-#     Better handles multi-column layouts and preserves formatting
-#     """
-#     text = ""
-#     with pdfplumber.open(pdf_path) as pdf:
-#         for page in pdf.pages:
-#             page_text = page.extract_text()
-#             if page_text:
-#                 text += page_text + "\n"
-#     return text
-
-# # print(extract_text_pdfplumber("SamplePDf.pdf"))
-
-pdf_file_path: str = "MESL_ELEMENTS_9.pdf"
-
-# Method 3
 def extract_pdf_text(pdf_file_path):
     """
     Extract text from PDF file, handling left and right columns separately
@@ -88,7 +55,7 @@ def extract_questions(text):
             continue
             
         # Look for question pattern: number followed by question text
-        question_match = re.search(r'^(\d+)\.\s*(.+?)(?=\n[A-D]\.)', block, re.MULTILINE | re.DOTALL)
+        question_match = re.search(r'^(\d+)\.\s*(.+?)(?=\n[a-dA-D]\.)', block, re.MULTILINE | re.DOTALL)
         
         if question_match:
             question_num = question_match.group(1)
@@ -96,14 +63,14 @@ def extract_questions(text):
             
             # Find all choices (A., B., C., D.)
             choices = {}
-            choice_pattern = r'([A-D])\.\s*(.+?)(?=\n[A-D]\.|ANSWER|$)'
+            choice_pattern = r'([a-dA-D])\.\s*(.+?)(?=\n[a-dA-D]\.|ANSWER|$)'
             choice_matches = re.findall(choice_pattern, block, re.MULTILINE | re.DOTALL)
             
             for letter, choice_text in choice_matches:
                 choices[letter] = choice_text.strip()
             
             # Find the correct answer
-            answer_match = re.search(r'ANSWER:\s*([A-D])', block)
+            answer_match = re.search(r'ANSWER:\s*([a-dA-D])', block)
             correct_answer = answer_match.group(1) if answer_match else "Not found"
             
             # Store the question data

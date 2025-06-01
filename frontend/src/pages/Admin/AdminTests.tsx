@@ -22,6 +22,10 @@ import { AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
 import { useEffect, useState } from 'react';
 import useQuestionMaker, { QuestionOption } from '../../hooks/useQuestionMaker';
 import { QuestionData } from '../../hooks/useQuestionMaker';
+import QuizStore from '../../store/quizStore';
+
+import parseOptions from '../../utils/parserOptions';
+import convertQuestionType from '../../utils/converQuestionType';
 
 const AdminTests = () => {
 	const {
@@ -40,23 +44,7 @@ const AdminTests = () => {
 			[field]: value,
 		});
 	};
-	// Parse the input text into separate options
-	const parseOptions = (text: string) => {
-		if (!text.trim()) return [];
 
-		const line = text.split('\n').filter((line) => line.trim() !== '');
-
-		const options: QuestionOption[] = line.map((option, index) => {
-			return {
-				id: index + 1,
-				text: option.trim(),
-				isCorrect: false,
-			};
-		});
-
-		console.log('parsed options: ', options);
-		return options;
-	};
 	//DONE
 	const handleUpdateOptions = (
 		questionId: number,
@@ -80,7 +68,7 @@ const AdminTests = () => {
 			formattedOptions = parseOptions(updatedOption);
 			console.log('it detects line break: ', formattedOptions);
 		} else {
-			console.log('it doesnt detect line break: ', formattedOptions);
+			console.log("it doesn't detect line break: ", formattedOptions);
 			formattedOptions = currentQuestion.options.map((option) =>
 				option.id === optionId ? { ...option, text: updatedOption } : option
 			);
@@ -126,24 +114,7 @@ const AdminTests = () => {
 			return console.log(`Question with ID ${questionId} does not exist`);
 		}
 
-		const baseQuestion = {
-			id: currentQuestion.id,
-			questionText: currentQuestion.questionText,
-			points: currentQuestion.points,
-		};
-
-		const updatedQuestion: QuestionData =
-			questionType === 'multiple-choice'
-				? {
-						...baseQuestion,
-						type: 'multiple-choice',
-						options: [{ id: 1, text: 'Option 1', isCorrect: true }],
-				  }
-				: {
-						...baseQuestion,
-						type: 'short-answer',
-						correctAnswer: '',
-				  };
+		const updatedQuestion = convertQuestionType(currentQuestion, questionType);
 
 		updateQuestion(questionId, updatedQuestion);
 	};
@@ -271,12 +242,14 @@ const AdminTests = () => {
 	}, []);
 
 	// DEBUGGER, REMOVE THIS BEFORE SHIPPING
-	useEffect(() => {
-		questions.map((quest) => {
-			console.log('correct answer', quest.correctAnswer);
-			console.log('options', quest.options);
-		});
-	}, [questions]);
+	// useEffect(() => {
+	// 	questions.map((quest) => {
+	// 		console.log('correct answer', quest.correctAnswer);
+	// 		console.log('options', quest.options);
+	// 	});
+	// }, [questions]);
+
+	useEffect(() => {}, []);
 	const QuestionFormat = (question: QuestionData) => {
 		return (
 			<form key={question.id} style={{ marginBottom: '20px', width: '100%' }}>
