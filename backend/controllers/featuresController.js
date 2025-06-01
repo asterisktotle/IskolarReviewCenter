@@ -256,7 +256,7 @@ export const getAllQuizzes = async (req, res) => {
 		}
 
 		if (req.query.title) {
-			filter.title = { $regex: req.query.title, $options: 'i' }; // case-insensitive
+			filter.title = { $regex: `^${req.query.title}$`, $options: 'i' }; // case-insensitive
 		}
 
 		const quizzes = await Quiz.find(filter);
