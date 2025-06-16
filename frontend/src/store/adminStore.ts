@@ -80,14 +80,17 @@ const AdminStore = create<AdminStore>((set, get) => ({
 	},
 	setPdfList: (pdfList) => set({ pdfList }),
 	getAllPdf: async () => {
-		const { setPdfList, setMessageError } = get();
+		const { setPdfList, setMessageError, setLoading } = get();
 		try {
+			setLoading(true);
 			const { data } = await axios.get(BACKEND_URL + '/api/pdf/pdf-lectures');
 			const pdf = data.data;
 			setPdfList(pdf);
 		} catch (err) {
 			setMessageError(err.message);
 			console.error('getPdf error: ', err);
+		} finally {
+			setLoading(false);
 		}
 	},
 

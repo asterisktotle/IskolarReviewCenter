@@ -147,10 +147,9 @@ const AdminLectures = () => {
 
 	useEffect(() => {
 		getAllPdf();
-	}, [loading]);
+	}, [getAllPdf]);
 
-	const handleViewPdf = (pdfId) => {
-		//insert dynamic url
+	const handleViewPdf = (pdfId: string) => {
 		navigate(`/view-pdf/${pdfId}`);
 	};
 

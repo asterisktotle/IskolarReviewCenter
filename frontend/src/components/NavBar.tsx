@@ -68,6 +68,11 @@ export default function Simple() {
 	const { logout, userData } = useAuthStore();
 	const navigate = useNavigate();
 
+	const handleLogOut = () => {
+		logout();
+		navigate('/');
+	};
+
 	return (
 		<>
 			<Box px={4}>
@@ -92,9 +97,13 @@ export default function Simple() {
 							spacing={5}
 							display={{ base: 'none', md: 'flex' }}
 						>
-							{adminLinks.map((name, path) => (
-								<NavLink key={path}>{name}</NavLink>
-							))}
+							{userData?.isAdmin
+								? adminLinks.map((name, path) => (
+										<NavLink key={path}>{name}</NavLink>
+								  ))
+								: userLinks.map((name, path) => (
+										<NavLink key={path}>{name}</NavLink>
+								  ))}
 						</HStack>
 					</HStack>
 					<Flex alignItems={'center'}>
@@ -135,7 +144,7 @@ export default function Simple() {
 								<MenuItem>Setting</MenuItem>
 								<MenuDivider />
 								{/* <MenuItem onClick={logout}>Verify Account</MenuItem> */}
-								<MenuItem onClick={logout}>Logout</MenuItem>
+								<MenuItem onClick={handleLogOut}>Logout</MenuItem>
 							</MenuList>
 						</Menu>
 					</Flex>
