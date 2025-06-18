@@ -4,6 +4,7 @@ import { create } from 'zustand';
 
 axios.defaults.withCredentials = true;
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+// console.log('this is backend', BACKEND_URL);
 
 export interface QuestionOption {
 	id: number;
@@ -131,7 +132,7 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		const params = new URLSearchParams(searchParams);
 		try {
 			const { data } = await axios.get(
-				BACKEND_URL + `api/quiz/get-all-quizzes?${params}`
+				BACKEND_URL + `/api/quiz/get-all-quizzes?${params}`
 			);
 
 			if (data.success) {
