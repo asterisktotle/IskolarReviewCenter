@@ -39,6 +39,7 @@ export interface QuizProfile {
 	passingScore?: number;
 	totalPoints: number;
 	questions: QuestionData[];
+	isPublished: boolean;
 }
 
 interface QuizStore {
@@ -49,6 +50,9 @@ interface QuizStore {
 	addQuestions: (question: QuestionData) => void;
 	removeQuestion: (questionId: number) => void;
 	updateQuestion: (questionId: number, updatedQuestion: QuestionData) => void;
+	fetchQuizParams: (searchParams?: {
+		[key: string]: string | boolean;
+	}) => Promise<QuizProfile | undefined>;
 }
 
 const QuizStore = create<QuizStore>((set, get) => ({
@@ -60,8 +64,15 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		passingScore: 0,
 		totalPoints: 0,
 		questions: [],
+		isPublished: false,
 	},
-	setQuizProfile: (quizProfile) => set({ quizProfile }),
+	setQuizProfile: (updates) =>
+		set((state) => ({
+			quizProfile: {
+				...state.quizProfile,
+				...updates,
+			},
+		})),
 	questions: [],
 	setQuestions: (questions) => set({ questions }),
 	//Add new question
@@ -117,6 +128,7 @@ const QuizStore = create<QuizStore>((set, get) => ({
 				totalPoints: quizProfile.totalPoints,
 				passingScore: quizProfile.passingScore,
 				timeLimit: quizProfile.timeLimit,
+				isPublished: quizProfile.isPublished,
 			});
 
 			if (data.success) {
@@ -129,7 +141,12 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		}
 	},
 	fetchQuizParams: async (searchParams = {}) => {
-		const params = new URLSearchParams(searchParams);
+		const stringParams: { [key: string]: string } = {};
+		for (const key in searchParams) {
+			stringParams[key] = String(searchParams[key]);
+		}
+
+		const params = new URLSearchParams(stringParams);
 		try {
 			const { data } = await axios.get(
 				BACKEND_URL + `/api/quiz/get-all-quizzes?${params}`

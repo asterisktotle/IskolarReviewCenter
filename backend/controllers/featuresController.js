@@ -208,6 +208,7 @@ export const createQuiz = async (req, res) => {
 		totalPoints,
 		passingScore,
 		timeLimit,
+		isPublished,
 	} = req.body;
 
 	if (!title || !subject || !questions || !category) {
@@ -230,6 +231,7 @@ export const createQuiz = async (req, res) => {
 			totalPoints: totalPoints || 0,
 			passingScore: passingScore || 70,
 			timeLimit: timeLimit || 0, //minutes
+			isPublished,
 		});
 
 		await quiz.save();
@@ -428,6 +430,7 @@ export const updateQuiz = async (req, res) => {
 		// UPDATE QUIZ FIELDS
 		if (updates.title) quiz.title = updates.title;
 		if (updates.subject) quiz.subject = updates.subject;
+		if (updates.isPublished) quiz.isPublished = updates.isPublished;
 		if (updates.timeLimit !== undefined) quiz.timeLimit = updates.timeLimit;
 		if (updates.passingScore !== undefined)
 			quiz.passingScore = updates.passingScore;
@@ -489,29 +492,31 @@ export const updateQuiz = async (req, res) => {
 	}
 };
 
-export const parseQuestionsFromFile = async (req, res) => {
-	try {
-		// Path to your questions file - using absolute path
-		const filePath = path.join(
-			process.cwd(),
-			'..',
-			'pdf_extractor',
-			'MESL_ELEMENTS_9_questions.txt'
-		);
+// TODO: use the utils function for pdf text extraction
 
-		// Read the file
-		const text = fs.readFileSync(filePath, 'utf-8');
+// export const parseQuestionsFromFile = async (req, res) => {
+// 	try {
+// 		// Path to your questions file - using absolute path
+// 		const filePath = path.join(
+// 			process.cwd(),
+// 			'..',
+// 			'pdf_extractor',
+// 			'MESL_ELEMENTS_9_questions.txt'
+// 		);
 
-		// Parse the questions
-		const questions = parseQuestionsFromText(text);
+// 		// Read the file
+// 		const text = fs.readFileSync(filePath, 'utf-8');
 
-		return res.json({
-			success: true,
-			message: 'Questions parsed successfully',
-			questions,
-		});
-	} catch (err) {
-		console.error('Error reading file:', err);
-		return res.json({ success: false, message: err.message });
-	}
-};
+// 		// Parse the questions
+// 		const questions = parseQuestionsFromText(text);
+
+// 		return res.json({
+// 			success: true,
+// 			message: 'Questions parsed successfully',
+// 			questions,
+// 		});
+// 	} catch (err) {
+// 		console.error('Error reading file:', err);
+// 		return res.json({ success: false, message: err.message });
+// 	}
+// };
