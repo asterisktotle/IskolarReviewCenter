@@ -14,18 +14,34 @@ import {
 	HStack,
 	Button,
 	Flex,
+	Icon,
 	IconButton,
 	NumberInput,
 	NumberInputField,
+	Tabs,
+	TabList,
+	TabPanels,
+	Tab,
+	TabPanel,
+	Box,
+	Text,
+	Divider,
+	Badge,
+	Card,
+	CardHeader,
+	CardBody,
+	Heading,
+	useColorModeValue,
 } from '@chakra-ui/react';
-import { AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
+import { AddIcon, CloseIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { MdPlayArrow } from 'react-icons/md';
 import { useEffect, useState } from 'react';
 import useQuestionMaker, { QuestionOption } from '../../hooks/useQuestionMaker';
 import { QuestionData } from '../../hooks/useQuestionMaker';
 import QuizStore from '../../store/quizStore';
-
 import parseOptions from '../../utils/parserOptions';
 import convertQuestionType from '../../utils/converQuestionType';
+import PlayQuiz from '../../components/PlayQuiz';
 
 const AdminTests = () => {
 	const {
@@ -37,7 +53,14 @@ const AdminTests = () => {
 		setQuizProfile,
 	} = useQuestionMaker();
 
-	//DONE
+	const { fetchQuizParams } = QuizStore();
+	const [fetchedQuestions, setFetchedQuestions] = useState([]);
+	const [tabIndex, setTabIndex] = useState(0);
+
+	// Color mode values
+	const cardBg = useColorModeValue('white', 'gray.800');
+	const borderColor = useColorModeValue('gray.200', 'gray.600');
+
 	const handleChangeQuizProfile = (field: string, value: string) => {
 		setQuizProfile({
 			...quizProfile,
@@ -45,7 +68,6 @@ const AdminTests = () => {
 		});
 	};
 
-	//DONE
 	const handleUpdateOptions = (
 		questionId: number,
 		optionId: number,
@@ -66,9 +88,7 @@ const AdminTests = () => {
 
 		if (updatedOption.match(/[\n\r]+/)) {
 			formattedOptions = parseOptions(updatedOption);
-			console.log('it detects line break: ', formattedOptions);
 		} else {
-			console.log("it doesn't detect line break: ", formattedOptions);
 			formattedOptions = currentQuestion.options.map((option) =>
 				option.id === optionId ? { ...option, text: updatedOption } : option
 			);
@@ -81,7 +101,6 @@ const AdminTests = () => {
 		updateQuestion(questionId, updatedQuestion);
 	};
 
-	//DONE
 	const handleUpdateShortAnswer = (
 		questionId: number,
 		shortAnswerValue: string
@@ -103,7 +122,7 @@ const AdminTests = () => {
 
 		updateQuestion(questionId, updatedQuestion);
 	};
-	//DONE
+
 	const handleQuestionType = (
 		questionId: number,
 		questionType: 'multiple-choice' | 'short-answer'
@@ -115,16 +134,15 @@ const AdminTests = () => {
 		}
 
 		const updatedQuestion = convertQuestionType(currentQuestion, questionType);
-
 		updateQuestion(questionId, updatedQuestion);
 	};
-	// DONE
+
 	const handleAddQuestionButton = () => {
 		const baseQuestion: QuestionData = {
 			id: Date.now(),
 			questionText: 'Untitled question',
-			type: 'multiple-choice', // or 'short-answer'
-			options: [{ text: `Option 1`, isCorrect: true, id: 1 }], // required if type is 'multiple-choice'
+			type: 'multiple-choice',
+			options: [{ text: `Option 1`, isCorrect: true, id: 1 }],
 			points: 1,
 		};
 
@@ -139,7 +157,6 @@ const AdminTests = () => {
 		}
 	};
 
-	// DONE
 	const handleAddOption = (questionId: number) => {
 		const currentQuestion = questions.find((q) => q.id === questionId);
 		if (!currentQuestion) {
@@ -223,247 +240,371 @@ const AdminTests = () => {
 		updateQuestion(questionId, updatedQuestion);
 	};
 
-	// Creates default quiz form
 	useEffect(() => {
-		if (questions.length === 0) {
-			const defaultQuizForm: QuestionData = {
-				id: Date.now(),
-				questionText: 'Untitled question',
-				type: 'multiple-choice',
-				options: [
-					{ id: 1, text: 'Option 1', isCorrect: true },
-					{ id: 2, text: 'Option 2', isCorrect: false },
-				],
-				points: 1,
-			};
+		const getQuiz = async () => {
+			try {
+				const quiz = await fetchQuizParams({ title: 'Test Quiz' });
 
-			addQuestion(defaultQuizForm);
-		}
-	}, []);
+				if (quiz) {
+					const quizItems = quiz.questions;
+					setFetchedQuestions(quizItems);
+				} else {
+					console.log('Quiz failed to fetch');
+				}
+			} catch (error) {
+				console.error('Error fetching quiz:', error);
+			}
+		};
+		getQuiz();
+	}, [fetchQuizParams]);
 
-	// DEBUGGER, REMOVE THIS BEFORE SHIPPING
-	// useEffect(() => {
-	// 	questions.map((quest) => {
-	// 		console.log('correct answer', quest.correctAnswer);
-	// 		console.log('options', quest.options);
-	// 	});
-	// }, [questions]);
-
-	useEffect(() => {}, []);
-	const QuestionFormat = (question: QuestionData) => {
+	const QuestionEditor = (question: QuestionData) => {
 		return (
-			<form key={question.id} style={{ marginBottom: '20px', width: '100%' }}>
-				{/* Select Test Categories */}
-				<HStack spacing={1}>
-					{' '}
-					{/* spacing is the gap */}
-					<FormControl w={'150%'}>
-						<Input border="none" borderBottom="1px" />
-					</FormControl>
-					<FormControl>
-						<Select
-							value={question.type}
-							onChange={(e) => handleQuestionType(question.id, e.target.value)}
-							bg="gray.100"
-							color="black"
-						>
-							{/* THIS ONE IS HARDCODED */}
-							<option style={{ color: 'black' }} value={'multiple-choice'}>
-								Multiple choices
-							</option>
-							<option style={{ color: 'black' }} value={'short-answer'}>
-								Short answer
-							</option>
-						</Select>
-					</FormControl>
-					<Button
-						onClick={() => handleRemoveQuestion(question.id)}
-						leftIcon={<DeleteIcon />}
-						iconSpacing={'-0.5'}
-						w={{ base: 'auto', md: '5rem' }}
-					/>
-					<Button
-						onClick={handleAddQuestionButton}
-						leftIcon={<AddIcon />}
-						iconSpacing={'-0.5'}
-						w={{ base: 'auto', md: '5rem' }}
-					/>
-				</HStack>
-
-				<FormControl as={'fieldset'}>
-					{/* Multiple choice */}
-					{question.type === 'multiple-choice' && (
-						<RadioGroup>
-							<Stack direction={'column'} spacing={4}>
-								{question.options?.map((choice, index) => (
-									<Flex key={index} alignItems={'center'}>
-										<Radio
-											value={choice.id.toString()}
-											isChecked={choice.isCorrect}
-											onChange={() =>
-												handleCorrectOption(question.id, choice.id)
-											}
-										/>
-
-										<Input
-											value={choice.text}
-											onChange={(e) =>
-												handleUpdateOptions(
-													question.id,
-													choice.id,
-													e.target.value
-												)
-											}
-											onPaste={(e) => {
-												// Prevent default to stop the normal paste behavior
-												e.preventDefault();
-
-												// Get pasted text from clipboard
-												const pastedText = e.clipboardData.getData('text');
-
-												// Check if pasted text contains line breaks
-												if (pastedText.match(/[\n\r]+/)) {
-													// Handle multi-line paste
-													handleUpdateOptions(
-														question.id,
-														choice.id,
-														pastedText
-													);
-												} else {
-													// Normal single-line paste, update just this field
-													handleUpdateOptions(
-														question.id,
-														choice.id,
-														pastedText
-													);
-												}
-											}}
-											placeholder="Enter option text"
-											mr={2}
-											// ...rest of your styling props
-										/>
-										<IconButton
-											size="sm"
-											ml={2}
-											icon={<CloseIcon />}
-											aria-label="Remove option"
-											onClick={() =>
-												handleRemoveChoices(question.id, choice.id)
-											}
-										/>
-									</Flex>
-								))}
+			<Card key={question.id} mb={4} bg={cardBg} borderColor={borderColor}>
+				<CardBody>
+					<VStack spacing={4} align="stretch">
+						{/* Question Header */}
+						<HStack justify="space-between">
+							<Badge colorScheme="blue" px={2} py={1}>
+								Question {questions.indexOf(question) + 1}
+							</Badge>
+							<HStack spacing={2}>
+								<Select
+									value={question.type}
+									onChange={(e) =>
+										handleQuestionType(question.id, e.target.value)
+									}
+									size="sm"
+									maxW="200px"
+								>
+									<option value={'multiple-choice'}>Multiple Choice</option>
+									<option value={'short-answer'}>Short Answer</option>
+								</Select>
 								<IconButton
 									size="sm"
-									ml={'auto'}
-									icon={<AddIcon />}
-									aria-label="Add Option"
-									onClick={() => handleAddOption(question.id)}
+									colorScheme="red"
+									onClick={() => handleRemoveQuestion(question.id)}
+									icon={<DeleteIcon />}
+									aria-label="Delete question"
 								/>
-							</Stack>
-						</RadioGroup>
-					)}
-					{question.type === 'short-answer' && (
-						<Input
-							onChange={(e) => {
-								handleUpdateShortAnswer(question.id, e.target.value);
-							}}
-							placeholder="Answer"
-						/>
-					)}
-				</FormControl>
-			</form>
+							</HStack>
+						</HStack>
+
+						{/* Question Text */}
+						<FormControl>
+							<FormLabel fontSize="sm" fontWeight="medium">
+								Question Text
+							</FormLabel>
+							<Editable
+								defaultValue={question.questionText}
+								onSubmit={(value) =>
+									updateQuestion(question.id, {
+										...question,
+										questionText: value,
+									})
+								}
+							>
+								<EditablePreview
+									p={3}
+									borderRadius="md"
+									border="1px"
+									borderColor={borderColor}
+									minH="40px"
+									_hover={{ bg: 'gray.50' }}
+								/>
+								<EditableInput p={3} />
+							</Editable>
+						</FormControl>
+
+						{/* Question Options */}
+						{question.type === 'multiple-choice' ? (
+							<FormControl>
+								<HStack justify="space-between" mb={2}>
+									<FormLabel fontSize="sm" fontWeight="medium" mb={0}>
+										Answer Options
+									</FormLabel>
+									<Button
+										size="sm"
+										leftIcon={<AddIcon />}
+										onClick={() => handleAddOption(question.id)}
+										colorScheme="green"
+									>
+										Add Option
+									</Button>
+								</HStack>
+								<VStack spacing={2} align="stretch">
+									{question.options?.map((choice, index) => (
+										<HStack key={choice.id} spacing={2}>
+											<Radio
+												isChecked={choice.isCorrect}
+												onChange={() =>
+													handleCorrectOption(question.id, choice.id)
+												}
+												colorScheme="green"
+											/>
+											<Input
+												value={choice.text}
+												onChange={(e) =>
+													handleUpdateOptions(
+														question.id,
+														choice.id,
+														e.target.value
+													)
+												}
+												placeholder={`Option ${index + 1}`}
+												size="sm"
+											/>
+											<IconButton
+												size="sm"
+												colorScheme="red"
+												variant="ghost"
+												icon={<CloseIcon />}
+												onClick={() =>
+													handleRemoveChoices(question.id, choice.id)
+												}
+												aria-label="Remove option"
+											/>
+										</HStack>
+									))}
+								</VStack>
+							</FormControl>
+						) : (
+							<FormControl>
+								<FormLabel fontSize="sm" fontWeight="medium">
+									Correct Answer
+								</FormLabel>
+								<Input
+									onChange={(e) =>
+										handleUpdateShortAnswer(question.id, e.target.value)
+									}
+									placeholder="Enter the correct answer"
+									size="sm"
+								/>
+							</FormControl>
+						)}
+
+						{/* Points */}
+						<FormControl maxW="100px">
+							<FormLabel fontSize="sm" fontWeight="medium">
+								Points
+							</FormLabel>
+							<NumberInput
+								size="sm"
+								defaultValue={question.points}
+								min={1}
+								onChange={(value) =>
+									updateQuestion(question.id, {
+										...question,
+										points: parseInt(value) || 1,
+									})
+								}
+							>
+								<NumberInputField />
+							</NumberInput>
+						</FormControl>
+					</VStack>
+				</CardBody>
+			</Card>
 		);
 	};
+
 	return (
-		<Container
-			flexDirection={'column'}
-			mb={'5'}
-			maxW={'full'}
-			p={5}
-			borderColor={'gray.500'}
-			borderRadius={'md'}
-			bgColor={'whiteAlpha.50'}
-			minH={'100vh'} // Add minimum height to ensure background extends
-			pb={'10'}
-		>
-			<form>
-				<VStack spacing="3">
-					<FormControl>
-						<Editable
-							defaultValue={quizProfile.title}
-							borderBottom={'1px'}
-							w={'full'}
-							onChange={(value) => handleChangeQuizProfile('title', value)}
-						>
-							<EditablePreview />
-							<EditableInput />
-						</Editable>
-					</FormControl>
+		<Container maxW="6xl" py={6}>
+			<VStack spacing={6} align="stretch">
+				{/* Header */}
+				<Box textAlign="center">
+					<Heading size="lg" mb={2}>
+						Quiz Administration
+					</Heading>
+					<Text color="gray.600">Create and manage your quizzes</Text>
+				</Box>
 
-					<FormControl as={'fieldset'}>
-						<FormLabel>Subject</FormLabel>
-						<RadioGroup
-							onChange={(value) => handleChangeQuizProfile('subject', value)}
-							defaultValue="mesl"
-						>
-							<Stack direction={'row'} spacing={4}>
-								<Radio value="mesl">MESL</Radio>
-								<Radio value="pipe">PIPE</Radio>
-								<Radio value="mdsp">MDSP</Radio>
-							</Stack>
-						</RadioGroup>
-					</FormControl>
+				{/* Tabs */}
+				<Tabs index={tabIndex} onChange={setTabIndex} variant="enclosed">
+					<TabList>
+						<Tab>
+							<Flex align="center" gap={2}>
+								<EditIcon />
+								Create Quiz
+							</Flex>
+						</Tab>
+						<Tab>
+							<Flex align="center" gap={2}>
+								<Icon as={MdPlayArrow} />
+								Preview Quiz
+							</Flex>
+						</Tab>
+					</TabList>
 
-					<FormControl as={'fieldset'}>
-						<FormLabel>Test Category</FormLabel>
-						<RadioGroup
-							defaultValue="terms"
-							onChange={(value) => handleChangeQuizProfile('category', value)}
-						>
-							<Stack
-								direction={{ base: 'column', md: 'row' }}
-								spacing={{ base: 2, md: 4 }}
-							>
-								<Radio value="terms">Terms</Radio>
-								<Radio value="weekly-test">Weekly Exam</Radio>
-								<Radio value="take-home-test">Take Home Exam</Radio>
-								<Radio value="pre-board-exam">Pre-board Exam</Radio>
-							</Stack>
-						</RadioGroup>
-					</FormControl>
-					<FormControl as={'fieldset'}>
-						<FormLabel>Time Limit (minutes)</FormLabel>
-						<NumberInput
-							onChange={(value) => handleChangeQuizProfile('timeLimit', value)}
-						>
-							<NumberInputField
-								placeholder="0"
-								defaultValue={0}
-								w={'fit-content'}
-							/>
-						</NumberInput>
-					</FormControl>
-					<Button>Publish</Button>
-				</VStack>
-			</form>
+					<TabPanels>
+						{/* Create Quiz Tab */}
+						<TabPanel px={0}>
+							<VStack spacing={6} align="stretch">
+								{/* Quiz Settings */}
+								<Card bg={cardBg} borderColor={borderColor}>
+									<CardHeader>
+										<Heading size="md">Quiz Settings</Heading>
+									</CardHeader>
+									<CardBody>
+										<VStack spacing={4} align="stretch">
+											<FormControl>
+												<FormLabel>Quiz Title</FormLabel>
+												<Editable
+													defaultValue={quizProfile.title}
+													onChange={(value) =>
+														handleChangeQuizProfile('title', value)
+													}
+												>
+													<EditablePreview
+														p={3}
+														borderRadius="md"
+														border="1px"
+														borderColor={borderColor}
+													/>
+													<EditableInput p={3} />
+												</Editable>
+											</FormControl>
 
-			<br />
-			{questions.length === 0 && (
-				<Button
-					onClick={handleAddQuestionButton}
-					leftIcon={<AddIcon />}
-					iconSpacing="2"
-					px={{ base: 4, md: 6 }}
-					minW={{ base: 'auto', md: '8rem' }}
-					size="md"
-				>
-					Add Question
-				</Button>
-			)}
+											<HStack spacing={4} align="start">
+												<FormControl>
+													<FormLabel>Subject</FormLabel>
+													<RadioGroup
+														onChange={(value) =>
+															handleChangeQuizProfile('subject', value)
+														}
+														defaultValue="mesl"
+													>
+														<Stack direction="row" spacing={4}>
+															<Radio value="mesl">MESL</Radio>
+															<Radio value="pipe">PIPE</Radio>
+															<Radio value="mdsp">MDSP</Radio>
+														</Stack>
+													</RadioGroup>
+												</FormControl>
 
-			<VStack spacing={4} width="100%" align="stretch" pb={8}>
-				{questions.map((q) => QuestionFormat(q))}
+												<FormControl>
+													<FormLabel>Time Limit (minutes)</FormLabel>
+													<NumberInput
+														onChange={(value) =>
+															handleChangeQuizProfile('timeLimit', value)
+														}
+														maxW="150px"
+													>
+														<NumberInputField
+															placeholder="0"
+															defaultValue={0}
+														/>
+													</NumberInput>
+												</FormControl>
+											</HStack>
+
+											<FormControl>
+												<FormLabel>Test Category</FormLabel>
+												<RadioGroup
+													defaultValue="terms"
+													onChange={(value) =>
+														handleChangeQuizProfile('category', value)
+													}
+												>
+													<Stack
+														direction={{ base: 'column', md: 'row' }}
+														spacing={4}
+													>
+														<Radio value="terms">Terms</Radio>
+														<Radio value="weekly-test">Weekly Exam</Radio>
+														<Radio value="take-home-test">Take Home Exam</Radio>
+														<Radio value="pre-board-exam">Pre-board Exam</Radio>
+													</Stack>
+												</RadioGroup>
+											</FormControl>
+
+											<HStack spacing={3}>
+												<Button colorScheme="blue">Save Draft</Button>
+												<Button colorScheme="green">Publish Quiz</Button>
+												<Button variant="outline">Scan PDF</Button>
+											</HStack>
+										</VStack>
+									</CardBody>
+								</Card>
+
+								<Divider />
+
+								{/* Questions Section */}
+								<Box>
+									<HStack justify="space-between" mb={4}>
+										<Heading size="md">Questions</Heading>
+										<Button
+											leftIcon={<AddIcon />}
+											onClick={handleAddQuestionButton}
+											colorScheme="blue"
+										>
+											Add Question
+										</Button>
+									</HStack>
+
+									{questions.length === 0 ? (
+										<Card bg={cardBg} borderColor={borderColor}>
+											<CardBody textAlign="center" py={10}>
+												<Text color="gray.500" mb={4}>
+													No questions added yet
+												</Text>
+												<Button
+													leftIcon={<AddIcon />}
+													onClick={handleAddQuestionButton}
+													colorScheme="blue"
+												>
+													Add Your First Question
+												</Button>
+											</CardBody>
+										</Card>
+									) : (
+										<VStack spacing={4} align="stretch">
+											{questions.map((q) => QuestionEditor(q))}
+										</VStack>
+									)}
+								</Box>
+							</VStack>
+						</TabPanel>
+
+						{/* Preview Quiz Tab */}
+						<TabPanel px={0}>
+							<VStack spacing={6} align="stretch">
+								<Box textAlign="center">
+									<Heading size="md" mb={2}>
+										Quiz Preview
+									</Heading>
+									<Text color="gray.600">
+										See how your quiz will look to students
+									</Text>
+								</Box>
+
+								{fetchedQuestions && fetchedQuestions.length > 0 ? (
+									<VStack spacing={6} align="stretch">
+										{fetchedQuestions.map((item, index) => (
+											<PlayQuiz
+												key={item._id}
+												question={item}
+												questionNumber={index + 1}
+												totalQuestions={fetchedQuestions.length}
+											/>
+										))}
+									</VStack>
+								) : (
+									<Card bg={cardBg} borderColor={borderColor}>
+										<CardBody textAlign="center" py={10}>
+											<Text color="gray.500" mb={4}>
+												No quiz available for preview
+											</Text>
+											<Button onClick={() => setTabIndex(0)} colorScheme="blue">
+												Create Questions First
+											</Button>
+										</CardBody>
+									</Card>
+								)}
+							</VStack>
+						</TabPanel>
+					</TabPanels>
+				</Tabs>
 			</VStack>
 		</Container>
 	);

@@ -12,7 +12,7 @@ import {
 } from '../controllers/featuresController.js';
 
 const quizRouter = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
+// const upload = multer({ storage: multer.memoryStorage() });
 
 quizRouter.post('/create-quiz', userAuth, createQuiz); // deleted userauth
 quizRouter.post('/submit-quiz', submitAndEvaluateQuiz);

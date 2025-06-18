@@ -178,23 +178,20 @@ const AdminLectures = () => {
 							<Th>Subject</Th>
 							<Th>Category</Th>
 							<Th>Title</Th>
-							<Th>File</Th>
 						</Tr>
 					</Thead>
 					<Tbody>
 						{pdfList &&
 							pdfList.map((pdf) => (
-								<Tr key={pdf.fileId}>
+								<Tr
+									key={pdf.fileId}
+									_hover={{ bgColor: 'gray.600' }}
+									cursor={'pointer'}
+									onClick={() => handleViewPdf(pdf._id)}
+								>
 									<Td>{pdf.subject.toUpperCase()}</Td>
 									<Td>{pdf.category.toUpperCase()}</Td>
 									<Td>{pdf.title}</Td>
-									<Td
-										cursor={'pointer'}
-										_hover={{ color: 'blue.500' }}
-										onClick={() => handleViewPdf(pdf._id)}
-									>
-										View
-									</Td>
 								</Tr>
 							))}
 						{messageError && <p>{messageError}</p>}

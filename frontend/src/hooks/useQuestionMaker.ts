@@ -77,13 +77,6 @@ const useQuestionMaker = (initialQuestions = []) => {
 		});
 	};
 
-	// const publishQuiz = (profile) ==> {
-	// 	const quizData = {
-	// 		title: ,
-	// 		subject: ,
-	// 	}
-	// }
-
 	return {
 		questions,
 		addQuestion,
