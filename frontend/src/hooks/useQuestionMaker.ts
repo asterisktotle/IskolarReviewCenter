@@ -34,6 +34,7 @@ const useQuestionMaker = (initialQuestions = []) => {
 		timeLimit: 0,
 		passingScore: 0,
 		totalPoints: 0,
+		isPublished: false,
 	});
 
 	// Add new question of the current type

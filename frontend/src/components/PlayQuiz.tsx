@@ -32,7 +32,7 @@ const PlayQuiz = ({ question, questionNumber, totalQuestions }) => {
 					>
 						Question {questionNumber} of {totalQuestions}
 					</Badge>
-					<Text fontSize="sm" color="gray.500" fontWeight="medium">
+					<Text fontSize="sm" color="gray.300" fontWeight="medium">
 						{question.points} {question.points === 1 ? 'point' : 'points'}
 					</Text>
 				</HStack>
@@ -49,7 +49,7 @@ const PlayQuiz = ({ question, questionNumber, totalQuestions }) => {
 						{question.type === 'multiple-choice' ? (
 							<RadioGroup value={selectedAnswer} onChange={setSelectedAnswer}>
 								<VStack spacing={3} align="stretch">
-									{question.options?.map((choice, index) => {
+									{question.options?.map((choice) => {
 										const isSelected = selectedAnswer === choice.id.toString();
 
 										return (

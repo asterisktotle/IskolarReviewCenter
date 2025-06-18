@@ -45,27 +45,32 @@ import PlayQuiz from '../../components/PlayQuiz';
 
 const AdminTests = () => {
 	const {
-		addQuestion,
+		fetchQuizParams,
 		questions,
-		removeQuestion,
-		updateQuestion,
+		setQuestions,
 		quizProfile,
 		setQuizProfile,
-	} = useQuestionMaker();
-
-	const { fetchQuizParams } = QuizStore();
+		removeQuestion,
+		updateQuestion,
+		addQuestions,
+	} = QuizStore();
 	const [fetchedQuestions, setFetchedQuestions] = useState([]);
 	const [tabIndex, setTabIndex] = useState(0);
+	const [published, setPublished] = useState<boolean>(false);
 
 	// Color mode values
 	const cardBg = useColorModeValue('white', 'gray.800');
 	const borderColor = useColorModeValue('gray.200', 'gray.600');
 
-	const handleChangeQuizProfile = (field: string, value: string) => {
+	const handleChangeQuizProfile = (field: string, value: string | boolean) => {
 		setQuizProfile({
 			...quizProfile,
 			[field]: value,
 		});
+	};
+
+	const handleSaveQuiz = () => {
+		console.log('Quiz saved');
 	};
 
 	const handleUpdateOptions = (
@@ -146,7 +151,7 @@ const AdminTests = () => {
 			points: 1,
 		};
 
-		addQuestion(baseQuestion);
+		addQuestions(baseQuestion);
 	};
 
 	const handleRemoveQuestion = (questionId: number) => {
@@ -332,41 +337,59 @@ const AdminTests = () => {
 										Add Option
 									</Button>
 								</HStack>
-								<VStack spacing={2} align="stretch">
-									{question.options?.map((choice, index) => (
-										<HStack key={choice.id} spacing={2}>
-											<Radio
-												isChecked={choice.isCorrect}
-												onChange={() =>
-													handleCorrectOption(question.id, choice.id)
-												}
-												colorScheme="green"
-											/>
-											<Input
-												value={choice.text}
-												onChange={(e) =>
-													handleUpdateOptions(
-														question.id,
-														choice.id,
-														e.target.value
-													)
-												}
-												placeholder={`Option ${index + 1}`}
-												size="sm"
-											/>
-											<IconButton
-												size="sm"
-												colorScheme="red"
-												variant="ghost"
-												icon={<CloseIcon />}
-												onClick={() =>
-													handleRemoveChoices(question.id, choice.id)
-												}
-												aria-label="Remove option"
-											/>
-										</HStack>
-									))}
-								</VStack>
+
+								<RadioGroup
+									value={
+										question.options
+											.find((opt) => opt.isCorrect)
+											?.id.toString() || ''
+									}
+									onChange={(value) =>
+										handleCorrectOption(question.id, Number(value))
+									}
+								>
+									<VStack spacing={2} align="stretch">
+										{question.options?.map((choice, index) => (
+											<HStack key={choice.id} spacing={2}>
+												<Radio
+													value={choice.id.toString()}
+													colorScheme="green"
+												/>
+												<Input
+													value={choice.text}
+													onChange={(e) =>
+														handleUpdateOptions(
+															question.id,
+															choice.id,
+															e.target.value
+														)
+													}
+													placeholder={`Option ${index + 1}`}
+													size="sm"
+													onPaste={(e) => {
+														e.preventDefault();
+														const pastedText = e.clipboardData.getData('text');
+														handleUpdateOptions(
+															question.id,
+															choice.id,
+															pastedText
+														);
+													}}
+												/>
+												<IconButton
+													size="sm"
+													colorScheme="red"
+													variant="ghost"
+													icon={<CloseIcon />}
+													onClick={() =>
+														handleRemoveChoices(question.id, choice.id)
+													}
+													aria-label="Remove option"
+												/>
+											</HStack>
+										))}
+									</VStack>
+								</RadioGroup>
 							</FormControl>
 						) : (
 							<FormControl>
@@ -465,7 +488,11 @@ const AdminTests = () => {
 												</Editable>
 											</FormControl>
 
-											<HStack spacing={4} align="start">
+											<Stack
+												direction={{ base: 'column', md: 'row' }}
+												spacing={4}
+												align="start"
+											>
 												<FormControl>
 													<FormLabel>Subject</FormLabel>
 													<RadioGroup
@@ -496,7 +523,7 @@ const AdminTests = () => {
 														/>
 													</NumberInput>
 												</FormControl>
-											</HStack>
+											</Stack>
 
 											<FormControl>
 												<FormLabel>Test Category</FormLabel>
@@ -519,8 +546,26 @@ const AdminTests = () => {
 											</FormControl>
 
 											<HStack spacing={3}>
-												<Button colorScheme="blue">Save Draft</Button>
-												<Button colorScheme="green">Publish Quiz</Button>
+												<Button
+													onClick={handleSaveQuiz}
+													backgroundColor={'orange.500'}
+												>
+													Save Quiz
+												</Button>
+												<Button backgroundColor={'red.500'}>Delete Quiz</Button>
+												<Button
+													onClick={() => {
+														setPublished((prev) => !prev);
+														handleChangeQuizProfile('isPublished', published);
+														console.log(
+															'published profile',
+															quizProfile.isPublished
+														);
+													}}
+													backgroundColor={published ? 'green' : 'gray.500'}
+												>
+													{published ? 'Published' : 'Draft'}
+												</Button>
 												<Button variant="outline">Scan PDF</Button>
 											</HStack>
 										</VStack>
@@ -573,7 +618,7 @@ const AdminTests = () => {
 									<Heading size="md" mb={2}>
 										Quiz Preview
 									</Heading>
-									<Text color="gray.600">
+									<Text color="gray.200">
 										See how your quiz will look to students
 									</Text>
 								</Box>

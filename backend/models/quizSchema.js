@@ -82,6 +82,10 @@ const QuizSchema = new Schema(
 			type: Number,
 			default: 0, // in minutes
 		},
+		isPublished: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	{ timestamps: true }
 );
