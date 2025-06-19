@@ -46,6 +46,7 @@ interface AdminStore {
 	setCategory: (category: string) => void;
 	setSubject: (subject: string) => void;
 	uploadPdfFile: () => Promise<any>;
+	deletePdfFile: (id: string) => Promise<any>;
 }
 
 const AdminStore = create<AdminStore>((set, get) => ({
@@ -152,7 +153,8 @@ const AdminStore = create<AdminStore>((set, get) => ({
 		}
 	},
 
-	deletePdfFile: async (id) => {
+	deletePdfFile: async (id: string) => {
+		const { getAllPdf } = get();
 		try {
 			set({ loading: true });
 
@@ -163,6 +165,9 @@ const AdminStore = create<AdminStore>((set, get) => ({
 			if (!result.data.success) {
 				console.error(result.data.message);
 			}
+			// console.log('file deleted');
+			getAllPdf();
+			return result;
 		} catch (err) {
 			console.error('Upload error: ', err);
 			throw err;

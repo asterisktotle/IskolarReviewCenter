@@ -145,6 +145,9 @@ const AdminLectures = () => {
 	const navigate = useNavigate();
 	const [openUploadForm, setOpenUploadForm] = useState(false);
 	const { getAllPdf, pdfList, messageError, loading } = AdminStore();
+	const toast = useToast();
+
+	const { deletePdfFile } = AdminStore();
 
 	useEffect(() => {
 		getAllPdf();
@@ -152,6 +155,16 @@ const AdminLectures = () => {
 
 	const handleViewPdf = (pdfId: string) => {
 		navigate(`/view-pdf/${pdfId}`);
+	};
+
+	const handleDelete = (id: string) => {
+		toast.promise(deletePdfFile(id), {
+			success: { title: 'File deleted' },
+			error: {
+				title: 'File failed to delete',
+			},
+			loading: { title: 'Deleting file' },
+		});
 	};
 
 	return (
@@ -195,11 +208,7 @@ const AdminLectures = () => {
 									<Td onClick={() => handleViewPdf(pdf._id)}>{pdf.title}</Td>
 									<Td>
 										<Button>Edit</Button>
-										<Button
-											onClick={() =>
-												console.log('pdf title to be deleted: ', pdf._id)
-											}
-										>
+										<Button onClick={() => handleDelete(pdf._id)}>
 											Delete
 										</Button>
 									</Td>
