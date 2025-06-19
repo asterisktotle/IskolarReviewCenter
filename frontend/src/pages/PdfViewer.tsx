@@ -26,7 +26,7 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState, useCallback } from 'react';
 import { pdfjs, Document, Page } from 'react-pdf';
-import usePdfViewer from '../hooks/usePdfViewer.ts';
+// import usePdfViewer from '../hooks/usePdfViewer.ts';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import {
@@ -60,7 +60,7 @@ const ViewPdf = () => {
 	const buttonSize = useBreakpointValue({ base: 'sm', md: 'md' });
 	const iconSize = useBreakpointValue({ base: 4, md: 5 });
 
-	const { setSelectedPdf, pdfUrl, errorMessage, loading } = usePdfViewer();
+	// const { setSelectedPdf, pdfUrl, errorMessage, loading } = usePdfViewer();
 
 	useEffect(() => {
 		if (!pdfId) {

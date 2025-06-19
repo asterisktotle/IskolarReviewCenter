@@ -7,7 +7,7 @@ import {
 	findPdfByTitle,
 	getAllPdf,
 	uploadPdf,
-} from '../controllers/featuresController.js';
+} from '../controllers/pdfController.js';
 
 const pdfRoute = express.Router();
 

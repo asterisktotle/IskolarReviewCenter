@@ -9,7 +9,7 @@ import {
 	deleteQuiz,
 	updateQuiz,
 	// parseQuestionsFromFile,
-} from '../controllers/featuresController.js';
+} from '../controllers/quizController.js';
 
 const quizRouter = express.Router();
 // const upload = multer({ storage: multer.memoryStorage() });

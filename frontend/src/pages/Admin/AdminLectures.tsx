@@ -101,6 +101,7 @@ const UploadPdf = () => {
 							placeholder="Enter File Name"
 							required
 							onChange={(e) => setTitle(e.target.value)}
+							value={title}
 						/>
 						<FormErrorMessage>Please enter a title</FormErrorMessage>
 					</FormControl>
@@ -178,20 +179,30 @@ const AdminLectures = () => {
 							<Th>Subject</Th>
 							<Th>Category</Th>
 							<Th>Title</Th>
+							<Th>Options</Th>
 						</Tr>
 					</Thead>
 					<Tbody>
 						{pdfList &&
 							pdfList.map((pdf) => (
 								<Tr
-									key={pdf.fileId}
+									key={pdf._id}
 									_hover={{ bgColor: 'gray.600' }}
 									cursor={'pointer'}
-									onClick={() => handleViewPdf(pdf._id)}
 								>
 									<Td>{pdf.subject.toUpperCase()}</Td>
 									<Td>{pdf.category.toUpperCase()}</Td>
-									<Td>{pdf.title}</Td>
+									<Td onClick={() => handleViewPdf(pdf._id)}>{pdf.title}</Td>
+									<Td>
+										<Button>Edit</Button>
+										<Button
+											onClick={() =>
+												console.log('pdf title to be deleted: ', pdf._id)
+											}
+										>
+											Delete
+										</Button>
+									</Td>
 								</Tr>
 							))}
 						{messageError && <p>{messageError}</p>}

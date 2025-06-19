@@ -13,7 +13,6 @@ interface UserData {
 
 interface PdfFiles {
 	_id: string;
-	fileId: string;
 	subject: string;
 	category: string;
 	title: string;
@@ -135,28 +134,42 @@ const AdminStore = create<AdminStore>((set, get) => ({
 		formData.append('subject', subject);
 		formData.append('category', category);
 
-		// Uploading PDF
 		try {
 			const result = await axios.post(
 				BACKEND_URL + '/api/pdf/pdf-lectures',
-				formData,
-				{
-					headers: {
-						'Content-Type': 'multipart/form-data',
-					},
-				}
+				formData
 			);
+
+			console.log('Status success: ', result.data.success);
 			resetForm();
-			set({ loading: false });
+
 			return result;
 		} catch (err) {
-			set({ loading: false });
 			console.error('Upload error: ', err);
 			throw err;
+		} finally {
+			set({ loading: false });
 		}
 	},
 
-	// Upload Function
+	deletePdfFile: async (id) => {
+		try {
+			set({ loading: true });
+
+			const result = await axios.delete(
+				BACKEND_URL + '/api/pdf/pdf-lectures/' + id
+			);
+
+			if (!result.data.success) {
+				console.error(result.data.message);
+			}
+		} catch (err) {
+			console.error('Upload error: ', err);
+			throw err;
+		} finally {
+			set({ loading: false });
+		}
+	},
 }));
 
 export default AdminStore;
