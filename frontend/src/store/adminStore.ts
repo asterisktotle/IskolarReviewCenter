@@ -119,7 +119,7 @@ const AdminStore = create<AdminStore>((set, get) => ({
 
 	// Prepare form data before submission
 	uploadPdfFile: async () => {
-		const { title, file, subject, category, resetForm } = get();
+		const { title, file, subject, category, resetForm, getAllPdf } = get();
 
 		// Validation check
 		if (!title || !file || !subject || !category) {
@@ -141,9 +141,8 @@ const AdminStore = create<AdminStore>((set, get) => ({
 				formData
 			);
 
-			console.log('Status success: ', result.data.success);
 			resetForm();
-
+			getAllPdf();
 			return result;
 		} catch (err) {
 			console.error('Upload error: ', err);
