@@ -43,6 +43,9 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 	import.meta.url
 ).toString();
 
+import usePdfViewer from '../hooks/usePdfViewer';
+
+
 const ViewPdf = () => {
 	const { pdfId } = useParams();
 	const navigate = useNavigate();
@@ -60,7 +63,7 @@ const ViewPdf = () => {
 	const buttonSize = useBreakpointValue({ base: 'sm', md: 'md' });
 	const iconSize = useBreakpointValue({ base: 4, md: 5 });
 
-	// const { setSelectedPdf, pdfUrl, errorMessage, loading } = usePdfViewer();
+	const { setSelectedPdf, pdfUrl, errorMessage, loading } = usePdfViewer();
 
 	useEffect(() => {
 		if (!pdfId) {
