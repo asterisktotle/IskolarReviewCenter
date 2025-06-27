@@ -45,7 +45,6 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 import usePdfViewer from '../hooks/usePdfViewer';
 
-
 const ViewPdf = () => {
 	const { pdfId } = useParams();
 	const navigate = useNavigate();
@@ -211,6 +210,7 @@ const ViewPdf = () => {
 						variant="ghost"
 						color="white"
 						_hover={{ bg: 'whiteAlpha.200' }}
+						aria-label="previous page"
 					/>
 				</Tooltip>
 
@@ -244,6 +244,7 @@ const ViewPdf = () => {
 						variant="ghost"
 						color="white"
 						_hover={{ bg: 'whiteAlpha.200' }}
+						aria-label="next page"
 					/>
 				</Tooltip>
 			</HStack>
