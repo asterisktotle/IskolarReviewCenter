@@ -1,8 +1,9 @@
 // PDF GET AND UPLOAD
 
+import { GetObjectCommand } from '@aws-sdk/client-s3';
 import pdfModel from '../models/pdfSchema.js';
-import deleteObject from '../utils/deleteObject.js';
-import putObject from '../utils/putObject.js';
+
+import { getObject, deleteObject, putObject } from '../utils/objectActions.js';
 
 export const uploadPdf = async (req, res) => {
 	try {
@@ -76,24 +77,15 @@ export const downloadPdfById = async (req, res) => {
 			return res.status(404).json({ success: false, message: 'PDF not found' });
 		}
 
-		// Get GridFS bucket
-		// const pdfBucket = getGridFSBucket();
+		// res.set('Content-Type', 'application/pdf');
+		// res.set('Content-Disposition', `inline; filename="${pdf.title}.pdf"`);
 
-		// Set content type and filename for download
-		res.set('Content-Type', 'application/pdf');
-		res.set('Content-Disposition', `inline; filename="${pdf.title}.pdf"`);
+		// const pdfData = await getObject(pdf.pdf);
 
-		// Stream the file from GridFS to the response
-		// const downloadStream = pdfBucket.openDownloadStream(pdf.fileId);
-
-		// downloadStream.on('error', (err) => {
-		// 	res
-		// 		.status(404)
-		// 		.json({ success: false, message: 'File not found in storage' });
-		// });
-
-		// Pipe the file to the response
-		// downloadStream.pipe(res);
+		return res.json({ success: true, data: pdf });
+		// if (pdfData) {
+		// 	return res.json({ success: true, message: 'pdt get', data: pdfData });
+		// }
 	} catch (err) {
 		console.error('Error downloading PDF:', err);
 		res.status(500).json({ success: false, message: err.message });
