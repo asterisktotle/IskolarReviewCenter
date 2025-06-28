@@ -18,7 +18,7 @@ const PlayQuiz = ({ question, questionNumber, totalQuestions }) => {
 	const [shortAnswer, setShortAnswer] = useState('');
 
 	return (
-		<Container maxW="2xl" py={6}>
+		<Container maxW="2xl" py={5}>
 			<VStack spacing={6} align="stretch">
 				{/* Question Header */}
 				<HStack justify="space-between" align="center">

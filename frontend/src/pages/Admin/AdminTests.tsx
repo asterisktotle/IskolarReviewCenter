@@ -32,31 +32,81 @@ import {
 	CardBody,
 	Heading,
 	useColorModeValue,
+	Center,
+	Spinner,
+	SimpleGrid
 } from '@chakra-ui/react';
 import { AddIcon, CloseIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
-import { MdPlayArrow } from 'react-icons/md';
-import { useEffect, useState } from 'react';
-import useQuestionMaker, { QuestionOption } from '../../hooks/useQuestionMaker';
+import { MdPlayArrow, MdFormatListBulleted, MdBook } from 'react-icons/md';
+import { useEffect, useMemo, useState } from 'react';
+import { QuestionOption } from '../../hooks/useQuestionMaker';
 import { QuestionData } from '../../hooks/useQuestionMaker';
 import QuizStore from '../../store/quizStore';
 import parseOptions from '../../utils/parserOptions';
 import convertQuestionType from '../../utils/converQuestionType';
 import PlayQuiz from '../../components/PlayQuiz';
+import QuizCard from '../../components/QuizList';
+
+const MeslQuizTab = ({ isLoading, quizzesFetch, subject }) => {
+  const meslQuizzes = useMemo(() => 
+    quizzesFetch.filter((quiz) => quiz.subject === subject), 
+    [quizzesFetch]
+  );
+
+  if (isLoading) {
+    return (
+      <TabPanel>
+        <Center h="200px">
+          <Spinner size="xl" color="blue.500" />
+        </Center>
+      </TabPanel>
+    );
+  }
+
+  return (
+    <TabPanel>
+      {meslQuizzes.length > 0 ? (
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+          {meslQuizzes.map((data) => (
+            <QuizCard key={data._id} quiz={data} />
+          ))}
+        </SimpleGrid>
+      ) : (
+        <Center h="300px">
+          <VStack spacing={4}>
+            <Icon as={MdBook} boxSize={16} color="gray.300" />
+            <Heading size="md" color="gray.500">
+              No {subject.toUpperCase()}  Quizzes
+            </Heading>
+            <Text color="gray.400" textAlign="center" maxW="300px">
+              There are currently no quizzes available for the {subject.toUpperCase()} subject. 
+              New quizzes will appear here when they're published.
+            </Text>
+          </VStack>
+        </Center>
+      )}
+    </TabPanel>
+  );
+};
 
 const AdminTests = () => {
 	const {
 		fetchQuizParams,
+		quizzesFetch,
 		questions,
-		setQuestions,
 		quizProfile,
 		setQuizProfile,
 		removeQuestion,
 		updateQuestion,
 		addQuestions,
+		publishQuiz, 
+		isLoading
 	} = QuizStore();
 	const [fetchedQuestions, setFetchedQuestions] = useState([]);
 	const [tabIndex, setTabIndex] = useState(0);
+	const [tabIndexQuizzes, setTabIndexQuizzes] = useState(0);
 	const [published, setPublished] = useState<boolean>(false);
+	
 
 	// Color mode values
 	const cardBg = useColorModeValue('white', 'gray.800');
@@ -69,8 +119,10 @@ const AdminTests = () => {
 		});
 	};
 
-	const handleSaveQuiz = () => {
-		console.log('Quiz saved');
+	const handleSaveQuiz = async () => {
+		publishQuiz()
+
+		//close the quiz
 	};
 
 	const handleUpdateOptions = (
@@ -177,7 +229,7 @@ const AdminTests = () => {
 
 		const newOption = {
 			id: optionLength + 1,
-			text: `Option ${optionLength + 1}`,
+			text: '',
 			isCorrect: false,
 		};
 
@@ -246,22 +298,30 @@ const AdminTests = () => {
 	};
 
 	useEffect(() => {
-		const getQuiz = async () => {
-			try {
-				const quiz = await fetchQuizParams({ title: 'Test Quiz' });
+		// const getQuiz = async () => {
+		// 	try {
+		// 		const quiz = await fetchQuizParams({ title: quizProfile.title });
 
-				if (quiz) {
-					const quizItems = quiz.questions;
-					setFetchedQuestions(quizItems);
-				} else {
-					console.log('Quiz failed to fetch');
-				}
-			} catch (error) {
-				console.error('Error fetching quiz:', error);
-			}
-		};
-		getQuiz();
-	}, [fetchQuizParams]);
+		// 		if (quiz) {
+		// 			const quizItems = quiz.questions;
+		// 			setFetchedQuestions(quizItems);
+		// 		} else {
+		// 			console.log('Quiz failed to fetch');
+		// 		}
+		// 	} catch (error) {
+		// 		console.error('Error fetching quiz:', error);
+		// 	}
+		// };
+		// getQuiz();
+		fetchQuizParams()
+		console.log('quiz fetch: ', quizzesFetch)
+		
+		
+	}, []);
+
+	
+
+
 
 	const QuestionEditor = (question: QuestionData) => {
 		return (
@@ -447,6 +507,12 @@ const AdminTests = () => {
 					<TabList>
 						<Tab>
 							<Flex align="center" gap={2}>
+								<Icon as={MdFormatListBulleted} />
+								Quizzes
+							</Flex>
+						</Tab>
+						<Tab>
+							<Flex align="center" gap={2}>
 								<EditIcon />
 								Create Quiz
 							</Flex>
@@ -460,6 +526,67 @@ const AdminTests = () => {
 					</TabList>
 
 					<TabPanels>
+						
+						{/*  Quizzes Tab */}
+						<TabPanel px={0}>
+							<VStack spacing={6} align="stretch">
+								
+							<Box>
+
+
+								<Tabs index={tabIndexQuizzes} onChange={setTabIndexQuizzes} variant={'soft-rounded'} >
+
+							
+									<TabList>
+										<Tab>
+											<Flex align="center" gap={2}>
+												MESL
+											</Flex>
+										</Tab>
+										<Tab>
+											<Flex align="center" gap={2}>
+												PIPE
+											</Flex>
+										</Tab>
+										<Tab>
+											<Flex align="center" gap={2}>
+												MDSP
+											</Flex>
+										</Tab>
+									</TabList>
+
+									<TabPanels>
+										{/* NOTES INSERT FETCHED DISPLAYED QUIZ HERE */}
+										{/* <TabPanel>
+											{!isLoading ? quizzesFetch.filter((quiz) => quiz.subject === 'mesl').map((data) => (
+												
+											<QuizCard key={data._id} quiz={data}/>
+												
+												
+											)) : <Box>Loading...</Box>}
+
+
+										</TabPanel> */}
+										<MeslQuizTab quizzesFetch={quizzesFetch} subject={'mesl'} isLoading={isLoading}/>
+										
+										{/* <TabPanel> */}
+										<MeslQuizTab quizzesFetch={quizzesFetch} subject={'pipe'} isLoading={isLoading}/>
+										
+										{/* </TabPanel> */}
+										{/* <TabPanel> */}
+										<MeslQuizTab quizzesFetch={quizzesFetch} subject={'mdsp'} isLoading={isLoading}/>
+										
+										{/* </TabPanel> */}
+
+									</TabPanels>
+
+								</Tabs>
+
+									
+							</Box>
+							</VStack>
+						</TabPanel>
+
 						{/* Create Quiz Tab */}
 						<TabPanel px={0}>
 							<VStack spacing={6} align="stretch">
@@ -549,6 +676,7 @@ const AdminTests = () => {
 												<Button
 													onClick={handleSaveQuiz}
 													backgroundColor={'orange.500'}
+													disabled={isLoading}
 												>
 													Save Quiz
 												</Button>
@@ -578,13 +706,6 @@ const AdminTests = () => {
 								<Box>
 									<HStack justify="space-between" mb={4}>
 										<Heading size="md">Questions</Heading>
-										<Button
-											leftIcon={<AddIcon />}
-											onClick={handleAddQuestionButton}
-											colorScheme="blue"
-										>
-											Add Question
-										</Button>
 									</HStack>
 
 									{questions.length === 0 ? (
@@ -605,6 +726,13 @@ const AdminTests = () => {
 									) : (
 										<VStack spacing={4} align="stretch">
 											{questions.map((q) => QuestionEditor(q))}
+											<Button
+												leftIcon={<AddIcon />}
+												onClick={handleAddQuestionButton}
+												colorScheme="blue"
+											>
+												Add Question
+											</Button>
 										</VStack>
 									)}
 								</Box>

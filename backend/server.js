@@ -13,12 +13,6 @@ const app = express();
 const port = process.env.PORT || 3001;
 connectDB();
 
-// const s3 = new AWS.S3();
-// s3.putObject*=({
-
-// })
-
-// console.log('local key: ', process.env.AWS_BUCKET_NAME);
 
 const allowedOrigins = ['http://localhost:5173'];
 

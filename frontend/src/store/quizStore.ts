@@ -4,7 +4,6 @@ import { create } from 'zustand';
 
 axios.defaults.withCredentials = true;
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-// console.log('this is backend', BACKEND_URL);
 
 export interface QuestionOption {
 	id: number;
@@ -42,9 +41,15 @@ export interface QuizProfile {
 	isPublished: boolean;
 }
 
+
+
 interface QuizStore {
 	questions: QuestionData[];
+	quizzesFetch: QuizProfile[];
+	isLoading: boolean,
+	setIsLoading: (isLoading: boolean) => void;
 	quizProfile: QuizProfile;
+	setQuizzesFetch: ([]) => void;
 	setQuestions: (questions: QuestionData[]) => void;
 	setQuizProfile: (quizProfile: QuizProfile) => void;
 	addQuestions: (question: QuestionData) => void;
@@ -52,7 +57,9 @@ interface QuizStore {
 	updateQuestion: (questionId: number, updatedQuestion: QuestionData) => void;
 	fetchQuizParams: (searchParams?: {
 		[key: string]: string | boolean;
-	}) => Promise<QuizProfile | undefined>;
+	}) => void;
+	publishQuiz: () => void;
+	
 }
 
 const QuizStore = create<QuizStore>((set, get) => ({
@@ -75,12 +82,15 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		})),
 	questions: [],
 	setQuestions: (questions) => set({ questions }),
-	//Add new question
+	quizzesFetch: [],
+	setQuizzesFetch: (quizzesFetch) => set({ quizzesFetch }),
+	isLoading: false,
+	setIsLoading: (isLoading) => set({isLoading}),
 	addQuestions: async (question: QuestionData) => {
 		const { setQuestions, questions } = get();
 
 		const newQuestion: QuestionData = { ...question };
-		setQuestions([newQuestion, ...questions]);
+		setQuestions([...questions, newQuestion]);
 	},
 	removeQuestion: (questionId: number) => {
 		const { questions, setQuestions } = get();
@@ -118,8 +128,9 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		setQuestions(updatedQuestions);
 	},
 	publishQuiz: async () => {
-		const { quizProfile, questions } = get();
+		const { quizProfile, questions, setIsLoading } = get();	
 		try {
+			setIsLoading(true)
 			const { data } = await axios.post(BACKEND_URL + '/api/quiz/create-quiz', {
 				title: quizProfile.title,
 				subject: quizProfile.subject,
@@ -138,9 +149,13 @@ const QuizStore = create<QuizStore>((set, get) => ({
 			}
 		} catch (err) {
 			console.log('publishQUiz error: ', err);
+		}finally {
+			setIsLoading(false)
 		}
 	},
+
 	fetchQuizParams: async (searchParams = {}) => {
+		const {setQuizzesFetch, setIsLoading} = get()
 		const stringParams: { [key: string]: string } = {};
 		for (const key in searchParams) {
 			stringParams[key] = String(searchParams[key]);
@@ -148,15 +163,23 @@ const QuizStore = create<QuizStore>((set, get) => ({
 
 		const params = new URLSearchParams(stringParams);
 		try {
+			setIsLoading(true)
 			const { data } = await axios.get(
 				BACKEND_URL + `/api/quiz/get-all-quizzes?${params}`
 			);
 
 			if (data.success) {
-				return data.data[0];
+
+			
+
+				console.log('quiz fetched: ',data.data)
+				setQuizzesFetch(data.data)
+				
 			} else console.log('Quiz cannot get');
 		} catch (err) {
 			console.log('fetching error: ', err);
+		}finally {
+			setIsLoading(false)
 		}
 	},
 }));
