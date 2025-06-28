@@ -1,5 +1,3 @@
-// import { getGridFSBucket } from '../config/db.js';
-// import pdfModel from '../models/pdfSchema.js';
 import { Quiz, QuizAttempt } from '../models/quizSchema.js';
 
 // QUIZ MAKER
@@ -256,35 +254,35 @@ export const updateQuiz = async (req, res) => {
 			}
 		}
 
-		if (updates.totalPoints)
-			if (updates.questions && Array.isArray(updates.questions)) {
-				//UPDATE QUESTIONS
-				quiz.questions = updates.questions.map((questions) => {
-					const validatedQuestion = {
-						questionText: questions.questionText,
-						type: questions.type,
-						points: questions.points || 1,
-					};
+		if (updates.questions && Array.isArray(updates.questions)) {
+			//UPDATE QUESTIONS
+			quiz.questions = updates.questions.map((questions) => {
+				const validatedQuestion = {
+					questionText: questions.questionText,
+					type: questions.type,
+					points: questions.points || 1,
+				};
 
-					if (questions.type === 'multiple-choice') {
-						validatedQuestion.options =
-							questions.options?.map((option) => {
-								return {
-									text: option.text,
-									isCorrect: option.isCorrect,
-								};
-							}) || [];
-					} else if (questions.type === 'short-answer') {
-						validatedQuestion.correctAnswer = questions.correctAnswer;
-					}
-					return validatedQuestion;
-				});
+				if (questions.type === 'multiple-choice') {
+					validatedQuestion.options =
+						questions.options?.map((option) => {
+							return {
+								text: option.text,
+								isCorrect: option.isCorrect,
+							};
+						}) || [];
+				} else if (questions.type === 'short-answer') {
+					validatedQuestion.correctAnswer = questions.correctAnswer;
+				}
+				return validatedQuestion;
+			});
 
-				quiz.totalPoints = quiz.questions.reduce(
-					(sum, q) => sum + (q.points || 1),
-					0
-				);
-			}
+			quiz.totalPoints = quiz.questions.reduce(
+				(sum, q) => sum + (q.points || 1),
+				0
+			);
+		}
+
 		await quiz.save();
 		return res.json({
 			success: true,
@@ -296,31 +294,3 @@ export const updateQuiz = async (req, res) => {
 	}
 };
 
-// TODO: use the utils function for pdf text extraction
-
-// export const parseQuestionsFromFile = async (req, res) => {
-// 	try {
-// 		// Path to your questions file - using absolute path
-// 		const filePath = path.join(
-// 			process.cwd(),
-// 			'..',
-// 			'pdf_extractor',
-// 			'MESL_ELEMENTS_9_questions.txt'
-// 		);
-
-// 		// Read the file
-// 		const text = fs.readFileSync(filePath, 'utf-8');
-
-// 		// Parse the questions
-// 		const questions = parseQuestionsFromText(text);
-
-// 		return res.json({
-// 			success: true,
-// 			message: 'Questions parsed successfully',
-// 			questions,
-// 		});
-// 	} catch (err) {
-// 		console.error('Error reading file:', err);
-// 		return res.json({ success: false, message: err.message });
-// 	}
-// };

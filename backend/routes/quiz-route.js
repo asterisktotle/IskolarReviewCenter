@@ -1,6 +1,5 @@
 import express from 'express';
 import { userAuth } from '../middleware/userAuth.js';
-// import multer from 'multer';
 import {
 	createQuiz,
 	getAllQuizzes,
@@ -12,7 +11,6 @@ import {
 } from '../controllers/quizController.js';
 
 const quizRouter = express.Router();
-// const upload = multer({ storage: multer.memoryStorage() });
 
 quizRouter.post('/create-quiz', createQuiz); // deleted userauth
 quizRouter.post('/submit-quiz', submitAndEvaluateQuiz);

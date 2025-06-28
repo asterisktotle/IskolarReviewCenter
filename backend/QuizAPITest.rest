@@ -1,5 +1,5 @@
 ### CREATE QUIZ
-GET http://localhost:3100/api/qui/get-all-quizzes
+GET http://localhost:3100/api/quiz/get-all-quizzes
    
 ### Upload a quiz with multiple-choices and short-answer DONE CHECKING
 POST http://localhost:3100/api/quiz/create-quiz
