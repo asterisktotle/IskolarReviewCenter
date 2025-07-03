@@ -32,9 +32,8 @@ import {
 	CardBody,
 	Heading,
 	useColorModeValue,
-	Center,
-	Spinner,
-	SimpleGrid
+	useToast,
+
 } from '@chakra-ui/react';
 import { AddIcon, CloseIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { MdPlayArrow, MdFormatListBulleted, MdBook } from 'react-icons/md';
@@ -45,49 +44,8 @@ import QuizStore from '../../store/quizStore';
 import parseOptions from '../../utils/parserOptions';
 import convertQuestionType from '../../utils/converQuestionType';
 import PlayQuiz from '../../components/PlayQuiz';
-import QuizCard from '../../components/QuizList';
 
-const MeslQuizTab = ({ isLoading, quizzesFetch, subject }) => {
-  const meslQuizzes = useMemo(() => 
-    quizzesFetch.filter((quiz) => quiz.subject === subject), 
-    [quizzesFetch]
-  );
-
-  if (isLoading) {
-    return (
-      <TabPanel>
-        <Center h="200px">
-          <Spinner size="xl" color="blue.500" />
-        </Center>
-      </TabPanel>
-    );
-  }
-
-  return (
-    <TabPanel>
-      {meslQuizzes.length > 0 ? (
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-          {meslQuizzes.map((data) => (
-            <QuizCard key={data._id} quiz={data} />
-          ))}
-        </SimpleGrid>
-      ) : (
-        <Center h="300px">
-          <VStack spacing={4}>
-            <Icon as={MdBook} boxSize={16} color="gray.300" />
-            <Heading size="md" color="gray.500">
-              No {subject.toUpperCase()}  Quizzes
-            </Heading>
-            <Text color="gray.400" textAlign="center" maxW="300px">
-              There are currently no quizzes available for the {subject.toUpperCase()} subject. 
-              New quizzes will appear here when they're published.
-            </Text>
-          </VStack>
-        </Center>
-      )}
-    </TabPanel>
-  );
-};
+import {SubjectQuizTab } from '../../components/QuizList';
 
 const AdminTests = () => {
 	const {
@@ -106,7 +64,8 @@ const AdminTests = () => {
 	const [tabIndex, setTabIndex] = useState(0);
 	const [tabIndexQuizzes, setTabIndexQuizzes] = useState(0);
 	const [published, setPublished] = useState<boolean>(false);
-	
+	const [clearQuizForm, setClearQuizForm] = useState(true)
+	const toast = useToast()
 
 	// Color mode values
 	const cardBg = useColorModeValue('white', 'gray.800');
@@ -120,9 +79,16 @@ const AdminTests = () => {
 	};
 
 	const handleSaveQuiz = async () => {
-		publishQuiz()
+		toast.promise(publishQuiz(), {
+			success: { title: 'Quiz created', description: 'Lez go' },
+			error: {
+				title: 'Quiz failed to upload',
+				description: 'Something wrong',
+			},
+			loading: { title: 'Quiz creating', description: 'Please wait' },
+		});
 
-		//close the quiz
+		setClearQuizForm(true)
 	};
 
 	const handleUpdateOptions = (
@@ -197,12 +163,12 @@ const AdminTests = () => {
 	const handleAddQuestionButton = () => {
 		const baseQuestion: QuestionData = {
 			id: Date.now(),
-			questionText: 'Untitled question',
+			questionText: '',
 			type: 'multiple-choice',
 			options: [{ text: `Option 1`, isCorrect: true, id: 1 }],
 			points: 1,
 		};
-
+		console.log('base q: ', baseQuestion)
 		addQuestions(baseQuestion);
 	};
 
@@ -314,10 +280,9 @@ const AdminTests = () => {
 		// };
 		// getQuiz();
 		fetchQuizParams()
-		console.log('quiz fetch: ', quizzesFetch)
 		
 		
-	}, []);
+	}, [clearQuizForm]);
 
 	
 
@@ -361,7 +326,7 @@ const AdminTests = () => {
 								Question Text
 							</FormLabel>
 							<Editable
-								defaultValue={question.questionText}
+								placeholder={'Enter a question'}								
 								onSubmit={(value) =>
 									updateQuestion(question.id, {
 										...question,
@@ -386,7 +351,7 @@ const AdminTests = () => {
 							<FormControl>
 								<HStack justify="space-between" mb={2}>
 									<FormLabel fontSize="sm" fontWeight="medium" mb={0}>
-										Answer Options
+										Answer Choices
 									</FormLabel>
 									<Button
 										size="sm"
@@ -416,7 +381,7 @@ const AdminTests = () => {
 													colorScheme="green"
 												/>
 												<Input
-													value={choice.text}
+									
 													onChange={(e) =>
 														handleUpdateOptions(
 															question.id,
@@ -424,11 +389,13 @@ const AdminTests = () => {
 															e.target.value
 														)
 													}
+													value={choice.text}
 													placeholder={`Option ${index + 1}`}
 													size="sm"
 													onPaste={(e) => {
 														e.preventDefault();
 														const pastedText = e.clipboardData.getData('text');
+														console.log('pasted text: ', pastedText)
 														handleUpdateOptions(
 															question.id,
 															choice.id,
@@ -567,14 +534,14 @@ const AdminTests = () => {
 
 
 										</TabPanel> */}
-										<MeslQuizTab quizzesFetch={quizzesFetch} subject={'mesl'} isLoading={isLoading}/>
+										<SubjectQuizTab quizzesFetch={quizzesFetch} subject={'mesl'} isLoading={isLoading}/>
 										
 										{/* <TabPanel> */}
-										<MeslQuizTab quizzesFetch={quizzesFetch} subject={'pipe'} isLoading={isLoading}/>
+										<SubjectQuizTab quizzesFetch={quizzesFetch} subject={'pipe'} isLoading={isLoading}/>
 										
 										{/* </TabPanel> */}
 										{/* <TabPanel> */}
-										<MeslQuizTab quizzesFetch={quizzesFetch} subject={'mdsp'} isLoading={isLoading}/>
+										<SubjectQuizTab quizzesFetch={quizzesFetch} subject={'mdsp'} isLoading={isLoading}/>
 										
 										{/* </TabPanel> */}
 
@@ -708,7 +675,7 @@ const AdminTests = () => {
 										<Heading size="md">Questions</Heading>
 									</HStack>
 
-									{questions.length === 0 ? (
+									{clearQuizForm ? (
 										<Card bg={cardBg} borderColor={borderColor}>
 											<CardBody textAlign="center" py={10}>
 												<Text color="gray.500" mb={4}>
@@ -716,7 +683,12 @@ const AdminTests = () => {
 												</Text>
 												<Button
 													leftIcon={<AddIcon />}
-													onClick={handleAddQuestionButton}
+													onClick={() => {
+														//unset the clear form first to render the question form
+														setClearQuizForm(false)
+														//add question
+														handleAddQuestionButton()
+													} }
 													colorScheme="blue"
 												>
 													Add Your First Question
