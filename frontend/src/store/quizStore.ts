@@ -45,12 +45,14 @@ export interface QuizProfile {
 
 interface QuizStore {
 	questions: QuestionData[];
+	setQuestions: (questions: QuestionData[]) => void;
 	quizzesFetch: QuizProfile[];
-	isLoading: boolean,
+	setQuizzesFetch: (quizzes: QuizProfile[]) => void;
+	selectedQuiz: QuizProfile[];
+	setSelectedQuiz: (selectedQuiz: QuizProfile[]) => void;
+	isLoading: boolean;
 	setIsLoading: (isLoading: boolean) => void;
 	quizProfile: QuizProfile;
-	setQuizzesFetch: ([]) => void;
-	setQuestions: (questions: QuestionData[]) => void;
 	setQuizProfile: (quizProfile: QuizProfile) => void;
 	addQuestions: (question: QuestionData) => void;
 	removeQuestion: (questionId: number) => void;
@@ -58,7 +60,7 @@ interface QuizStore {
 	fetchQuizParams: (searchParams?: {
 		[key: string]: string | boolean;
 	}) => void;
-	publishQuiz: () => void;
+	publishQuiz: () => Promise<any>;
 	
 }
 
@@ -84,6 +86,8 @@ const QuizStore = create<QuizStore>((set, get) => ({
 	setQuestions: (questions) => set({ questions }),
 	quizzesFetch: [],
 	setQuizzesFetch: (quizzesFetch) => set({ quizzesFetch }),
+	selectedQuiz: [],
+	setSelectedQuiz: (selectedQuiz) => set({ selectedQuiz }),
 	isLoading: false,
 	setIsLoading: (isLoading) => set({isLoading}),
 	addQuestions: async (question: QuestionData) => {
@@ -142,11 +146,7 @@ const QuizStore = create<QuizStore>((set, get) => ({
 				isPublished: quizProfile.isPublished,
 			});
 
-			if (data.success) {
-				console.log('Quiz published successfully');
-			} else {
-				console.log('QUiz published failed');
-			}
+			return data;
 		} catch (err) {
 			console.log('publishQUiz error: ', err);
 		}finally {
@@ -164,6 +164,8 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		const params = new URLSearchParams(stringParams);
 		try {
 			setIsLoading(true)
+			console.log('this is params',params.size)
+
 			const { data } = await axios.get(
 				BACKEND_URL + `/api/quiz/get-all-quizzes?${params}`
 			);

@@ -24,7 +24,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
 	signupSchema,
-	signinSchema,
+
 	forgotPasswordSchema,
 	otpSchema,
 } from '../schema/formSchema';
@@ -235,7 +235,7 @@ const SignUpForm = () => {
 
 		return (
 			<form onSubmit={handleSignInForm}>
-				<VStack padding={3} spacing={3} align={'stretch'}>
+				<VStack padding={3} spacing={3} align={'stretch'} >
 					<Box fontSize={30}> SIGN IN</Box>
 
 					{/* Email */}
@@ -468,6 +468,7 @@ const SignUpForm = () => {
 				}
 				setSuccessChangePass(true);
 				setOtpMessage(data.message);
+				console.log('otp msg ',otpMessage )
 				console.log('success change password');
 			} catch (err) {
 				console.log(err.message);
@@ -493,7 +494,7 @@ const SignUpForm = () => {
 		}
 
 		return (
-			<Box>
+			<Box  bgColor={'green'}>
 				<form
 					onSubmit={handleSubmit(handleOTP)}
 					className="flex flex-col items-center gap-2 "
@@ -513,7 +514,7 @@ const SignUpForm = () => {
 					<FormControl isRequired isInvalid={!!errors.password}>
 						<InputGroup>
 							<Input
-								placeholder="Password"
+								placeholder="New Password"
 								type={togglePassword ? 'text' : 'password'}
 								{...register('password')}
 							/>
