@@ -13,15 +13,17 @@ import {
 	TabPanel,
 	Center,
 	Spinner,
-	Icon
+	Icon,
+	Button
 } from '@chakra-ui/react';
-import { MdBook } from 'react-icons/md';
+import { MdBook, MdDoneOutline, MdHourglassBottom, MdHourglassDisabled,  MdOutlineChecklist} from 'react-icons/md';
 
 import { QuizProfile } from '../store/quizStore';
-import { useMemo } from 'react';
+import {  useMemo} from 'react';
+import useAuthStore from '../store/authStore';
 
 export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
-  const meslQuizzes = useMemo(() => 
+  const quizzesFetched = useMemo(() => 
 	quizzesFetch.filter((quiz) => quiz.subject === subject), 
 	[quizzesFetch]
   );
@@ -38,9 +40,9 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 
   return (
 	<TabPanel>
-	  {meslQuizzes.length > 0 ? (
+	  {quizzesFetched.length > 0 ? (
 		<SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-		  {meslQuizzes.map((data) => (
+		  {quizzesFetched.map((data) => (
 			<QuizCard key={data._id} quiz={data} />
 		  ))}
 		</SimpleGrid>
@@ -63,9 +65,8 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 };
 
  const QuizCard = ({ quiz }: {quiz: QuizProfile}) => {
-	const cardBg = useColorModeValue('white', 'gray.800');
-	const borderColor = useColorModeValue('gray.200', 'gray.600');
-
+	
+	const {userData} = useAuthStore()
 	const getCategoryColor = (category: string) => {
 		const colors: Record<string, string> = {
 			terms: 'blue',
@@ -83,13 +84,20 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 
 	return (
 		<Card
-			bg={cardBg}
-			border="1px"
-			borderColor={borderColor}
+			cursor="pointer"
+			transition="all 0.2s ease"
+			_hover={{
+				transform: 'translateY(-2px)',
+				shadow: 'lg',
+				borderColor: 'purple.400',
+			}}
+			_active={{ transform: 'translateY(0px)' }}
+			// onClick={() => } // show stats trial
+			bg="whiteAlpha.800"
+			backdropFilter="blur(10px)"
+			border="1px solid"
+			borderColor="whiteAlpha.200"
 			shadow="md"
-			_hover={{ shadow: 'lg', transform: 'translateY(-2px)' }}
-			transition="all 0.2s"
-			opacity={quiz.isPublished ? 1 : 0.7}
             marginBlock={'1'}
 		>
 			<CardHeader pb={2}>
@@ -105,6 +113,9 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 						>
 							{quiz.category}
 						</Badge>
+
+						{userData?.isAdmin && 
+						
 						<Badge
 							colorScheme={quiz.isPublished ? 'green' : 'orange'}
 							variant="outline"
@@ -112,6 +123,7 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 						>
 							{quiz.isPublished ? 'Published' : 'Draft'}
 						</Badge>
+						}
 					</VStack>
 				</Flex>
 			</CardHeader>
@@ -120,7 +132,7 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 				<VStack spacing={3} align="stretch">
 					<SimpleGrid columns={2} spacing={4}>
 						<HStack spacing={2}>
-							{/* <Icon as={Clock} color="blue.500" boxSize={4} /> */}
+							<Icon as={quiz.timeLimit ? MdHourglassBottom: MdHourglassDisabled} color="blue.500" boxSize={4} />
 							<Text
 								fontSize="sm"
 								color={useColorModeValue('gray.600', 'gray.400')}
@@ -130,7 +142,7 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 						</HStack>
 
 						<HStack spacing={2}>
-							{/* <Icon as={BookOpen} color="green.500" boxSize={4} /> */}
+							<Icon as={MdBook} color="green.500" boxSize={4} />
 							<Text
 								fontSize="sm"
 								color={useColorModeValue('gray.600', 'gray.400')}
@@ -140,7 +152,7 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 						</HStack>
 
 						<HStack spacing={2}>
-							{/* <Icon as={IoMdTrophy} color="yellow.500" boxSize={4} /> */}
+							<Icon as={MdDoneOutline} color="yellow.500" boxSize={4} />
 							<Text
 								fontSize="sm"
 								color={useColorModeValue('gray.600', 'gray.400')}
@@ -150,7 +162,7 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 						</HStack>
 
 						<HStack spacing={2}>
-							{/* <Icon as={Users} color="purple.500" boxSize={4} /> */}
+							<Icon as={MdOutlineChecklist} color="purple.500" boxSize={4} />
 							<Text
 								fontSize="sm"
 								color={useColorModeValue('gray.600', 'gray.400')}
@@ -158,6 +170,35 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 								{quiz.totalPoints} points
 							</Text>
 						</HStack>
+						
+
+						<HStack spacing={2}>
+
+							{userData?.isAdmin && 
+							
+							<>
+							<Button
+								fontSize="sm"
+							>
+								Edit
+							</Button>
+							<Button
+								fontSize="sm"
+							>
+								Delete
+							</Button>
+							
+							</>
+						
+							}
+							<Button
+								fontSize="sm"
+								bgColor={'green'}
+							>
+								Play
+							</Button>
+				
+						</HStack>	
 					</SimpleGrid>
 				</VStack>
 			</CardBody>

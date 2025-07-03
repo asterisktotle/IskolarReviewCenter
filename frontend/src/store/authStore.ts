@@ -34,7 +34,7 @@ interface AuthStore {
 	//Setters
 	setIsLogin: (value: boolean) => void;
 	// setIsRegister: (value: boolean) => void;
-	setUserData: (data: UserData) => void;
+	setUserData: (data: UserData | null)  => void;
 	setEmail: (email: string) => void;
 	setPassword: (password: string) => void;
 	setIncorrectPassword: (value: boolean) => void;
