@@ -58,9 +58,9 @@ const AdminTests = () => {
 		updateQuestion,
 		addQuestions,
 		publishQuiz, 
-		isLoading
+		isLoading,
+		selectedQuiz
 	} = QuizStore();
-	const [fetchedQuestions, setFetchedQuestions] = useState([]);
 	const [tabIndex, setTabIndex] = useState(0);
 	const [tabIndexQuizzes, setTabIndexQuizzes] = useState(0);
 	const [published, setPublished] = useState<boolean>(false);
@@ -87,7 +87,6 @@ const AdminTests = () => {
 			},
 			loading: { title: 'Quiz creating', description: 'Please wait' },
 		});
-
 		setClearQuizForm(true)
 	};
 
@@ -264,24 +263,7 @@ const AdminTests = () => {
 	};
 
 	useEffect(() => {
-		// const getQuiz = async () => {
-		// 	try {
-		// 		const quiz = await fetchQuizParams({ title: quizProfile.title });
-
-		// 		if (quiz) {
-		// 			const quizItems = quiz.questions;
-		// 			setFetchedQuestions(quizItems);
-		// 		} else {
-		// 			console.log('Quiz failed to fetch');
-		// 		}
-		// 	} catch (error) {
-		// 		console.error('Error fetching quiz:', error);
-		// 	}
-		// };
-		// getQuiz();
 		fetchQuizParams()
-		
-		
 	}, [clearQuizForm]);
 
 	
@@ -395,7 +377,6 @@ const AdminTests = () => {
 													onPaste={(e) => {
 														e.preventDefault();
 														const pastedText = e.clipboardData.getData('text');
-														console.log('pasted text: ', pastedText)
 														handleUpdateOptions(
 															question.id,
 															choice.id,
@@ -723,14 +704,14 @@ const AdminTests = () => {
 									</Text>
 								</Box>
 
-								{fetchedQuestions && fetchedQuestions.length > 0 ? (
+								{selectedQuiz && selectedQuiz.length > 0 ? (
 									<VStack spacing={6} align="stretch">
-										{fetchedQuestions.map((item, index) => (
+										{selectedQuiz.map((item, index) => (
 											<PlayQuiz
 												key={item._id}
 												question={item}
 												questionNumber={index + 1}
-												totalQuestions={fetchedQuestions.length}
+												totalQuestions={selectedQuiz.length}
 											/>
 										))}
 									</VStack>

@@ -155,7 +155,7 @@ const QuizStore = create<QuizStore>((set, get) => ({
 	},
 
 	fetchQuizParams: async (searchParams = {}) => {
-		const {setQuizzesFetch, setIsLoading} = get()
+		const {setSelectedQuiz,setQuizzesFetch, setIsLoading} = get()
 		const stringParams: { [key: string]: string } = {};
 		for (const key in searchParams) {
 			stringParams[key] = String(searchParams[key]);
@@ -164,20 +164,22 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		const params = new URLSearchParams(stringParams);
 		try {
 			setIsLoading(true)
-			console.log('this is params',params.size)
 
 			const { data } = await axios.get(
 				BACKEND_URL + `/api/quiz/get-all-quizzes?${params}`
 			);
 
-			if (data.success) {
-
 			
-
-				console.log('quiz fetched: ',data.data)
+			if (data.success && data.data.length === 1) {
+				setSelectedQuiz(data.data)
+				return	
+			}  
+			
+			if (data.success && data.data.length > 1){
 				setQuizzesFetch(data.data)
-				
-			} else console.log('Quiz cannot get');
+				return;
+			}
+		
 		} catch (err) {
 			console.log('fetching error: ', err);
 		}finally {
