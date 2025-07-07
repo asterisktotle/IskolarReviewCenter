@@ -127,21 +127,37 @@ const QuizAttemptSchema = new Schema({
 				required: true,
 			},
 			questionText: String, // optional: store the actual question for record-keeping
-			selectedOptions: [String], // for multiple-choice or true/false
+			selectedOption: {
+				type: Schema.Types.ObjectId,
+				ref: 'Question.options', // reference to the options in QuestionSchema
+			}, // for multiple-choice or true/false
 			textAnswer: String, // for short-answer
 			isCorrect: Boolean,
 			pointsEarned: Number,
 		},
 	],
-	score: {
+	currentScore: {
+		type: Number,
+		required: true,
+	},
+	scores: {
+		type: [Number],
+	},
+	currentPercentageScore: {
 		type: Number,
 	},
-	percentageScore: {
-		type: Number,
+	percentageScores: {
+		type: [Number],
 	},
 	passed: {
 		type: Boolean,
 	},
+	attemptNumber: {
+		type: Number,
+		required: true,
+		default: 1,
+	},
+	
 });
 
 const Quiz = mongoose.model('Quiz', QuizSchema);

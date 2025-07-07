@@ -22,12 +22,12 @@ import {
 import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons';
 
 const userLinks = [
-	{ name: 'Dashboard', path: '/user-dashboard' },
+	{ name: 'Dashboard', path: '/dashboard' },
 	{ name: 'Lectures', path: '/user-lectures' },
 	{ name: 'Tests', path: '/user-tests' },
 ];
 const adminLinks = [
-	{ name: 'Dashboard', path: '/admin-dashboard' },
+	{ name: 'Dashboard', path: '/dashboard' },
 	{ name: 'Lectures', path: '/admin-lectures' },
 	{ name: 'Tests', path: '/admin-tests' },
 ];

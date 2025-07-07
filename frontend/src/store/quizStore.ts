@@ -34,14 +34,12 @@ export interface QuizProfile {
 	title: string;
 	subject: 'mesl' | 'mdsp' | 'pipe';
 	category: 'terms' | 'weekly-test' | 'take-home-test' | 'pre-board-exam';
-	timeLimit?: number;
-	passingScore?: number;
+	timeLimit: number;
+	passingScore: number;
 	totalPoints: number;
 	questions: QuestionData[];
 	isPublished: boolean;
 }
-
-
 
 interface QuizStore {
 	questions: QuestionData[];
@@ -57,11 +55,8 @@ interface QuizStore {
 	addQuestions: (question: QuestionData) => void;
 	removeQuestion: (questionId: number) => void;
 	updateQuestion: (questionId: number, updatedQuestion: QuestionData) => void;
-	fetchQuizParams: (searchParams?: {
-		[key: string]: string | boolean;
-	}) => void;
+	fetchQuizParams: (searchParams?: { [key: string]: string | boolean }) => void;
 	publishQuiz: () => Promise<any>;
-	
 }
 
 const QuizStore = create<QuizStore>((set, get) => ({
@@ -89,7 +84,7 @@ const QuizStore = create<QuizStore>((set, get) => ({
 	selectedQuiz: [],
 	setSelectedQuiz: (selectedQuiz) => set({ selectedQuiz }),
 	isLoading: false,
-	setIsLoading: (isLoading) => set({isLoading}),
+	setIsLoading: (isLoading) => set({ isLoading }),
 	addQuestions: async (question: QuestionData) => {
 		const { setQuestions, questions } = get();
 
@@ -132,9 +127,9 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		setQuestions(updatedQuestions);
 	},
 	publishQuiz: async () => {
-		const { quizProfile, questions, setIsLoading } = get();	
+		const { quizProfile, questions, setIsLoading } = get();
 		try {
-			setIsLoading(true)
+			setIsLoading(true);
 			const { data } = await axios.post(BACKEND_URL + '/api/quiz/create-quiz', {
 				title: quizProfile.title,
 				subject: quizProfile.subject,
@@ -149,13 +144,12 @@ const QuizStore = create<QuizStore>((set, get) => ({
 			return data;
 		} catch (err) {
 			console.log('publishQUiz error: ', err);
-		}finally {
-			setIsLoading(false)
+		} finally {
+			setIsLoading(false);
 		}
 	},
-
 	fetchQuizParams: async (searchParams = {}) => {
-		const {setSelectedQuiz,setQuizzesFetch, setIsLoading} = get()
+		const { setSelectedQuiz, setQuizzesFetch, setIsLoading } = get();
 		const stringParams: { [key: string]: string } = {};
 		for (const key in searchParams) {
 			stringParams[key] = String(searchParams[key]);
@@ -163,29 +157,29 @@ const QuizStore = create<QuizStore>((set, get) => ({
 
 		const params = new URLSearchParams(stringParams);
 		try {
-			setIsLoading(true)
+			setIsLoading(true);
 
 			const { data } = await axios.get(
 				BACKEND_URL + `/api/quiz/get-all-quizzes?${params}`
 			);
 
-			
 			if (data.success && data.data.length === 1) {
-				setSelectedQuiz(data.data)
-				return	
-			}  
-			
-			if (data.success && data.data.length > 1){
-				setQuizzesFetch(data.data)
+				setSelectedQuiz(data.data);
 				return;
 			}
-		
+
+			if (data.success && data.data.length > 1) {
+				setQuizzesFetch(data.data);
+				return;
+			}
 		} catch (err) {
 			console.log('fetching error: ', err);
-		}finally {
-			setIsLoading(false)
+		} finally {
+			setIsLoading(false);
 		}
 	},
+	getQuizHistory: async (quizId, userId) => {}
+	
 }));
 
 export default QuizStore;

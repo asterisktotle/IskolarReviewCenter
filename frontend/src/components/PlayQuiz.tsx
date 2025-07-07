@@ -12,8 +12,23 @@ import {
 	Container,
 } from '@chakra-ui/react';
 import { useState } from 'react';
+import QuizStore from '../store/quizStore';
 
-const PlayQuiz = ({ question, questionNumber, totalQuestions }) => {
+
+// type PlayQuizTypes {
+// 	question: string,
+// 	questionNumber: Number,
+// 	totalQuestions: Number
+// }
+
+// TODO: 
+// user must navigate to the new url to play the quiz
+// use the admin test component for mapping the quiz data 
+
+
+const PlayQuiz = ({question, questionNumber, totalQuestions}) => {
+	
+	
 	const [selectedAnswer, setSelectedAnswer] = useState('');
 	const [shortAnswer, setShortAnswer] = useState('');
 
