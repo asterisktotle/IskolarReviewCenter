@@ -141,22 +141,28 @@ const QuizAttemptSchema = new Schema({
 		required: true,
 	},
 	scores: {
-		type: [Number],
+		type: [Number],	
+		default: [],
 	},
 	currentPercentageScore: {
 		type: Number,
+
 	},
 	percentageScores: {
 		type: [Number],
+		default: [],
 	},
 	passed: {
 		type: Boolean,
 	},
 	attemptNumber: {
 		type: Number,
-		required: true,
 		default: 1,
 	},
+	 attemptDates: {
+        type: [Date],
+        default: [] 
+    },
 	
 });
 

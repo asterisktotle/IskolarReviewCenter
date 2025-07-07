@@ -78,7 +78,7 @@ export const getAllQuizzes = async (req, res) => {
 	}
 };
 
-	export const submitAndEvaluateQuiz = async (req, res) => {
+export const submitAndEvaluateQuiz = async (req, res) => {
 		try {
 			const { quizId, answers, userId } = req.body;
 			if (!quizId || !answers.length) {
@@ -153,7 +153,7 @@ export const getAllQuizzes = async (req, res) => {
 				quiz: quizId,
 			})
 				.sort({ completedAt: -1 })
-				.select('score percentageScore passed completedAt answers');
+				
 
 			if (!userAttemptQuiz) {
 				
@@ -182,11 +182,26 @@ export const getAllQuizzes = async (req, res) => {
 				userAttemptQuiz.passed = passed; 
 				userAttemptQuiz.completedAt = new Date();
 				
+				 // Track history progress - add defensive checks
+				if (!userAttemptQuiz.scores) {
+					userAttemptQuiz.scores = [];
+				}
+				if (!userAttemptQuiz.percentageScores) {
+					userAttemptQuiz.percentageScores = [];
+				}
+				if (!userAttemptQuiz.attemptDates) {
+					userAttemptQuiz.attemptDates = [];
+				}
+
+				
+
+				
+
 				//Track history progress
 				userAttemptQuiz.scores.push(score);
 				userAttemptQuiz.percentageScores.push(percentageScore);
 				userAttemptQuiz.attemptDates.push(new Date());
-				userAttemptQuiz.attemptNumber += 1;
+				userAttemptQuiz.attemptNumber = Number(userAttemptQuiz.attemptNumber + 1);
 				
 				await userAttemptQuiz.save();
 				return res.json({ success: true, attempt: userAttemptQuiz });
@@ -198,7 +213,7 @@ export const getAllQuizzes = async (req, res) => {
 				message: 'Submission error: ' + err.message,
 			});
 		}
-	};
+};
 
 export const getUserQuizHistory = async (req, res) => {
 	try {
