@@ -37,7 +37,7 @@ import {
 } from '@chakra-ui/react';
 import { AddIcon, CloseIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { MdPlayArrow, MdFormatListBulleted, MdBook } from 'react-icons/md';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QuestionOption } from '../../hooks/useQuestionMaker';
 import { QuestionData } from '../../hooks/useQuestionMaker';
 import QuizStore from '../../store/quizStore';
@@ -167,7 +167,7 @@ const AdminTests = () => {
 			options: [{ text: `Option 1`, isCorrect: true, id: 1 }],
 			points: 1,
 		};
-		console.log('base q: ', baseQuestion)
+		
 		addQuestions(baseQuestion);
 	};
 

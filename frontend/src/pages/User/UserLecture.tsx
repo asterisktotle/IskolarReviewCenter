@@ -10,7 +10,6 @@ import {
 	Th,
 	Td,
 	TableContainer,
-	Heading,
 	Box,
 	Card,
 	CardBody,
@@ -29,7 +28,7 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import AdminStore from '../../store/adminStore';
+import AdminStore, { PdfFiles } from '../../store/adminStore';
 import { useNavigate } from 'react-router-dom';
 
 const UsersLecture = () => {
@@ -73,7 +72,7 @@ const UsersLecture = () => {
 	};
 
 	// Mobile Card Component
-	const MobileCard = ({ pdf }) => (
+	const MobileCard = ({ pdf }: {pdf: PdfFiles}) => (
 		<Card
 			cursor="pointer"
 			transition="all 0.2s ease"
@@ -88,6 +87,7 @@ const UsersLecture = () => {
 			backdropFilter="blur(10px)"
 			border="1px solid"
 			borderColor="whiteAlpha.200"
+			
 		>
 			<CardBody p={4}>
 				<Stack spacing={3}>
@@ -164,20 +164,7 @@ const UsersLecture = () => {
 	return (
 		<Container maxW="full" p={0}>
 			<VStack spacing={6} align="stretch">
-				{/* Header */}
-				<Box textAlign="center" mb={2}>
-					<Heading
-						size={isMobile ? 'lg' : 'xl'}
-						color="white"
-						mb={2}
-						fontWeight="bold"
-					>
-						📚 Your Lectures
-					</Heading>
-					<Text color="gray.300" fontSize={isMobile ? 'sm' : 'md'}>
-						{filteredPdfs?.length || 0} lectures available
-					</Text>
-				</Box>
+				
 
 				{/* Search and Filters */}
 				<Box
@@ -269,7 +256,7 @@ const UsersLecture = () => {
 						// Mobile Card View
 						<VStack spacing={cardSpacing} align="stretch">
 							{filteredPdfs.map((pdf) => (
-								<MobileCard key={pdf.fileId} pdf={pdf} />
+								<MobileCard key={pdf._id} pdf={pdf} />
 							))}
 						</VStack>
 					) : (
@@ -300,7 +287,7 @@ const UsersLecture = () => {
 									<Tbody>
 										{filteredPdfs.map((pdf) => (
 											<Tr
-												key={pdf.fileId}
+												key={pdf._id}
 												_hover={{ bg: 'whiteAlpha.100' }}
 												transition="background 0.2s ease"
 											>

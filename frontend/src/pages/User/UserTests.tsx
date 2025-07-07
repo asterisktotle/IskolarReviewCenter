@@ -10,16 +10,12 @@ import {
 	Th,
 	Td,
 	TableContainer,
-	Heading,
 	Box,
 	Card,
 	CardBody,
 	Stack,
 	Badge,
 	Spinner,
-	Alert,
-	AlertIcon,
-	AlertDescription,
 	useBreakpointValue,
 	Flex,
 	InputGroup,
@@ -27,19 +23,27 @@ import {
 	Select,
 	HStack,
 	Button,
+	Icon,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
+import {
+	MdBook,
+	MdCheck,
+	MdChecklist,
+	MdDoneOutline,
+	MdHourglassBottom,
+	MdHourglassDisabled,
+	MdOutlineChecklist,
+} from 'react-icons/md';
+
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import AdminStore from '../../store/adminStore';
-import { useNavigate } from 'react-router-dom';
-import QuizStore from '../../store/quizStore';
-import QuizCard from '../../components/QuizList';
+import QuizStore, { QuizProfile } from '../../store/quizStore';
 import { MdOutlineClass } from 'react-icons/md';
 
 const UsersTest = () => {
-	// const { getAllPdf,  messageError, loading } = AdminStore();
-	const {fetchQuizParams, quizzesFetch, selectedQuiz, isLoading} = QuizStore()
+	const { fetchQuizParams, quizzesFetch, isLoading } = QuizStore();
 
+	//Actions
 	const [searchTerm, setSearchTerm] = useState('');
 	const [selectedCategory, setSelectedCategory] = useState('all');
 	const [selectedSubject, setSelectedSubject] = useState('all');
@@ -48,34 +52,36 @@ const UsersTest = () => {
 	const isMobile = useBreakpointValue({ base: true, lg: false });
 	const cardSpacing = useBreakpointValue({ base: 3, md: 4 });
 
+	// Fetch quizzes
 	useEffect(() => {
-		fetchQuizParams()
+		fetchQuizParams();
+		
 	}, []);
 
 	// Filter logic
-	const filteredQuizzes = quizzesFetch.filter((quizzes) => quizzes.isPublished).filter((quiz) => {
-		const matchesSearch =
-			quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			quiz.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			quiz.category.toLowerCase().includes(searchTerm.toLowerCase());
+	const filteredQuizzes = quizzesFetch.filter((q) => q.isPublished).filter((quiz) => {
+			const matchesSearch =
+				quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				quiz.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				quiz.category.toLowerCase().includes(searchTerm.toLowerCase());
 
-		const matchesCategory =
-			selectedCategory === 'all' ||
-			quiz.category.toLowerCase() === selectedCategory.toLowerCase();
-		const matchesSubject =
-			selectedSubject === 'all' ||
-			quiz.subject.toLowerCase() === selectedSubject.toLowerCase();
+			const matchesCategory =
+				selectedCategory === 'all' ||
+				quiz.category.toLowerCase() === selectedCategory.toLowerCase();
+			const matchesSubject =
+				selectedSubject === 'all' ||
+				quiz.subject.toLowerCase() === selectedSubject.toLowerCase();
 
-		return matchesSearch && matchesCategory && matchesSubject;
-	});
+			return matchesSearch && matchesCategory && matchesSubject;
+		});
 
 	// Get unique categories and subjects for filters
-	const categories = [...new Set(quizzesFetch?.map((quiz) => quiz.category) || [])];
-	const subjects = [...new Set(quizzesFetch?.map((quiz) => quiz.subject) || [])];
-
-	// const handleViewquiz = (quizId: string) => {
-	// 	navigate(`/view-quiz/${quizId}`);
-	// };
+	const categories = [
+		...new Set(quizzesFetch?.map((quiz) => quiz.category) || []),
+	];
+	const subjects = [
+		...new Set(quizzesFetch?.map((quiz) => quiz.subject) || []),
+	];
 
 	if (isLoading) {
 		return (
@@ -87,6 +93,96 @@ const UsersTest = () => {
 			</Container>
 		);
 	}
+
+	// Mobile Card Component
+	const MobileCard = ({ quiz }: { quiz: QuizProfile }) => (
+		<Card
+			cursor="pointer"
+			transition="all 0.2s ease"
+			_hover={{
+				transform: 'translateY(-2px)',
+				shadow: 'lg',
+				borderColor: 'purple.400',
+			}}
+			_active={{ transform: 'translateY(0px)' }}
+			bg="whiteAlpha.100"
+			backdropFilter="blur(10px)"
+			border="1px solid"
+			borderColor="whiteAlpha.200"
+
+		>
+			<CardBody p={4}>
+				<Stack spacing={3}>
+					{/* Subject and Category Badges */}
+					<HStack justify="space-between" wrap="wrap" spacing={2}>
+						<Badge
+							colorScheme="purple"
+							variant="subtle"
+							fontSize="xs"
+							px={2}
+							py={1}
+							borderRadius="full"
+						>
+							{quiz.subject.toUpperCase()}
+						</Badge>
+						<Badge
+							colorScheme="blue"
+							variant="outline"
+							fontSize="xs"
+							px={2}
+							py={1}
+							borderRadius="full"
+						>
+							{quiz.category.toUpperCase()}
+						</Badge>
+					</HStack>
+
+					{/* Title */}
+					<Box>
+						<Text
+							fontWeight="semibold"
+							color="white"
+							fontSize="md"
+							lineHeight="1.4"
+							noOfLines={2}
+						>
+							{quiz.title.toUpperCase()}
+						</Text>
+					</Box>
+					{/* Points */}
+					<Box display="flex" alignItems="center" gap={2}>
+						<Icon as={MdOutlineChecklist} />
+						<Text fontWeight="semibold" color="white" fontSize="sm">
+							Total Items: {quiz.totalPoints}
+						</Text>
+					</Box>
+					{/* Passing Score */}
+					<Box display="flex" alignItems="center" gap={2}>
+						<Icon as={MdCheck} color={'green'} />
+						<Text fontWeight="semibold" color="white" fontSize="sm">
+							Passing score:{' '}
+							{Math.ceil((quiz.passingScore / 100) * quiz.totalPoints)}
+						</Text>
+					</Box>
+					{/* Time Limit */}
+					<Box display="flex" alignItems="center" gap={2}>
+						<Icon
+							as={quiz.timeLimit ? MdHourglassBottom : MdHourglassDisabled}
+						/>
+						<Text fontWeight="semibold" color="white" fontSize="sm">
+							Time Limit:{' '}
+							{quiz.timeLimit ? `${quiz.timeLimit} mins` : 'Unlimited'}
+						</Text>
+					</Box>
+
+					{/* Action indicator */}
+						<Button fontSize="sm">
+							Tap to Play →
+						</Button>
+				</Stack>
+			</CardBody>
+		</Card>
+	);
 
 	//TODO
 	//add play quiz when click play
@@ -106,21 +202,6 @@ const UsersTest = () => {
 	return (
 		<Container maxW="full" p={0}>
 			<VStack spacing={6} align="stretch">
-				{/* Header */}
-				<Box textAlign="center" mb={2}>
-					<Heading
-						size={isMobile ? 'lg' : 'xl'}
-						color="white"
-						mb={2}
-						fontWeight="bold"
-					>
-						📚 Your Lectures
-					</Heading>
-					<Text color="gray.300" fontSize={isMobile ? 'sm' : 'md'}>
-						{filteredQuizzes?.length || 0} lectures available
-					</Text>
-				</Box>
-
 				{/* Search and Filters */}
 				<Box
 					bg="whiteAlpha.100"
@@ -137,7 +218,7 @@ const UsersTest = () => {
 								<MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
 							</InputLeftElement>
 							<Input
-								placeholder="Search lectures, subjects, or categories..."
+								placeholder="Search quizzes, subjects, or categories..."
 								value={searchTerm}
 								onChange={(e) => setSearchTerm(e.target.value)}
 								bg="whiteAlpha.100"
@@ -208,10 +289,10 @@ const UsersTest = () => {
 				{/* Content */}
 				{filteredQuizzes && filteredQuizzes.length > 0 ? (
 					isMobile ? (
-						// Mobile Card View
+						//  Mobile Card View
 						<VStack spacing={cardSpacing} align="stretch">
-							{filteredQuizzes.map((quiz) => (
-								<QuizCard key={quiz._id} quiz={quiz}/>
+							{filteredQuizzes.filter(q => q.isPublished).map((quiz) => (
+								<MobileCard key={quiz._id} quiz={quiz} />
 							))}
 						</VStack>
 					) : (
@@ -228,35 +309,89 @@ const UsersTest = () => {
 								<Table variant="simple">
 									<Thead bg="whiteAlpha.200">
 										<Tr>
-											<Th color="white" fontSize="sm" fontWeight="bold">
+											<Th
+												textAlign={'center'}
+												color="white"
+												fontSize="sm"
+												fontWeight="bold"
+											>
 												Subject
 											</Th>
-											<Th color="white" fontSize="sm" fontWeight="bold">
+											<Th
+												textAlign={'center'}
+												color="white"
+												fontSize="sm"
+												fontWeight="bold"
+											>
 												Category
 											</Th>
-											<Th color="white" fontSize="sm" fontWeight="bold">
+											<Th
+												textAlign={'center'}
+												color="white"
+												fontSize="sm"
+												fontWeight="bold"
+											>
 												Title
+											</Th>
+											<Th
+												textAlign={'center'}
+												color="white"
+												fontSize="sm"
+												fontWeight="bold"
+											>
+												Items
+											</Th>
+											<Th
+												textAlign={'center'}
+												color="white"
+												fontSize="sm"
+												fontWeight="bold"
+											>
+												Passing Score
+											</Th>
+											<Th
+												textAlign={'center'}
+												color="white"
+												fontSize="sm"
+												fontWeight="bold"
+											>
+												Time Limit
 											</Th>
 										</Tr>
 									</Thead>
 									<Tbody>
-										{filteredQuizzes.map((quiz) => (
+										{filteredQuizzes.filter(q => q.isPublished).map((quiz) => (
 											<Tr
+												onClick={() => console.log('play quiz: ', quiz._id)}
 												key={quiz._id}
 												_hover={{ bg: 'whiteAlpha.100' }}
 												transition="background 0.2s ease"
 											>
-												<Td color="gray.200">
+												<Td color="gray.200" textAlign={'center'}>
 													<Badge colorScheme="purple" variant="subtle">
 														{quiz.subject.toUpperCase()}
 													</Badge>
 												</Td>
-												<Td color="gray.200">
+												<Td color="gray.200" textAlign={'center'}>
 													<Badge colorScheme="blue" variant="outline">
 														{quiz.category.toUpperCase()}
 													</Badge>
 												</Td>
 												<Td
+													textAlign={'center'}
+													cursor="pointer"
+													color="white"
+													fontWeight="medium"
+													_hover={{ color: 'purple.300' }}
+													transition="color 0.2s ease"
+													onClick={() =>
+														console.log('direct to play quiz game: ', quiz._id)
+													}
+												>
+													{quiz.title}
+												</Td>
+												<Td
+													textAlign={'center'}
 													cursor="pointer"
 													color="white"
 													fontWeight="medium"
@@ -264,7 +399,29 @@ const UsersTest = () => {
 													// onClick={() => handleViewPdf(quiz._id)}
 													transition="color 0.2s ease"
 												>
-													{quiz.title}
+													{quiz.totalPoints}
+												</Td>
+												<Td
+													textAlign={'center'}
+													cursor="pointer"
+													color="white"
+													fontWeight="medium"
+													_hover={{ color: 'purple.300' }}
+													// onClick={() => handleViewPdf(quiz._id)}
+													transition="color 0.2s ease"
+												>
+													{quiz.passingScore}%
+												</Td>
+												<Td
+													textAlign={'center'}
+													cursor="pointer"
+													color="white"
+													fontWeight="medium"
+													_hover={{ color: 'purple.300' }}
+													// onClick={() => handleViewPdf(quiz._id)}
+													transition="color 0.2s ease"
+												>
+													{quiz.timeLimit} mins
 												</Td>
 											</Tr>
 										))}
@@ -284,7 +441,7 @@ const UsersTest = () => {
 						borderColor="whiteAlpha.200"
 					>
 						<VStack spacing={4}>
-							<MdOutlineClass size={'5rem'}/>
+							<MdOutlineClass size={'5rem'} />
 							<Text color="gray.300" fontSize="lg" fontWeight="medium">
 								No quizzes found
 							</Text>

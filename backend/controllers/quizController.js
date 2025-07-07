@@ -78,95 +78,127 @@ export const getAllQuizzes = async (req, res) => {
 	}
 };
 
-export const submitAndEvaluateQuiz = async (req, res) => {
-	try {
-		const { quizId, answers, userId } = req.body;
-		if (!quizId || !answers) {
+	export const submitAndEvaluateQuiz = async (req, res) => {
+		try {
+			const { quizId, answers, userId } = req.body;
+			if (!quizId || !answers.length) {
+				return res.json({
+					success: false,
+					message: 'Provide the Quiz ID and answers',
+				});
+			}
+
+			if (!userId) {
+				return res.json({ success: false, message: 'Provide the user ID' });
+			}
+
+			const quiz = await Quiz.findById(quizId);
+			if (!quiz) {
+				return res.json({ success: false, message: 'Quiz not found' });
+			}
+
+			let score = 0;
+
+			const evaluatedAnswers = [];
+			let totalPoints = 0;
+			const passingScore = quiz.passingScore || 0;
+
+			for (let userAnswer of answers) {
+				const question = quiz.questions.id(userAnswer.questionId);
+				if (!question) continue; // skip question not found
+
+				let isCorrect = false;
+				let pointsEarned = 0;
+
+				// Evaluate based on type
+				if (question.type === 'multiple-choice') {
+					// find the the element in array with true value of isCorrect
+					const correctOption = question.options.find(
+						(option) => option.isCorrect
+					);
+
+					isCorrect =
+						correctOption &&
+						correctOption._id.toString() === userAnswer.selectedOption;
+				} else if (question.type === 'short-answer') {
+					isCorrect =
+						question.correctAnswer.trim().toLowerCase() ===
+						userAnswer.textAnswer.trim().toLowerCase();
+				}
+
+				//add points
+				if (isCorrect) {
+					pointsEarned = question.points || 0;
+					totalPoints += pointsEarned;
+				}
+
+				evaluatedAnswers.push({
+					questionId: userAnswer.questionId,
+					questionText: question.questionText,
+					selectedOption: userAnswer.selectedOption || null ,
+					textAnswer: userAnswer.textAnswer || '',
+					isCorrect,
+					pointsEarned,
+				});
+			}
+
+			score = totalPoints;
+			const percentageScore = quiz.totalPoints
+				? (score / quiz.totalPoints) * 100
+				: 0;
+			const passed = percentageScore >= passingScore;
+
+			const userAttemptQuiz = await QuizAttempt.findOne({
+				user: userId,
+				quiz: quizId,
+			})
+				.sort({ completedAt: -1 })
+				.select('score percentageScore passed completedAt answers');
+
+			if (!userAttemptQuiz) {
+				
+				const quizAttempt = new QuizAttempt({
+				quiz: quizId,
+				quizTitle: quiz.title,
+				user: userId,
+				answers: evaluatedAnswers,
+				currentScore: score,
+				scores: [score],
+				currentPercentageScore: percentageScore,
+				percentageScores: [percentageScore],
+				passed,
+				completedAt: new Date(),
+				attemptNumber: 1,
+				attemptDates: [new Date()]
+			});
+
+			await quizAttempt.save()
+			return res.json({ success: true, attempt: quizAttempt });
+			} else{
+				// If user has attempted the quiz before, update the existing attempt
+				userAttemptQuiz.answers = evaluatedAnswers;
+				userAttemptQuiz.currentScore = score;
+				userAttemptQuiz.currentPercentageScore = percentageScore;
+				userAttemptQuiz.passed = passed; 
+				userAttemptQuiz.completedAt = new Date();
+				
+				//Track history progress
+				userAttemptQuiz.scores.push(score);
+				userAttemptQuiz.percentageScores.push(percentageScore);
+				userAttemptQuiz.attemptDates.push(new Date());
+				userAttemptQuiz.attemptNumber += 1;
+				
+				await userAttemptQuiz.save();
+				return res.json({ success: true, attempt: userAttemptQuiz });
+			}
+			
+		} catch (err) {
 			return res.json({
 				success: false,
-				message: 'Provide the Quiz ID and answers',
+				message: 'Submission error: ' + err.message,
 			});
 		}
-
-		if (!userId) {
-			return res.json({ success: false, message: 'Provide the user ID' });
-		}
-
-		const quiz = await Quiz.findById(quizId);
-		if (!quiz) {
-			return res.json({ success: false, message: 'Quiz not found' });
-		}
-
-		let score = 0;
-
-		const evaluatedAnswers = [];
-		let totalPoints = 0;
-		const passingScore = quiz.passingScore || 0;
-
-		for (let userAnswer of answers) {
-			const question = quiz.questions.id(userAnswer.questionId);
-			if (!question) continue; // skip question not found
-
-			let isCorrect = false;
-			let pointsEarned = 0;
-
-			// Evaluate based on type
-			if (question.type === 'multiple-choice') {
-				// find the the element in array with true value of isCorrect
-				const correctOption = question.options.find(
-					(option) => option.isCorrect
-				);
-
-				isCorrect =
-					correctOption &&
-					correctOption._id.toString() === userAnswer.selectedOption;
-			} else if (question.type === 'short-answer') {
-				isCorrect =
-					question.correctAnswer.trim().toLowerCase() ===
-					userAnswer.textAnswer.trim().toLowerCase();
-			}
-
-			//add points
-			if (isCorrect) {
-				pointsEarned = question.points || 0;
-				totalPoints += pointsEarned;
-			}
-
-			evaluatedAnswers.push({
-				questionId: userAnswer.questionId,
-				questionText: question.questionText,
-				userAnswer: userAnswer.selectedOptions || userAnswer.textAnswer,
-				isCorrect,
-				pointsEarned,
-			});
-		}
-
-		score = totalPoints;
-		const percentageScore = quiz.totalPoints
-			? (score / quiz.totalPoints) * 100
-			: 0;
-		const passed = percentageScore >= passingScore;
-
-		const quizAttempt = new QuizAttempt({
-			quiz: quizId,
-			quizTitle: quiz.title,
-			user: userId,
-			answers: evaluatedAnswers,
-			score,
-			percentageScore,
-			passed,
-			completedAt: new Date(),
-		});
-
-		await quizAttempt.save();
-		res.json({ success: true, attempt: quizAttempt });
-	} catch (err) {
-		return res.json({
-			success: false,
-			message: 'Submission error: ' + err.message,
-		});
-	}
-};
+	};
 
 export const getUserQuizHistory = async (req, res) => {
 	try {
@@ -181,7 +213,7 @@ export const getUserQuizHistory = async (req, res) => {
 			quiz: quizId,
 		})
 			.sort({ completedAt: -1 })
-			.select('score percentageScore passed completedAt answers');
+			// .select('score percentageScore passed completedAt answers');
 
 		if (!userAttemptQuiz) {
 			return res.json({
@@ -189,6 +221,10 @@ export const getUserQuizHistory = async (req, res) => {
 				message: 'User did not take the quiz',
 			});
 		}
+
+		const findUser = await QuizAttempt.
+		find({user: userId})
+		.select('score quizTitle passed')
 
 		return res.json({
 			success: true,
@@ -293,4 +329,3 @@ export const updateQuiz = async (req, res) => {
 		return res.json({ success: false, message: err.message });
 	}
 };
-

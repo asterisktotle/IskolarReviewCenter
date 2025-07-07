@@ -11,7 +11,7 @@ interface UserData {
 	isAccountVerified: boolean;
 }
 
-interface PdfFiles {
+export interface PdfFiles {
 	_id: string;
 	subject: string;
 	category: string;

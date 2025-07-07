@@ -48,7 +48,7 @@ const Home = () => {
 									<div className="inline-flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-8 sm:mb-12">
 										<div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
 										<span className="text-sm font-medium text-gray-200">
-											{userData.isAccountVerified
+											{!userData.isAccountVerified
 												? 'Account Verified'
 												: 'Account Pending Verification'}
 										</span>

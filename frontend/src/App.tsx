@@ -52,7 +52,7 @@ const App = () => {
 					{/* USER */}
 					{!userData?.isAdmin && (
 						<>
-							<Route path="/user-dashboard" element={<UserDashboard />} />
+							<Route path="/dashboard" element={<Home />} />
 							<Route path="/user-tests" element={<UserTests />} />
 							<Route path="/user-lectures" element={<UsersLecture />} />
 						</>
