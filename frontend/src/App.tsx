@@ -16,6 +16,7 @@ import AdminTests from './pages/Admin/AdminTests';
 import UserDashboard from './pages/User/UserDashboard';
 import UserTests from './pages/User/UserTests';
 import ViewPdf from './pages/PdfViewer';
+import UserPlayQuiz from './pages/User/UserPlayQuiz';
 
 const App = () => {
 	const getAuth = useAuthStore((state) => state.getAuth);
@@ -55,6 +56,7 @@ const App = () => {
 							<Route path="/dashboard" element={<Home />} />
 							<Route path="/user-tests" element={<UserTests />} />
 							<Route path="/user-lectures" element={<UsersLecture />} />
+							<Route path="/user-tests/play/:quizId" element={<UserPlayQuiz/>} />
 						</>
 					)}
 					{/* USERS */}

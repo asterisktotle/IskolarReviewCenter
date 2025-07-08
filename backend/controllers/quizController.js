@@ -63,6 +63,10 @@ export const getAllQuizzes = async (req, res) => {
 			filter.title = { $regex: `^${req.query.title}$`, $options: 'i' }; // case-insensitive
 		}
 
+		if (req.query._id){
+			filter._id = req.query._id; // filter by quiz ID
+		}
+
 		const quizzes = await Quiz.find(filter);
 		if (quizzes.length === 0) {
 			return res.json({ success: true, message: 'No quizzes found' });
@@ -76,7 +80,31 @@ export const getAllQuizzes = async (req, res) => {
 			error: err.message,
 		});
 	}
-};
+}; 
+
+export const getQuizById = async (req, res) => {
+	try{
+		const {id} = req.params;
+		if(!id){
+			return res.json({success: false, message: 'Provide the quiz ID'})
+		}
+
+		const quiz = await Quiz.findById(id)
+
+		if(!quiz){
+			return res.json({success: false, message: 'Quiz not found'})
+		}
+
+		return res.json({success: true, data: quiz})
+
+	}catch(err){
+		return res.json({
+			success: false,
+			message: 'Failed to retrieve quizzes',
+			error: err.message,
+		});
+	}
+}
 
 export const submitAndEvaluateQuiz = async (req, res) => {
 		try {
@@ -134,7 +162,6 @@ export const submitAndEvaluateQuiz = async (req, res) => {
 
 				evaluatedAnswers.push({
 					questionId: userAnswer.questionId,
-					questionText: question.questionText,
 					selectedOption: userAnswer.selectedOption || null ,
 					textAnswer: userAnswer.textAnswer || '',
 					isCorrect,

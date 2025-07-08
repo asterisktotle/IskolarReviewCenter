@@ -706,7 +706,7 @@ const AdminTests = () => {
 
 								{selectedQuiz && selectedQuiz.length > 0 ? (
 									<VStack spacing={6} align="stretch">
-										{selectedQuiz.map((item, index) => (
+										{selectedQuiz.map(q => q).map((item, index) => (
 											<PlayQuiz
 												key={item._id}
 												question={item}

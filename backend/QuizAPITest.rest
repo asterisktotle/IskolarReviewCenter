@@ -1,5 +1,7 @@
-### CREATE QUIZ
+### GET ALL QUIZZES
 GET http://localhost:3100/api/quiz/get-all-quizzes
+### GET QUIZ BY ID
+GET http://localhost:3100/api/quiz/get-quiz/682493f4f2b3a7ab2feca5a4
    
 ### Upload a quiz with multiple-choices and short-answer DONE CHECKING
 POST http://localhost:3100/api/quiz/create-quiz

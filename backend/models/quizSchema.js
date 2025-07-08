@@ -126,7 +126,7 @@ const QuizAttemptSchema = new Schema({
 				type: Schema.Types.ObjectId,
 				required: true,
 			},
-			questionText: String, // optional: store the actual question for record-keeping
+			
 			selectedOption: {
 				type: Schema.Types.ObjectId,
 				ref: 'Question.options', // reference to the options in QuestionSchema

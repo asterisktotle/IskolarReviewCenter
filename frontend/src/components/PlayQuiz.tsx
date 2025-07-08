@@ -12,25 +12,28 @@ import {
 	Container,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import QuizStore from '../store/quizStore';
 
 
-// type PlayQuizTypes {
-// 	question: string,
-// 	questionNumber: Number,
-// 	totalQuestions: Number
-// }
-
-// TODO: 
+// 
+// TODO:
 // user must navigate to the new url to play the quiz
-// use the admin test component for mapping the quiz data 
+// use the admin test component for mapping the quiz data
+
+type QuestionTypes = {
+	points: number,
+	questionText: string,
+	type: 'multiple-choice' | 'short-answer',
+	options?: { id: number; text: string }[],
+}
 
 
-const PlayQuiz = ({question, questionNumber, totalQuestions}) => {
-	
-	
+const PlayQuiz = ({ question, questionNumber, totalQuestions } : 
+	{question: QuestionTypes, questionNumber: number, totalQuestions: number}
+) => {
 	const [selectedAnswer, setSelectedAnswer] = useState('');
 	const [shortAnswer, setShortAnswer] = useState('');
+	// console.log('question: ', question.points)
+	// console.log('questions: ', question.map((q) => console.log('question:', q.questionText)))
 
 	return (
 		<Container maxW="2xl" py={5}>

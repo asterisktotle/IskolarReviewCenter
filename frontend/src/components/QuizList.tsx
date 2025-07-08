@@ -18,7 +18,7 @@ import {
 } from '@chakra-ui/react';
 import { MdBook, MdDoneOutline, MdHourglassBottom, MdHourglassDisabled,  MdOutlineChecklist} from 'react-icons/md';
 
-import { QuizProfile } from '../store/quizStore';
+import QuizStore, { QuizProfile } from '../store/quizStore';
 import {  useMemo} from 'react';
 import useAuthStore from '../store/authStore';
 
@@ -77,10 +77,19 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 		return colors[category] || colors.default;
 	};
 
+	const {fetchQuizParams} = QuizStore()
+
 	const formatTime = (minutes: number) => {
 		if (minutes === 0) return 'No time limit';
 		return `${minutes} min`;
 	};
+
+	const handleSelectedQuizFetch = () => {
+		fetchQuizParams({
+			title: quiz.title,
+			category: quiz.category
+		})
+	}
 
 	return (
 		<Card
@@ -99,6 +108,7 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 			borderColor="whiteAlpha.200"
 			shadow="md"
             marginBlock={'1'}
+			onClick={handleSelectedQuizFetch}
 		>
 			<CardHeader pb={2}>
 				<Flex justify="space-between" align="start">
