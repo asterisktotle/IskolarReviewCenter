@@ -63,19 +63,12 @@ const UsersTest = () => {
 
 
 	// Handle play quiz action
-	const handlePlayQuiz = (quizTitle: string, quizCategory: string, quizSubject: string, quizId: string) => {
-		// fetchQuizParams({category: quizCategory, title: quizTitle, subject:quizSubject })
+	const handlePlayQuiz = (quizId: string) => {
 		
-		console.log('selected quiz title and ID:', quizTitle + " " + quizId )
-		//I have a component that needs these props to display the quiz 
-		// const singleQuestion = 
-		// <PlayQuiz />
 
+		navigate(`/user-tests/play/${quizId}`)
 
-		// if(!isLoading){
-		// 	navigate(`/user-tests/play/${quizId}`)
-
-		// }
+		
 
 	}
 
@@ -197,14 +190,10 @@ const UsersTest = () => {
 					</Box>
 
 					{/* Action indicator */}
-						<Button fontSize="sm" onClick={() => handlePlayQuiz(
-							quiz.title, quiz.category, quiz.subject, quiz._id
-						)}>
+						<Button fontSize="sm" onClick={() => handlePlayQuiz(quiz._id)}>	
 							Tap to Play →
 						</Button>
-						{quiz.questions.map((item, index) => 
-						<PlayQuiz question={item} questionNumber={index + 1} totalQuestions={quiz.questions.length} />
-						) }
+						
 				</Stack>
 			</CardBody>
 		</Card>
@@ -410,9 +399,7 @@ const UsersTest = () => {
 													fontWeight="medium"
 													_hover={{ color: 'purple.300' }}
 													transition="color 0.2s ease"
-													onClick={() =>
-														console.log('direct to play quiz game: ', quiz._id)
-													}
+													onClick={() => handlePlayQuiz(quiz._id)}
 												>
 													{quiz.title}
 												</Td>
