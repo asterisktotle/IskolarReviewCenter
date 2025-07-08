@@ -41,6 +41,11 @@ export interface QuizProfile {
 	isPublished: boolean;
 }
 
+export interface FetchResponse {
+	data: QuizProfile,
+	success: boolean
+}
+
 interface QuizStore {
 	questions: QuestionData[];
 	setQuestions: (questions: QuestionData[]) => void;
@@ -56,7 +61,9 @@ interface QuizStore {
 	removeQuestion: (questionId: number) => void;
 	updateQuestion: (questionId: number, updatedQuestion: QuestionData) => void;
 	fetchQuizParams: (searchParams?: { [key: string]: string | boolean }) => void;
+	fetchQuizById:(quizId: string) => Promise<FetchResponse | void> ;
 	publishQuiz: () => Promise<any>;
+
 }
 
 const QuizStore = create<QuizStore>((set, get) => ({
@@ -178,7 +185,29 @@ const QuizStore = create<QuizStore>((set, get) => ({
 			setIsLoading(false);
 		}
 	},
-	getQuizHistory: async (quizId, userId) => {}
+	fetchQuizById: async (quizId: string) => {
+		const {  setIsLoading } = get();
+		
+		try {
+			setIsLoading(true);
+			const { data } = await axios.get(
+				BACKEND_URL + `/api/quiz/get-quiz/${quizId}`)
+
+			if (!data.success){
+				throw new Error(data.message)
+			}
+			return data
+
+		}catch(err){
+			//make a an error message later on
+			console.log('fetching error: ', err)
+		}finally{
+			setIsLoading(false);
+			
+		}
+	},
+
+	// getQuizHistory: async (quizId, userId) => {}
 	
 }));
 

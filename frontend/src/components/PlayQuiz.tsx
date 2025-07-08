@@ -40,9 +40,7 @@ const PlayQuiz = ({ question, questionNumber, totalQuestions } :
 			<VStack spacing={6} align="stretch">
 				{/* Question Header */}
 				<HStack justify="space-between" align="center">
-					<Badge
-						variant="subtle"
-						colorScheme="whiteAlpha"
+					<Badge			
 						fontSize="sm"
 						px={3}
 						py={1}
