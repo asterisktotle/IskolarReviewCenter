@@ -39,14 +39,17 @@ import {
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import QuizStore, { QuizProfile } from '../../store/quizStore';
 import { MdOutlineClass } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
+import PlayQuiz from '../../components/PlayQuiz';
 
 const UsersTest = () => {
-	const { fetchQuizParams, quizzesFetch, isLoading } = QuizStore();
+	const { fetchQuizParams, quizzesFetch, isLoading , selectedQuiz} = QuizStore();
 
 	//Actions
 	const [searchTerm, setSearchTerm] = useState('');
 	const [selectedCategory, setSelectedCategory] = useState('all');
 	const [selectedSubject, setSelectedSubject] = useState('all');
+	const navigate = useNavigate()
 
 	// Responsive breakpoint
 	const isMobile = useBreakpointValue({ base: true, lg: false });
@@ -57,6 +60,24 @@ const UsersTest = () => {
 		fetchQuizParams();
 		
 	}, []);
+
+
+	// Handle play quiz action
+	const handlePlayQuiz = (quizTitle: string, quizCategory: string, quizSubject: string, quizId: string) => {
+		// fetchQuizParams({category: quizCategory, title: quizTitle, subject:quizSubject })
+		
+		console.log('selected quiz title and ID:', quizTitle + " " + quizId )
+		//I have a component that needs these props to display the quiz 
+		// const singleQuestion = 
+		// <PlayQuiz />
+
+
+		// if(!isLoading){
+		// 	navigate(`/user-tests/play/${quizId}`)
+
+		// }
+
+	}
 
 	// Filter logic
 	const filteredQuizzes = quizzesFetch.filter((q) => q.isPublished).filter((quiz) => {
@@ -176,9 +197,14 @@ const UsersTest = () => {
 					</Box>
 
 					{/* Action indicator */}
-						<Button fontSize="sm">
+						<Button fontSize="sm" onClick={() => handlePlayQuiz(
+							quiz.title, quiz.category, quiz.subject, quiz._id
+						)}>
 							Tap to Play →
 						</Button>
+						{quiz.questions.map((item, index) => 
+						<PlayQuiz question={item} questionNumber={index + 1} totalQuestions={quiz.questions.length} />
+						) }
 				</Stack>
 			</CardBody>
 		</Card>
