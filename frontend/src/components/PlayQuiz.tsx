@@ -14,13 +14,8 @@ import {
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { QuestionData } from '../store/quizStore';
+import QuizStore, { AnswerState, QuestionData, QuizFormEvaluation } from '../store/quizStore';
 
-interface AnswerState {
-	questionId: string;
-	selectedOptionId?: string;
-	textAnswer?: string;
-}
 
 const PlayQuiz = ({
 	questions,
@@ -33,6 +28,7 @@ const PlayQuiz = ({
 }) => {
 	const [answers, setAnswers] = useState<AnswerState[]>([]);
 	const navigate = useNavigate();
+	const {evaluateSubmittedQuiz, isLoading} = QuizStore()
 
 	const updateAnswer = (
 		questionId: string,
@@ -60,21 +56,31 @@ const PlayQuiz = ({
 	const getTextAnswer = (questionId: string) =>
 		answers?.find((ans) => ans.questionId === questionId)?.textAnswer || '';
 
-	const handleSubmit = () => {
-		const quizFormRequest = {
+	const handleSubmit = async () => {
+		const quizFormRequest : QuizFormEvaluation = {
 			userId,
 			quizId,
 			answers,
 		};
 
-		console.log('Quiz form:', quizFormRequest);
+		const response = await evaluateSubmittedQuiz(quizFormRequest)
+		if(!response.success){
+			alert('Failed to submit quiz. Please try again later.');
+			return;
+		}
+		console.log('Quiz submitted successfully:, ', response)
+		if(!isLoading){
+			navigate('/user-tests')
+		}
+
+		
 	};
 
 	return (
 		<Container maxW="2xl" py={5}>
 			<FormControl onSubmit={handleSubmit}>
 				{questions.map((question, index) => (
-					<VStack key={question.id} spacing={6} mb={5} align="stretch">
+					<VStack key={question._id} spacing={6} mb={5} align="stretch">
 						{/* Question Header */}
 						<HStack justify="space-between" align="center">
 							<Badge fontSize="sm" px={3} py={1} borderRadius="md">
@@ -194,7 +200,7 @@ const PlayQuiz = ({
 				))}
 
 				<Flex justify="center" mt={6} w={'full'}>
-					<Button onClick={handleSubmit}>Submit Answer</Button>
+					<Button disabled={isLoading} onClick={() => handleSubmit()}>Submit Answer</Button>
 				</Flex>
 			</FormControl>
 		</Container>

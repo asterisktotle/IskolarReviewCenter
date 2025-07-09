@@ -44,6 +44,7 @@ const UsersLecture = () => {
 
 	useEffect(() => {
 		getAllPdf();
+		console.log('pdf List: ', pdfList)
 	}, [getAllPdf]);
 
 	// Filter logic
@@ -82,7 +83,6 @@ const UsersLecture = () => {
 				borderColor: 'purple.400',
 			}}
 			_active={{ transform: 'translateY(0px)' }}
-			onClick={() => handleViewPdf(pdf._id)}
 			bg="whiteAlpha.100"
 			backdropFilter="blur(10px)"
 			border="1px solid"
@@ -130,7 +130,7 @@ const UsersLecture = () => {
 
 					{/* Action indicator */}
 					<Flex justify="flex-end" align="center" mt={2}>
-						<Text fontSize="sm" color="purple.300">
+						<Text onClick={() => handleViewPdf(pdf._id)} fontSize="sm" color="purple.300">
 							Tap to view →
 						</Text>
 					</Flex>

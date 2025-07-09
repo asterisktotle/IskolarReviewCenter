@@ -43,7 +43,7 @@ import { useNavigate } from 'react-router-dom';
 import PlayQuiz from '../../components/PlayQuiz';
 
 const UsersTest = () => {
-	const { fetchQuizParams, quizzesFetch, isLoading , selectedQuiz} = QuizStore();
+	const { fetchQuizParams, quizzesFetch, isLoading } = QuizStore();
 
 	//Actions
 	const [searchTerm, setSearchTerm] = useState('');

@@ -44,7 +44,7 @@ export const uploadPdf = async (req, res) => {
 
 export const getAllPdf = async (req, res) => {
 	try {
-		const pdf = await pdfModel.find().sort({ uploadDate: -1 });
+		const pdf = await pdfModel.find().sort({ uploadDate: -1 }).select('title subject category');
 		return res.json({ success: true, data: pdf, count: pdf.length });
 	} catch (err) {
 		console.log('get Pdf error: ', err.message);
