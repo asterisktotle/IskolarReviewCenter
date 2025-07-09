@@ -1,12 +1,11 @@
-import { Box, Button, Heading,  VStack } from '@chakra-ui/react';
+import { Box, Button, Heading, VStack, Text } from '@chakra-ui/react';
 import PlayQuiz from '../../components/PlayQuiz';
 import QuizStore, { QuizProfile } from '../../store/quizStore';
-import {  useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import useAuthStore from '../../store/authStore';
 
-
-
-// TODO: 
+// TODO:
 
 //PRIOR
 //1. submit the answer then show the evaluated answer, and user score
@@ -15,87 +14,64 @@ import { useEffect, useState } from 'react';
 //3. Display the timer if there is a timer, then auto submit,
 
 // LEAST FEATURE
-// 1. Display the timer if there is a timer, then auto submit,
+// 1. Display the timer if there is a timer, then auto submit
 
 const UserPlayQuiz = () => {
 	const { fetchQuizById, isLoading } = QuizStore();
-	const [quizData, setQuizData] = useState<QuizProfile>()
+	const { userData } = useAuthStore();
+	const [quizData, setQuizData] = useState<QuizProfile>();
 	// const [errorMessage, setErrorMessage] = useState(null || '')
 
 	// const [quizData, setQuizData] = useState()
-	const { quizId } = useParams()
+	const { quizId } = useParams();
 
 	//  fetch the quiz using quizId url params so that it can be fetch if the user refresh the page
-	useEffect( () => {
-		  const fetchData = async () => {
-			try{
-				const {data} = await fetchQuizById(quizId as string);
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await fetchQuizById(quizId as string);
 
-				if(!data){
+				if (!response || !response.data) {
 					// setErrorMessage( 'Quiz not found');
-				console.error('Error fetching quiz')
+					console.error('Error fetching quiz');
 
 					return;
 				}
 
-
-				setQuizData(data);
-				// setErrorMessage(null);
-				console.log('quiz titles: ', quizData.title )
-
-
-			}catch (err){
-				console.error('Error fetching quiz')
+				setQuizData(response.data);
+			} catch {
+				console.error('Error fetching quiz');
 				// setErrorMessage('Error fetching quiz data');
 			}
-
-    };
-    fetchData();
-
-
-}, [fetchQuizById, quizId])
-
-const handleButton = () => {
-	console.log('quiz submitted')
-}
+		};
+		fetchData();
+	}, [fetchQuizById, quizId]);
 
 	if (isLoading) {
 		return <Box>Please wait..</Box>;
 	}
-	
-
 
 	return (
+		<VStack spacing={6} align="stretch" px={4}>
+			<Box textAlign="center">
+				<Heading size="md" mb={2}>
+					{/* {quizData.title} */}
+				</Heading>
+				<Text color="gray.200" fontSize={'2xl'}>
+					{quizData?.title}
+				</Text>
+			</Box>
 
-		   <VStack spacing={6} align="stretch" px={4}>
-      <Box textAlign="center">
-        <Heading size="md" mb={2}>
-          {/* {quizData.title} */}
-        </Heading>
-        {/* <Text color="gray.200">{quizData.title}</Text> */}
-      </Box>
-
-      <VStack spacing={6} align="stretch">
-        {quizData?.questions?.map((q, i) => (
-          <PlayQuiz 
-            key={i} 
-            question={q} 
-            questionNumber={i + 1} 
-            totalQuestions={quizData.questions.length}
-          />
-        ))}
-        
-        <Box display="flex" justifyContent="center">
-          <Button 
-            w={{ base: 'full', sm: 'sm' }} 
-            onClick={handleButton}
-          >
-            Submit 
-          </Button>
-        </Box>
-      </VStack>
-    </VStack>
-  );
-	
+			<VStack spacing={6} align="stretch">
+				{quizData && quizData._id && userData?.userId && (
+					<PlayQuiz
+						questions={quizData.questions}
+						userId={userData.userId}
+						quizId={quizData._id}
+					/>
+				)}
+			</VStack>
+		</VStack>
+	);
 };
 export default UserPlayQuiz;

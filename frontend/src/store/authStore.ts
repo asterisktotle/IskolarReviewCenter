@@ -9,6 +9,7 @@ interface UserData {
 	name: string;
 	isAccountVerified: boolean;
 	isAdmin: boolean;
+	userId: string;
 }
 interface SendOTPVerify {
 	success: boolean;
