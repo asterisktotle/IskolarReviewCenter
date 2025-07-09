@@ -29,8 +29,19 @@ interface ShortAnswerQuestion extends BaseQuestionData {
 	correctAnswer: string;
 	options?: never;
 }
-
 export type QuestionData = MultipleChoiceQuestion | ShortAnswerQuestion;
+
+export interface AnswerState {
+	questionId: string;
+	selectedOptionId?: string;
+	textAnswer?: string;
+}
+
+export interface QuizFormEvaluation {
+	quizId: string;
+	userId: string;
+	answers: AnswerState[]
+}
 
 export interface QuizProfile {
 	title: string;
@@ -66,6 +77,7 @@ interface QuizStore {
 	fetchQuizParams: (searchParams?: { [key: string]: string | boolean }) => void;
 	fetchQuizById: (quizId: string) => Promise<FetchResponse | void>;
 	publishQuiz: () => Promise<any>;
+	evaluateSubmittedQuiz: (quizForm: QuizFormEvaluation) => Promise<any>;
 }
 
 const QuizStore = create<QuizStore>((set, get) => ({
@@ -207,8 +219,31 @@ const QuizStore = create<QuizStore>((set, get) => ({
 			setIsLoading(false);
 		}
 	},
+	evaluateSubmittedQuiz: async (quizForm : QuizFormEvaluation) => {
+		const { setIsLoading } = get();
+		try{
+			setIsLoading(true);
+			const { data } = await axios.post( BACKEND_URL + '/api/quiz/submit-quiz', {
+				quizId: quizForm.quizId,
+				userId: quizForm.userId,
+				answers: quizForm.answers
+			})
+			if( !data.success) {
+				throw new Error(data.message)
+			}
+			return data;
+		}catch (err) {
+			console.log('fetching error: ', err);
+			
+		}finally {
+			setIsLoading(false)
+		}
+	},
 
-	// getQuizHistory: async (quizId, userId) => {}
+	getQuizHistory: async (quizId, userId) => {
+		// not implemented yet
+		console.log('getquiz history: ', quizId, userId)
+	}
 }));
 
 export default QuizStore;

@@ -67,7 +67,7 @@ export const getAllQuizzes = async (req, res) => {
 			filter._id = req.query._id; // filter by quiz ID
 		}
 
-		const quizzes = await Quiz.find(filter);
+		const quizzes = await Quiz.find(filter).select('title subject category isPublished totalPoints passingScore timeLimit');
 		if (quizzes.length === 0) {
 			return res.json({ success: true, message: 'No quizzes found' });
 		}
@@ -200,7 +200,7 @@ export const submitAndEvaluateQuiz = async (req, res) => {
 			});
 
 			await quizAttempt.save()
-			return res.json({ success: true, attempt: quizAttempt });
+			return res.json({ success: true, data: quizAttempt });
 			} else{
 				// If user has attempted the quiz before, update the existing attempt
 				userAttemptQuiz.answers = evaluatedAnswers;
@@ -219,11 +219,6 @@ export const submitAndEvaluateQuiz = async (req, res) => {
 				if (!userAttemptQuiz.attemptDates) {
 					userAttemptQuiz.attemptDates = [];
 				}
-
-				
-
-				
-
 				//Track history progress
 				userAttemptQuiz.scores.push(score);
 				userAttemptQuiz.percentageScores.push(percentageScore);
@@ -231,7 +226,7 @@ export const submitAndEvaluateQuiz = async (req, res) => {
 				userAttemptQuiz.attemptNumber = Number(userAttemptQuiz.attemptNumber + 1);
 				
 				await userAttemptQuiz.save();
-				return res.json({ success: true, attempt: userAttemptQuiz });
+				return res.json({ success: true, data: userAttemptQuiz });
 			}
 			
 		} catch (err) {
