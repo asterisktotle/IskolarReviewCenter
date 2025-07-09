@@ -11,10 +11,13 @@ import {
 	Badge,
 	Container,
 	Button,
+	useToast,
+	Spinner,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QuizStore, { AnswerState, QuestionData, QuizFormEvaluation } from '../store/quizStore';
+import { set } from 'react-hook-form';
 
 
 const PlayQuiz = ({
@@ -27,12 +30,14 @@ const PlayQuiz = ({
 	quizId: string;
 }) => {
 	const [answers, setAnswers] = useState<AnswerState[]>([]);
-	const navigate = useNavigate();
+	const [spinner, setSpinner ] = useState(false)
+	// const navigate = useNavigate();
+	const toast = useToast()
 	const {evaluateSubmittedQuiz, isLoading} = QuizStore()
 
 	const updateAnswer = (
 		questionId: string,
-		selectedOptionId?: string,
+		selectedOption?: string,
 		textAnswer?: string
 	) => {
 		setAnswers((prev = []) => {
@@ -42,7 +47,7 @@ const PlayQuiz = ({
 				...filtered,
 				{
 					questionId,
-					...(selectedOptionId ? { selectedOptionId } : {}),
+					...(selectedOption ? { selectedOption } : {}),
 					...(textAnswer ? { textAnswer } : {}),
 				},
 			];
@@ -50,33 +55,75 @@ const PlayQuiz = ({
 	};
 
 	const getSelectedOption = (questionId: string) =>
-		answers?.find((ans) => ans.questionId === questionId)?.selectedOptionId ||
+		answers?.find((ans) => ans.questionId === questionId)?.selectedOption||
 		'';
 
 	const getTextAnswer = (questionId: string) =>
 		answers?.find((ans) => ans.questionId === questionId)?.textAnswer || '';
 
-	const handleSubmit = async () => {
+	const handleSubmit = () => {
 		const quizFormRequest : QuizFormEvaluation = {
 			userId,
 			quizId,
 			answers,
 		};
 
-		const response = await evaluateSubmittedQuiz(quizFormRequest)
-		if(!response.success){
-			alert('Failed to submit quiz. Please try again later.');
-			return;
-		}
-		console.log('Quiz submitted successfully:, ', response)
-		if(!isLoading){
-			navigate('/user-tests')
-		}
 
+		try {
+			setSpinner(true)
+			
+			setTimeout( async() => {
+
+				const response = await evaluateSubmittedQuiz(quizFormRequest)
+				if(!response.success){
+					toast({
+					title: 'Failed to submit quiz',
+					description: 'Please try again later.',
+					status: 'error',
+					duration: 5000,
+					isClosable: true,
+				});
+				setSpinner(false)
+				return
+				}
+	
+				const { data } = response;
+				setSpinner(false)
+				console.log('quiz result: ', data);
+
+			}, 5000)
+			
+
+
+		}catch (error){
+			console.error('Error submitting quiz:', error);
+			toast({
+				title: 'Failed to submit quiz',
+				description: 'Please try again later.',
+				status: 'error',
+				duration: 5000,
+				isClosable: true,
+			});
+			setSpinner(false)
+		
+		}
+		
+		
 		
 	};
 
+	 if (spinner) {
+        return (
+            <Flex justify="center" align="center" minH="300px">
+                <Spinner size="xl" thickness="4px" color="blue.400" />
+                <Text ml={4} fontSize="lg">Evaluating your answers...</Text>
+            </Flex>
+        );
+    }
+
 	return (
+			
+
 		<Container maxW="2xl" py={5}>
 			<FormControl onSubmit={handleSubmit}>
 				{questions.map((question, index) => (
@@ -200,7 +247,7 @@ const PlayQuiz = ({
 				))}
 
 				<Flex justify="center" mt={6} w={'full'}>
-					<Button disabled={isLoading} onClick={() => handleSubmit()}>Submit Answer</Button>
+					<Button disabled={isLoading} onClick={handleSubmit}>Submit Answer</Button>
 				</Flex>
 			</FormControl>
 		</Container>
