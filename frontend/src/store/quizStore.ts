@@ -15,12 +15,14 @@ interface BaseQuestionData {
 	id: number;
 	questionText: string;
 	points: number;
+	_id?: string;
 }
 
 export interface MultipleChoiceQuestion extends BaseQuestionData {
 	type: 'multiple-choice';
 	options: QuestionOption[];
 	correctAnswer?: never;
+	_id?: string;
 }
 interface ShortAnswerQuestion extends BaseQuestionData {
 	type: 'short-answer';
@@ -39,11 +41,12 @@ export interface QuizProfile {
 	totalPoints: number;
 	questions: QuestionData[];
 	isPublished: boolean;
+	_id?: string;
 }
 
 export interface FetchResponse {
-	data: QuizProfile,
-	success: boolean
+	data: QuizProfile;
+	success: boolean;
 }
 
 interface QuizStore {
@@ -61,9 +64,8 @@ interface QuizStore {
 	removeQuestion: (questionId: number) => void;
 	updateQuestion: (questionId: number, updatedQuestion: QuestionData) => void;
 	fetchQuizParams: (searchParams?: { [key: string]: string | boolean }) => void;
-	fetchQuizById:(quizId: string) => Promise<FetchResponse | void> ;
+	fetchQuizById: (quizId: string) => Promise<FetchResponse | void>;
 	publishQuiz: () => Promise<any>;
-
 }
 
 const QuizStore = create<QuizStore>((set, get) => ({
@@ -186,29 +188,27 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		}
 	},
 	fetchQuizById: async (quizId: string) => {
-		const {  setIsLoading } = get();
-		
+		const { setIsLoading } = get();
+
 		try {
 			setIsLoading(true);
 			const { data } = await axios.get(
-				BACKEND_URL + `/api/quiz/get-quiz/${quizId}`)
+				BACKEND_URL + `/api/quiz/get-quiz/${quizId}`
+			);
 
-			if (!data.success){
-				throw new Error(data.message)
+			if (!data.success) {
+				throw new Error(data.message);
 			}
-			return data
-
-		}catch(err){
+			return data;
+		} catch (err) {
 			//make a an error message later on
-			console.log('fetching error: ', err)
-		}finally{
+			console.log('fetching error: ', err);
+		} finally {
 			setIsLoading(false);
-			
 		}
 	},
 
 	// getQuizHistory: async (quizId, userId) => {}
-	
 }));
 
 export default QuizStore;

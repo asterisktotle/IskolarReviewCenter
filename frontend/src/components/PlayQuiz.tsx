@@ -10,122 +10,167 @@ import {
 	HStack,
 	Badge,
 	Container,
+	Button,
 } from '@chakra-ui/react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { QuestionData } from '../store/quizStore';
 
-
-// 
-// TODO:
-// user must navigate to the new url to play the quiz
-// use the admin test component for mapping the quiz data
-
-type QuestionTypes = {
-	points: number,
-	questionText: string,
-	type: 'multiple-choice' | 'short-answer',
-	options?: { id: number; text: string }[],
+interface AnswerState {
+	questionId: string;
+	selectedOptionId?: string;
+	textAnswer?: string;
 }
 
+const PlayQuiz = ({
+	questions,
+	userId,
+	quizId,
+}: {
+	questions: QuestionData[];
+	userId: string;
+	quizId: string;
+}) => {
+	const [answers, setAnswers] = useState<AnswerState[]>([]);
+	const navigate = useNavigate();
 
-const PlayQuiz = ({ question, questionNumber, totalQuestions } : 
-	{question: QuestionTypes, questionNumber: number, totalQuestions: number}
-) => {
-	const [selectedAnswer, setSelectedAnswer] = useState('');
-	const [shortAnswer, setShortAnswer] = useState('');
-	// console.log('question: ', question.points)
-	// console.log('questions: ', question.map((q) => console.log('question:', q.questionText)))
+	const updateAnswer = (
+		questionId: string,
+		selectedOptionId?: string,
+		textAnswer?: string
+	) => {
+		setAnswers((prev = []) => {
+			const filtered = prev.filter((ans) => ans.questionId !== questionId);
+
+			return [
+				...filtered,
+				{
+					questionId,
+					...(selectedOptionId ? { selectedOptionId } : {}),
+					...(textAnswer ? { textAnswer } : {}),
+				},
+			];
+		});
+	};
+
+	const getSelectedOption = (questionId: string) =>
+		answers?.find((ans) => ans.questionId === questionId)?.selectedOptionId ||
+		'';
+
+	const getTextAnswer = (questionId: string) =>
+		answers?.find((ans) => ans.questionId === questionId)?.textAnswer || '';
+
+	const handleSubmit = () => {
+		const quizFormRequest = {
+			userId,
+			quizId,
+			answers,
+		};
+
+		console.log('Quiz form:', quizFormRequest);
+	};
 
 	return (
 		<Container maxW="2xl" py={5}>
-			<VStack spacing={6} align="stretch">
-				{/* Question Header */}
-				<HStack justify="space-between" align="center">
-					<Badge			
-						fontSize="sm"
-						px={3}
-						py={1}
-						borderRadius="md"
-					>
-						Question {questionNumber} of {totalQuestions}
-					</Badge>
-					<Text fontSize="sm" color="gray.300" fontWeight="medium">
-						{question.points} {question.points === 1 ? 'point' : 'points'}
-					</Text>
-				</HStack>
+			<FormControl onSubmit={handleSubmit}>
+				{questions.map((question, index) => (
+					<VStack key={question.id} spacing={6} mb={5} align="stretch">
+						{/* Question Header */}
+						<HStack justify="space-between" align="center">
+							<Badge fontSize="sm" px={3} py={1} borderRadius="md">
+								Question {index + 1} of {questions.length}
+							</Badge>
+							<Text fontSize="sm" color="gray.300" fontWeight="medium">
+								{question.points} {question.points === 1 ? 'point' : 'points'}
+							</Text>
+						</HStack>
 
-				{/* Question Card */}
-				<Box bg="white" borderRadius="lg" p={6} border="1px">
-					{/* Question Text */}
-					<Text fontWeight="semibold" color="black" mb={6} lineHeight="1.5">
-						{question.questionText}
-					</Text>
+						{/* Question Card */}
+						<Box
+							bg="white"
+							borderRadius="lg"
+							p={4}
+							w={'-moz-min-content'}
+							border="1px"
+						>
+							{/* Question Text */}
+							<Text fontWeight="semibold" color="black" mb={2} lineHeight="1.5">
+								{question.questionText}
+							</Text>
 
-					<FormControl>
-						{/* Multiple Choice Options */}
-						{question.type === 'multiple-choice' ? (
-							<RadioGroup value={selectedAnswer} onChange={setSelectedAnswer}>
-								<VStack spacing={3} align="stretch">
-									{question.options?.map((choice) => {
-										const isSelected = selectedAnswer === choice.id.toString();
+							{/* Multiple Choice Options */}
+							{question.type === 'multiple-choice' ? (
+								<RadioGroup
+									value={getSelectedOption(String(question._id))}
+									onChange={(value) =>
+										updateAnswer(String(question._id), value)
+									}
+								>
+									<VStack spacing={1} align="stretch">
+										{question.options?.map((choice) => {
+											const isSelected =
+												getSelectedOption(String(question._id)) ===
+												String(choice._id);
 
-										return (
-											<Box key={choice.id} as="label" cursor="pointer">
-												<Flex
-													align="center"
-													p={4}
-													borderRadius="md"
-													border="1px"
-													borderColor={isSelected ? 'blue.300' : 'gray.200'}
-													bg={isSelected ? 'blue.50' : 'gray.50'}
-													_hover={{
-														bg: isSelected ? 'blue.100' : 'gray.100',
-														borderColor: isSelected ? 'blue.400' : 'gray.300',
-													}}
-													transition="all 0.2s ease"
-												>
-													<Radio
-														value={choice.id.toString()}
-														colorScheme="blue"
-														mr={3}
-													/>
+											return (
+												<Box key={choice.id} as="label" cursor="pointer">
+													<Flex
+														align="center"
+														p={2}
+														borderRadius="md"
+														border="1px"
+														borderColor={isSelected ? 'blue.300' : 'gray.200'}
+														bg={isSelected ? 'blue.50' : 'gray.50'}
+														_hover={{
+															bg: isSelected ? 'blue.100' : 'gray.100',
+															borderColor: isSelected ? 'blue.400' : 'gray.300',
+														}}
+														transition="all 0.2s ease"
+													>
+														<Radio
+															value={choice._id}
+															colorScheme="blue"
+															mr={3}
+														/>
 
-													<Text fontSize="md" color="gray.700" flex="1">
-														{choice.text}
-													</Text>
-												</Flex>
-											</Box>
-										);
-									})}
-								</VStack>
-							</RadioGroup>
-						) : (
-							/* Short Answer Input */
-							question.type === 'short-answer' && (
-								<VStack spacing={3}>
-									<Input
-										placeholder="Type your answer here..."
-										value={shortAnswer}
-										onChange={(e) => setShortAnswer(e.target.value)}
-										size="md"
-										borderRadius="md"
-										border="1px"
-										borderColor="gray.300"
-										_focus={{
-											borderColor: 'blue.400',
-											boxShadow: '0 0 0 1px var(--chakra-colors-blue-400)',
-										}}
-										textColor={'black'}
-										bg="white"
-										p={3}
-									/>
-								</VStack>
-							)
-						)}
-					</FormControl>
-				</Box>
+														<Text fontSize="sm" color="gray.700" flex="1">
+															{choice.text}
+														</Text>
+													</Flex>
+												</Box>
+											);
+										})}
+									</VStack>
+								</RadioGroup>
+							) : (
+								/* Short Answer Input */
+								question.type === 'short-answer' && (
+									<VStack spacing={3}>
+										<Input
+											placeholder="Type your answer here..."
+											value={getTextAnswer(String(question._id))}
+											onChange={(e) =>
+												updateAnswer(
+													String(question._id),
+													undefined,
+													e.target.value
+												)
+											}
+											size="sm"
+											borderRadius="md"
+											border="1px"
+											borderColor="gray.500"
+											textColor={'black'}
+											bg="white"
+											p={2}
+										/>
+									</VStack>
+								)
+							)}
+						</Box>
 
-				{/* ILL ADD THIS IF I WANT  */}
-				{/* Progress Bar
+						{/* ILL ADD THIS IF I WANT  */}
+						{/* Progress Bar
 				<Box>
 					<HStack justify="space-between" mb={2}>
 						<Text fontSize="xs" color="gray.500">
@@ -145,7 +190,13 @@ const PlayQuiz = ({ question, questionNumber, totalQuestions } :
 						/>
 					</Box>
 				</Box> */}
-			</VStack>
+					</VStack>
+				))}
+
+				<Flex justify="center" mt={6} w={'full'}>
+					<Button onClick={handleSubmit}>Submit Answer</Button>
+				</Flex>
+			</FormControl>
 		</Container>
 	);
 };
