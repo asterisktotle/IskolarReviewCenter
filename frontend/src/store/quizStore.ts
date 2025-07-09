@@ -33,7 +33,7 @@ export type QuestionData = MultipleChoiceQuestion | ShortAnswerQuestion;
 
 export interface AnswerState {
 	questionId: string;
-	selectedOptionId?: string;
+	selectedOption?: string;
 	textAnswer?: string;
 }
 
@@ -231,6 +231,7 @@ const QuizStore = create<QuizStore>((set, get) => ({
 			if( !data.success) {
 				throw new Error(data.message)
 			}
+			console.log('quiz evaluation: ', data)
 			return data;
 		}catch (err) {
 			console.log('fetching error: ', err);
