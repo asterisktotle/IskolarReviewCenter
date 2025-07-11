@@ -9,6 +9,7 @@ export interface QuestionOption {
 	id: number;
 	text: string;
 	isCorrect: boolean;
+	_id: string;
 }
 
 interface BaseQuestionData {
@@ -40,7 +41,7 @@ export interface AnswerState {
 export interface QuizFormEvaluation {
 	quizId: string;
 	userId: string;
-	answers: AnswerState[]
+	answers: AnswerState[];
 }
 
 export interface QuizProfile {
@@ -60,6 +61,28 @@ export interface FetchResponse {
 	success: boolean;
 }
 
+
+interface QuizAttemptResult {
+  quiz: string;
+  quizTitle: string;
+  user: string;
+  answers: Array<{
+	questionId: string;
+	selectedOption?: string;
+	textAnswer?: string;
+	isCorrect: boolean;
+	pointsEarned: number;
+  }>;
+  currentScore: number;
+  scores: number[];
+  currentPercentageScore: number;
+  percentageScores: number[];
+  passed: boolean;
+  completedAt: string;
+  attemptNumber: number;
+  attemptDates: string[];
+}
+
 interface QuizStore {
 	questions: QuestionData[];
 	setQuestions: (questions: QuestionData[]) => void;
@@ -67,6 +90,8 @@ interface QuizStore {
 	setQuizzesFetch: (quizzes: QuizProfile[]) => void;
 	selectedQuiz: QuizProfile[];
 	setSelectedQuiz: (selectedQuiz: QuizProfile[]) => void;
+	quizAttemptResults: QuizAttemptResult;
+	setQuizAttemptResults: (quizAttempt: QuizAttemptResult) => void;
 	isLoading: boolean;
 	setIsLoading: (isLoading: boolean) => void;
 	quizProfile: QuizProfile;
@@ -77,7 +102,7 @@ interface QuizStore {
 	fetchQuizParams: (searchParams?: { [key: string]: string | boolean }) => void;
 	fetchQuizById: (quizId: string) => Promise<FetchResponse | void>;
 	publishQuiz: () => Promise<any>;
-	evaluateSubmittedQuiz: (quizForm: QuizFormEvaluation) => Promise<any>;
+	evaluateSubmittedQuiz: (quizForm: QuizFormEvaluation) => void | Promise<any>;
 }
 
 const QuizStore = create<QuizStore>((set, get) => ({
@@ -104,6 +129,21 @@ const QuizStore = create<QuizStore>((set, get) => ({
 	setQuizzesFetch: (quizzesFetch) => set({ quizzesFetch }),
 	selectedQuiz: [],
 	setSelectedQuiz: (selectedQuiz) => set({ selectedQuiz }),
+	quizAttemptResults: {
+		quiz: '',
+		quizTitle: '',
+		user: '',
+		answers: [],
+		currentScore: 0,
+		scores: [],
+		currentPercentageScore: 0,
+		percentageScores: [],
+		passed: false,
+		completedAt: '',
+		attemptNumber: 0,
+		attemptDates: [],
+	},
+	setQuizAttemptResults: (quizAttemptResults) => set({quizAttemptResults}),
 	isLoading: false,
 	setIsLoading: (isLoading) => set({ isLoading }),
 	addQuestions: async (question: QuestionData) => {
@@ -219,32 +259,34 @@ const QuizStore = create<QuizStore>((set, get) => ({
 			setIsLoading(false);
 		}
 	},
-	evaluateSubmittedQuiz: async (quizForm : QuizFormEvaluation) => {
-		const { setIsLoading } = get();
-		try{
+	evaluateSubmittedQuiz: async (quizForm: QuizFormEvaluation) => {
+		const { setIsLoading , setQuizAttemptResults} = get();
+		try {
 			setIsLoading(true);
-			const { data } = await axios.post( BACKEND_URL + '/api/quiz/submit-quiz', {
+			const { data } = await axios.post(BACKEND_URL + '/api/quiz/submit-quiz', {
 				quizId: quizForm.quizId,
 				userId: quizForm.userId,
-				answers: quizForm.answers
-			})
-			if( !data.success) {
-				throw new Error(data.message)
+				answers: quizForm.answers,
+			});
+			if (!data.success) {
+				throw new Error(data.message);
 			}
-			console.log('quiz evaluation: ', data)
-			return data;
-		}catch (err) {
+			console.log('quiz evaluation: ', data);
+			setQuizAttemptResults(data.data)
+			return data.success
+			// return data;
+		} catch (err) {
 			console.log('fetching error: ', err);
-			
-		}finally {
-			setIsLoading(false)
+		} finally {
+			setIsLoading(false);
 		}
 	},
+	
 
 	getQuizHistory: async (quizId, userId) => {
 		// not implemented yet
-		console.log('getquiz history: ', quizId, userId)
-	}
+		console.log('getquiz history: ', quizId, userId);
+	},
 }));
 
 export default QuizStore;

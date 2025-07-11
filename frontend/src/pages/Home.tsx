@@ -25,7 +25,7 @@ const Home = () => {
 						<div className="pt-16 pb-20 sm:pt-24 sm:pb-32 lg:pt-32 lg:pb-40">
 							<div className="text-center">
 								{/* Greeting */}
-								<div className="mb-8 sm:mb-12">
+								<div >
 									<h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent leading-tight">
 										Hello
 									</h1>
