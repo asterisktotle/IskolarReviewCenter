@@ -12,9 +12,9 @@ import {
 	Container,
 	Button,
 	useToast,
-	Spinner,
+
 } from '@chakra-ui/react';
-import {  useState } from 'react';
+import {  useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QuizStore, {
 	AnswerState,
@@ -22,21 +22,38 @@ import QuizStore, {
 	QuizFormEvaluation,
 } from '../store/quizStore';
 import { MdCheckCircle, MdCancel } from 'react-icons/md';
+import useCountdownTimer from '../hooks/useCountdownTimer';
+
+// Responsibility
+// It display quiz form for user to answer 
+// It evaluate quiz and display the result
 
 const PlayQuiz = ({
 	questions,
 	userId,
 	quizId,
+	timeLimit
 }: {
 	questions: QuestionData[];
 	userId: string;
 	quizId: string;
+	timeLimit: number;
 }) => {
 	const [answers, setAnswers] = useState<AnswerState[]>([]);
 	// const navigate = useNavigate();
 	const toast = useToast();
 	const { evaluateSubmittedQuiz, isLoading, quizAttemptResults } = QuizStore();
 
+const { formatted: timer, isTimeUp , clearTimer} = useCountdownTimer(timeLimit);
+
+	useEffect(() => {
+		if(isTimeUp){
+			// Auto submit if timer is zero
+			handleSubmit();
+		}
+	}, [isTimeUp])
+	
+	
 	const updateAnswer = (
 		questionId: string,
 		selectedOption?: string,
@@ -63,6 +80,7 @@ const PlayQuiz = ({
 		answers?.find((ans) => ans.questionId === questionId)?.textAnswer || '';
 
 	const handleSubmit = async () => {
+		clearTimer(); // stop the timer
 		const quizFormRequest: QuizFormEvaluation = {
 			userId,
 			quizId,
@@ -106,6 +124,7 @@ const PlayQuiz = ({
 			py={5}
 			px={{ base: 2, md: 0 }}
 		>
+			{/* Display evaluated quiz */}
 			{quizAttemptResults && quizAttemptResults.answers.length ? (
 				<>
 					{/* Result Summary */}
@@ -128,6 +147,7 @@ const PlayQuiz = ({
 							{quizAttemptResults.currentPercentageScore.toFixed(1)}%
 						</Text>
 					</VStack>
+					{/* Display each questions with answers */}
 					<FormControl>
 						{quizAttemptResults.answers.map((ans, index) => {
 							const question = questions.find((q) => q._id === ans.questionId);
@@ -313,7 +333,24 @@ const PlayQuiz = ({
 					</FormControl>
 				</>
 			) : (
+				
 				<FormControl onSubmit={handleSubmit}>
+					{/* Display each questions for test mode */}
+					 <Box
+						position="sticky" // Makes it sticky
+						top={0} // Sticks to the top of the viewport
+						zIndex={10} // Ensures it stays above other content
+						bg="whiteAlpha.300" // Background color
+						padding={2}
+						rounded="full"
+						boxShadow="md" // Adds a shadow for better visibility
+						textAlign="center"
+						mb={4}
+						>
+						<Text fontWeight="bold" color={isTimeUp ? "red.500" : "white"}>
+							Time Limit: {timer}
+						</Text>
+						</Box>
 					{questions.map((question, index) => (
 						<VStack key={question._id} spacing={6} mb={5} align="stretch">
 							{/* Question Header */}

@@ -259,6 +259,8 @@ const QuizStore = create<QuizStore>((set, get) => ({
 			setIsLoading(false);
 		}
 	},
+
+	//TODO: do a clean up to the quiz attempt after seeing the result
 	evaluateSubmittedQuiz: async (quizForm: QuizFormEvaluation) => {
 		const { setIsLoading , setQuizAttemptResults} = get();
 		try {
