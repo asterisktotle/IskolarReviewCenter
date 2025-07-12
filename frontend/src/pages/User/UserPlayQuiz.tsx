@@ -5,16 +5,10 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import useAuthStore from '../../store/authStore';
 
-// TODO:
 
-//PRIOR
-//1. submit the answer then show the evaluated answer, and user score
-//2. if the user exit the quiz, then the quiz will be auto submitted,
-//3. Or if the user exit the quiz, it will track the users answer but not evaluated -- must do on backend
-//3. Display the timer if there is a timer, then auto submit,
 
-// LEAST FEATURE
-// 1. Display the timer if there is a timer, then auto submit
+// Responsibility
+// It fetches quizzes and display them
 
 const UserPlayQuiz = () => {
 	const { fetchQuizById, isLoading } = QuizStore();
@@ -66,6 +60,7 @@ const UserPlayQuiz = () => {
 				{quizData && quizData._id && userData?.userId && (
 					<PlayQuiz
 						questions={quizData.questions}
+						timeLimit={quizData.timeLimit}
 						userId={userData.userId}
 						quizId={quizData._id}
 					/>
