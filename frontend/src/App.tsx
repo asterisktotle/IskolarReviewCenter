@@ -13,10 +13,9 @@ import SimpleSidebar from './components/SideBar';
 import AdminLectures from './pages/Admin/AdminLectures';
 import UsersLecture from './pages/User/UserLecture';
 import AdminTests from './pages/Admin/AdminTests';
-import UserDashboard from './pages/User/UserDashboard';
 import UserTests from './pages/User/UserTests';
 import ViewPdf from './pages/PdfViewer';
-import UserPlayQuiz from './pages/User/UserPlayQuiz';
+import UserPlayQuiz from './pages/Quiz/UserPlayQuiz';
 
 const App = () => {
 	const getAuth = useAuthStore((state) => state.getAuth);

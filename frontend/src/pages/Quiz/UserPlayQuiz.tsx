@@ -1,34 +1,27 @@
-import { Box, Button, Heading, VStack, Text } from '@chakra-ui/react';
-import PlayQuiz from '../../components/PlayQuiz';
+import { Box, Heading, VStack, Text } from '@chakra-ui/react';
+import PlayQuiz from './PlayQuiz';
 import QuizStore, { QuizProfile } from '../../store/quizStore';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import useAuthStore from '../../store/authStore';
 
-
-
 // Responsibility
 // It fetches quizzes and display them
+// Quizzes can be played by PlayQuiz component
 
 const UserPlayQuiz = () => {
 	const { fetchQuizById, isLoading } = QuizStore();
 	const { userData } = useAuthStore();
 	const [quizData, setQuizData] = useState<QuizProfile>();
-	// const [errorMessage, setErrorMessage] = useState(null || '')
-
-	// const [quizData, setQuizData] = useState()
 	const { quizId } = useParams();
 
-	//  fetch the quiz using quizId url params so that it can be fetch if the user refresh the page
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
 				const response = await fetchQuizById(quizId as string);
 
 				if (!response || !response.data) {
-					// setErrorMessage( 'Quiz not found');
 					console.error('Error fetching quiz');
-
 					return;
 				}
 

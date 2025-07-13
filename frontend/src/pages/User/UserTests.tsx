@@ -17,7 +17,6 @@ import {
 	Badge,
 	Spinner,
 	useBreakpointValue,
-	Flex,
 	InputGroup,
 	InputLeftElement,
 	Select,
@@ -27,22 +26,22 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import {
-	MdBook,
 	MdCheck,
-	MdChecklist,
-	MdDoneOutline,
 	MdHourglassBottom,
 	MdHourglassDisabled,
 	MdOutlineChecklist,
 } from 'react-icons/md';
-
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import QuizStore, { QuizProfile } from '../../store/quizStore';
 import { MdOutlineClass } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
-import PlayQuiz from '../../components/PlayQuiz';
+
 
 const UsersTest = () => {
+	//RESPONSIBILITY
+	// It display list of quiz
+	// It can search quizzes
+	// It can play and navigate to the test mode page 
 	const { fetchQuizParams, quizzesFetch, isLoading } = QuizStore();
 
 	//Actions
@@ -61,15 +60,9 @@ const UsersTest = () => {
 		
 	}, []);
 
-
 	// Handle play quiz action
 	const handlePlayQuiz = (quizId: string) => {
-		
-
 		navigate(`/user-tests/play/${quizId}`)
-
-		
-
 	}
 
 	// Filter logic
