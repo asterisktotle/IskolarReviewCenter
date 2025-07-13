@@ -7,6 +7,12 @@ const useCountdownTimer = (timeLimit: number) => {
   const intervalRef = useRef<number | null>(null)
 
   useEffect(() => {
+    // Check if time limit is 0l then clear the timer
+    if(!timeLimit || timeLimit < 0){
+      setTimeLeft(0)
+      setIsTimeUp(false);
+      return;
+    }
     setTimeLeft(timeLimit * 60);
     setIsTimeUp(false);
 

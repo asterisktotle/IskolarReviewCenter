@@ -32,7 +32,7 @@ const TestModeQuiz = ({ userId, quizId ,questions, timeLimit}:
 	// TIMER COMPONENT	
 	const { formatted: timer, isTimeUp , clearTimer} = useCountdownTimer(timeLimit);
 	useEffect(() => {
-		if(isTimeUp){
+		if(isTimeUp && timeLimit){
 			// Auto submit if timer is zero
 			handleSubmit();
 		}
@@ -120,7 +120,7 @@ const TestModeQuiz = ({ userId, quizId ,questions, timeLimit}:
 						mb={4}
 						>
 						<Text fontWeight="bold" color={isTimeUp ? "red.500" : "white"}>
-							Time Limit: {timer}
+							Time Limit: {timeLimit ? timer: "Unlimited"}
 						</Text>
 						</Box>
 					{questions.map((question : QuestionData, index: number) => (
