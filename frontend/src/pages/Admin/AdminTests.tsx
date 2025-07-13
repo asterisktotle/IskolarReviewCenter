@@ -43,7 +43,7 @@ import { QuestionData } from '../../hooks/useQuestionMaker';
 import QuizStore from '../../store/quizStore';
 import parseOptions from '../../utils/parserOptions';
 import convertQuestionType from '../../utils/converQuestionType';
-import PlayQuiz from '../../components/PlayQuiz';
+import PlayQuiz from '../Quiz/PlayQuiz';
 
 import {SubjectQuizTab } from '../../components/QuizList';
 

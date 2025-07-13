@@ -62,7 +62,7 @@ export interface FetchResponse {
 }
 
 
-interface QuizAttemptResult {
+export interface QuizAttemptResult {
   quiz: string;
   quizTitle: string;
   user: string;
@@ -90,8 +90,8 @@ interface QuizStore {
 	setQuizzesFetch: (quizzes: QuizProfile[]) => void;
 	selectedQuiz: QuizProfile[];
 	setSelectedQuiz: (selectedQuiz: QuizProfile[]) => void;
-	quizAttemptResults: QuizAttemptResult;
-	setQuizAttemptResults: (quizAttempt: QuizAttemptResult) => void;
+	quizAttemptResults: QuizAttemptResult | null;
+	setQuizAttemptResults: (quizAttempt: QuizAttemptResult | null) => void;
 	isLoading: boolean;
 	setIsLoading: (isLoading: boolean) => void;
 	quizProfile: QuizProfile;
@@ -103,6 +103,7 @@ interface QuizStore {
 	fetchQuizById: (quizId: string) => Promise<FetchResponse | void>;
 	publishQuiz: () => Promise<any>;
 	evaluateSubmittedQuiz: (quizForm: QuizFormEvaluation) => void | Promise<any>;
+	loadQuizAttemptResults: () => void;
 }
 
 const QuizStore = create<QuizStore>((set, get) => ({
@@ -273,14 +274,33 @@ const QuizStore = create<QuizStore>((set, get) => ({
 			if (!data.success) {
 				throw new Error(data.message);
 			}
+			
 			console.log('quiz evaluation: ', data);
 			setQuizAttemptResults(data.data)
+			const {answers, passed, currentPercentageScore, currentScore, quiz} = data.data
+			const result = {
+				answers,
+				passed,
+				currentPercentageScore,
+				currentScore,
+				quiz
+			}
+			console.log('Saved to local storage: ', result)
+			localStorage.setItem('quizResult',JSON.stringify(result))
 			return data.success
 			// return data;
 		} catch (err) {
 			console.log('fetching error: ', err);
 		} finally {
 			setIsLoading(false);
+		}
+	},
+
+	loadQuizAttemptResults: () => {
+	
+		const savedResults = localStorage.getItem('quizResult')
+		if(savedResults){
+			set({quizAttemptResults: JSON.parse(savedResults)})
 		}
 	},
 	
