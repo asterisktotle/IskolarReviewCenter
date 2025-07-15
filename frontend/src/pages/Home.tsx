@@ -4,7 +4,6 @@ import UsersLecture from './User/UserLecture'; // Adjust import path as needed
 
 const Home = () => {
 	const { userData } = useAuth();
-	console.log('userdata: ', userData);
 
 	if (userData?.isAdmin) {
 		return <AdminDashBoard />;

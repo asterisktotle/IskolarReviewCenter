@@ -224,14 +224,14 @@ const SignUpForm = () => {
 			e.preventDefault();
 			setEmail(userEmail);
 			setPassword(userPass);
-			console.log('user info submitted: ', userEmail, userPass);
-
 			try {
 				await login();
 			} catch (err) {
 				console.log('error: ', err.message);
 			}
 		};
+
+		
 
 		return (
 			<form onSubmit={handleSignInForm}>
@@ -251,11 +251,11 @@ const SignUpForm = () => {
 								setUserEmail(e.target.value);
 							}}
 						/>
-						<FormErrorMessage>No user email</FormErrorMessage>
+						<FormErrorMessage>Email not found</FormErrorMessage>
 					</FormControl>
 
 					{/* Password */}
-					<FormControl isRequired isInvalid={incorrectPassword}>
+					<FormControl isRequired isInvalid={incorrectPassword || !!errorMessage}>
 						<InputGroup>
 							<Input
 								placeholder="Password"
@@ -277,7 +277,6 @@ const SignUpForm = () => {
 								/>
 							</InputRightElement>
 						</InputGroup>
-
 						<FormErrorMessage>Incorrect password.</FormErrorMessage>
 					</FormControl>
 
@@ -447,7 +446,7 @@ const SignUpForm = () => {
 		const handleOTP = async (userData) => {
 			const { email, password, otp } = userData;
 
-			console.log('userdata: ', email, password, otp);
+		
 			try {
 				setOtpMessageError('');
 				setSuccessChangePass(false);
