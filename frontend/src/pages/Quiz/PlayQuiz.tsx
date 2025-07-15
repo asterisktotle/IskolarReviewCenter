@@ -1,35 +1,14 @@
 import {
-	FormControl,
-	RadioGroup,
-	Radio,
-	Flex,
-	Box,
-	Text,
-	Input,
-	VStack,
-	HStack,
-	Badge,
 	Container,
-	Button,
-	useToast,
-
 } from '@chakra-ui/react';
-import {  useEffect, useState } from 'react';
+import {  useEffect } from 'react';
 
 import QuizStore, {
-	AnswerState,
 	QuestionData,
-	QuizFormEvaluation,
 } from '../../store/quizStore';
-import { MdCheckCircle, MdCancel } from 'react-icons/md';
-import useCountdownTimer from '../../hooks/useCountdownTimer';
 import EvaluatedQuiz from './EvaluatedQuiz';
 import TestModeQuiz from './TestModeQuiz';
-import { useLocation, useParams } from 'react-router-dom';
 
-// Responsibility
-// It display quiz form for user to answer 
-// It evaluate quiz and display the result
 
 const PlayQuiz = ({
 	questions,

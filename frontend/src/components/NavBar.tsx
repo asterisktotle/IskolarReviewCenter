@@ -121,7 +121,7 @@ export default function Simple() {
 									backgroundColor={'grey'}
 								/>
 							</MenuButton>
-							<MenuList padding={4} color={'black'} backgroundColor={'white'}>
+							<MenuList padding={4} >
 								<Text fontWeight={'bold'}>{userData?.name}</Text>
 								{userData?.isAdmin && (
 									<Text fontSize={'sm'} color={'gray.500'}>
@@ -130,7 +130,8 @@ export default function Simple() {
 								)}
 								<MenuDivider />
 
-								<MenuItem
+								<MenuItem 
+									
 									onClick={() => {
 										if (!userData?.isAccountVerified) {
 											return navigate('/email-verify');
@@ -141,7 +142,7 @@ export default function Simple() {
 									{!userData?.isAccountVerified ? 'Verify Account' : 'Account'}
 								</MenuItem>
 
-								<MenuItem>Setting</MenuItem>
+								<MenuItem>Settings</MenuItem>
 								<MenuDivider />
 								{/* <MenuItem onClick={logout}>Verify Account</MenuItem> */}
 								<MenuItem onClick={handleLogOut}>Logout</MenuItem>

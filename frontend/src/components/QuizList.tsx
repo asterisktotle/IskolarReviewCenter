@@ -77,19 +77,30 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 		return colors[category] || colors.default;
 	};
 
-	const {fetchQuizParams} = QuizStore()
+	const {fetchQuizById} = QuizStore()
 
 	const formatTime = (minutes: number) => {
 		if (minutes === 0) return 'No time limit';
 		return `${minutes} min`;
 	};
 
-	const handleSelectedQuizFetch = () => {
-		fetchQuizParams({
-			title: quiz.title,
-			category: quiz.category
-		})
+	const handleSelectedQuizFetch = async (quizId: string) => {
+		
+		try{
+			const response = await fetchQuizById(quizId)
+			if(!response.success){
+				window.alert('Cannot fetched quiz')
+				console.log("Failed to fetch the quiz")
+				return;
+			}
+			console.log('quiz: ', response.data)
+
+		}catch(err){
+
+			console.log('quiz fetched error: ',err)
+		}
 	}
+
 
 	return (
 		<Card
@@ -101,14 +112,13 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 				borderColor: 'purple.400',
 			}}
 			_active={{ transform: 'translateY(0px)' }}
-			// onClick={() => } // show stats trial
-			bg="whiteAlpha.800"
 			backdropFilter="blur(10px)"
 			border="1px solid"
 			borderColor="whiteAlpha.200"
 			shadow="md"
             marginBlock={'1'}
-			onClick={handleSelectedQuizFetch}
+			// onClick={() => handleSelectedQuizFetch(quiz._id)}
+			marginInline={{ sm:0, base:-5}}
 		>
 			<CardHeader pb={2}>
 				<Flex justify="space-between" align="start">
@@ -138,8 +148,8 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 				</Flex>
 			</CardHeader>
 
-			<CardBody pt={0}>
-				<VStack spacing={3} align="stretch">
+			<CardBody pt={0} ml={2}>
+				<VStack spacing={4} align="stretch">
 					<SimpleGrid columns={2} spacing={4}>
 						<HStack spacing={2}>
 							<Icon as={quiz.timeLimit ? MdHourglassBottom: MdHourglassDisabled} color="blue.500" boxSize={4} />
@@ -151,15 +161,6 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 							</Text>
 						</HStack>
 
-						<HStack spacing={2}>
-							<Icon as={MdBook} color="green.500" boxSize={4} />
-							<Text
-								fontSize="sm"
-								color={useColorModeValue('gray.600', 'gray.400')}
-							>
-								{quiz.questions.length} questions
-							</Text>
-						</HStack>
 
 						<HStack spacing={2}>
 							<Icon as={MdDoneOutline} color="yellow.500" boxSize={4} />
@@ -182,25 +183,27 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 						</HStack>
 						
 
-						<HStack spacing={2}>
+						<HStack spacing={1}>
 
-							{userData?.isAdmin && 
 							
-							<>
-							<Button
+							
+							
+							<Button w={'5rem'}	
+								onClick={() => handleSelectedQuizFetch(quiz._id)}
 								fontSize="sm"
 							>
 								Edit
 							</Button>
 							<Button
+								bg={'red'}
 								fontSize="sm"
 							>
 								Delete
 							</Button>
+					
 							
-							</>
 						
-							}
+							
 							<Button
 								fontSize="sm"
 								bgColor={'green'}

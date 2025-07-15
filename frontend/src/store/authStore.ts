@@ -40,7 +40,6 @@ interface AuthStore {
 	setPassword: (password: string) => void;
 	setIncorrectPassword: (value: boolean) => void;
 	setNoUserEmail: (value: boolean) => void;
-
 	//API Keys
 	backendUrl: string;
 
@@ -58,8 +57,6 @@ const useAuthStore = create<AuthStore>()(
 		(set, get) => ({
 			//Initial values
 			isLogin: false,
-			// isRegister: true,
-
 			email: '',
 			password: '',
 			incorrectPassword: false,
@@ -70,7 +67,6 @@ const useAuthStore = create<AuthStore>()(
 
 			// Setters
 			setIsLogin: (value) => set({ isLogin: value }),
-
 			setEmail: (email) => set({ email }),
 			setPassword: (password) => set({ password }),
 			setIncorrectPassword: (value) => set({ incorrectPassword: value }),
@@ -147,6 +143,7 @@ const useAuthStore = create<AuthStore>()(
 						console.log('login:', data.message);
 					} else if (data.message === 'User did not exist') {
 						setNoUserEmail(true);
+						
 					} else if (data.message === 'Incorrect password') {
 						setIncorrectPassword(true);
 					} else {
