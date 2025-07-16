@@ -20,6 +20,7 @@ import QuizStore, {
 	QuizFormEvaluation,
 } from '../../store/quizStore';
 import { QuestionData } from '../../hooks/useQuestionMaker';
+import { useAuth } from '../../hooks/useAuth';
 const TestModeQuiz = ({ userId, quizId ,questions, timeLimit}: 
     { userId: string,
       quizId: string,
@@ -27,11 +28,16 @@ const TestModeQuiz = ({ userId, quizId ,questions, timeLimit}:
       timeLimit: number}) => {
     const [answers, setAnswers] = useState<AnswerState[]>([]);
 	const toast = useToast();
+	const {userData} = useAuth()
 	const { evaluateSubmittedQuiz, isLoading} = QuizStore();
 
 	// TIMER COMPONENT	
 	const { formatted: timer, isTimeUp , clearTimer} = useCountdownTimer(timeLimit);
 	useEffect(() => {
+		if(userData?.isAdmin){
+			return 
+		}
+
 		if(isTimeUp && timeLimit){
 			// Auto submit if timer is zero
 			handleSubmit();
