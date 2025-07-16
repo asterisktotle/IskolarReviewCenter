@@ -51,7 +51,7 @@ export interface QuizProfile {
 	timeLimit: number;
 	passingScore: number;
 	totalPoints: number;
-	questions: QuestionData[];
+	questions?: QuestionData[];
 	isPublished: boolean;
 	_id?: string;
 }
@@ -84,26 +84,33 @@ export interface QuizAttemptResult {
 }
 
 interface QuizStore {
-	questions: QuestionData[];
-	setQuestions: (questions: QuestionData[]) => void;
+	// storing quizzes data
 	quizzesFetch: QuizProfile[];
 	setQuizzesFetch: (quizzes: QuizProfile[]) => void;
-	selectedQuiz: QuizProfile[];
-	setSelectedQuiz: (selectedQuiz: QuizProfile[]) => void;
-	quizAttemptResults: QuizAttemptResult | null;
-	setQuizAttemptResults: (quizAttempt: QuizAttemptResult | null) => void;
-	isLoading: boolean;
-	setIsLoading: (isLoading: boolean) => void;
+	
+
+	//Admin Create Quiz Actions
+	questions: QuestionData[];
+	setQuestions: (questions: QuestionData[]) => void;
 	quizProfile: QuizProfile;
 	setQuizProfile: (quizProfile: QuizProfile) => void;
 	addQuestions: (question: QuestionData) => void;
 	removeQuestion: (questionId: number) => void;
 	updateQuestion: (questionId: number, updatedQuestion: QuestionData) => void;
-	fetchQuizParams: (searchParams?: { [key: string]: string | boolean }) => void;
-	fetchQuizById: (quizId: string) => Promise<FetchResponse | void>;
 	publishQuiz: () => Promise<any>;
+	
+	// User Actions
+	quizAttemptResults: QuizAttemptResult | null;
+	setQuizAttemptResults: (quizAttempt: QuizAttemptResult | null) => void;
 	evaluateSubmittedQuiz: (quizForm: QuizFormEvaluation) => void | Promise<any>;
 	loadQuizAttemptResults: () => void;
+	fetchQuizParams: (searchParams?: { [key: string]: string | boolean }) => void;
+	fetchQuizById: (quizId: string) => Promise<FetchResponse | void>;
+	//Utils 	
+	isLoading: boolean;
+	setIsLoading: (isLoading: boolean) => void;
+	tabIndex: number;
+	setTabIndex: (tabIndex: number) => void;
 }
 
 const QuizStore = create<QuizStore>((set, get) => ({
@@ -128,8 +135,8 @@ const QuizStore = create<QuizStore>((set, get) => ({
 	setQuestions: (questions) => set({ questions }),
 	quizzesFetch: [],
 	setQuizzesFetch: (quizzesFetch) => set({ quizzesFetch }),
-	selectedQuiz: [],
-	setSelectedQuiz: (selectedQuiz) => set({ selectedQuiz }),
+
+	
 	quizAttemptResults: {
 		quiz: '',
 		quizTitle: '',
@@ -147,6 +154,8 @@ const QuizStore = create<QuizStore>((set, get) => ({
 	setQuizAttemptResults: (quizAttemptResults) => set({quizAttemptResults}),
 	isLoading: false,
 	setIsLoading: (isLoading) => set({ isLoading }),
+	tabIndex: 0,
+	setTabIndex: (tabIndex) => set({tabIndex}),
 	addQuestions: async (question: QuestionData) => {
 		const { setQuestions, questions } = get();
 
@@ -189,7 +198,12 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		setQuestions(updatedQuestions);
 	},
 	publishQuiz: async () => {
-		const { quizProfile, questions, setIsLoading } = get();
+		const { quizProfile, questions, setIsLoading, setQuizProfile, setQuestions } = get();
+
+		if(!questions.length){
+			throw new Error("No quiz submitted")
+		}
+		
 		try {
 			setIsLoading(true);
 			const { data } = await axios.post(BACKEND_URL + '/api/quiz/create-quiz', {
@@ -202,7 +216,19 @@ const QuizStore = create<QuizStore>((set, get) => ({
 				timeLimit: quizProfile.timeLimit,
 				isPublished: quizProfile.isPublished,
 			});
-
+			
+			// Clearing the forms field
+			setQuizProfile(
+				{title: 'Quiz Title',
+				subject: 'mesl',
+				category: 'terms',
+				timeLimit: 0,
+				passingScore: 0,
+				totalPoints: 0,
+				questions: [],
+				isPublished: false,}
+			)
+			setQuestions([])
 			return data;
 		} catch (err) {
 			console.log('publishQUiz error: ', err);
@@ -211,7 +237,7 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		}
 	},
 	fetchQuizParams: async (searchParams = {}) => {
-		const { setSelectedQuiz, setQuizzesFetch, setIsLoading } = get();
+		const { setQuizzesFetch, setIsLoading } = get();
 		const stringParams: { [key: string]: string } = {};
 		for (const key in searchParams) {
 			stringParams[key] = String(searchParams[key]);
@@ -225,12 +251,7 @@ const QuizStore = create<QuizStore>((set, get) => ({
 				BACKEND_URL + `/api/quiz/get-all-quizzes?${params}`
 			);
 
-			if (data.success && data.data.length === 1) {
-				setSelectedQuiz(data.data);
-				return;
-			}
-
-			if (data.success && data.data.length > 1) {
+			if (data.success) {
 				setQuizzesFetch(data.data);
 				return;
 			}

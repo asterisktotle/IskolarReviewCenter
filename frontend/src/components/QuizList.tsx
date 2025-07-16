@@ -14,59 +14,69 @@ import {
 	Center,
 	Spinner,
 	Icon,
-	Button
+	Button,
 } from '@chakra-ui/react';
-import { MdBook, MdDoneOutline, MdHourglassBottom, MdHourglassDisabled,  MdOutlineChecklist} from 'react-icons/md';
+import {
+	MdBook,
+	MdDoneOutline,
+	MdHourglassBottom,
+	MdHourglassDisabled,
+	MdOutlineChecklist,
+} from 'react-icons/md';
 
 import QuizStore, { QuizProfile } from '../store/quizStore';
-import {  useMemo} from 'react';
-import useAuthStore from '../store/authStore';
+import { useMemo } from 'react';
 
 export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
-  const quizzesFetched = useMemo(() => 
-	quizzesFetch.filter((quiz) => quiz.subject === subject), 
-	[quizzesFetch]
-  );
+	// Responsibilities:
+	// It fetches and display all quizzes based on subject
 
-  if (isLoading) {
-	return (
-	  <TabPanel>
-		<Center h="200px">
-		  <Spinner size="xl" color="blue.500" />
-		</Center>
-	  </TabPanel>
+	const quizzesFetched = useMemo(
+		() => quizzesFetch.filter((quiz) => quiz.subject === subject),
+		[quizzesFetch]
 	);
-  }
 
-  return (
-	<TabPanel>
-	  {quizzesFetched.length > 0 ? (
-		<SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-		  {quizzesFetched.map((data) => (
-			<QuizCard key={data._id} quiz={data} />
-		  ))}
-		</SimpleGrid>
-	  ) : (
-		<Center h="300px">
-		  <VStack spacing={4}>
-			<Icon as={MdBook} boxSize={16} color="gray.300" />
-			<Heading size="md" color="gray.500">
-			  No {subject.toUpperCase()}  Quizzes
-			</Heading>
-			<Text color="gray.400" textAlign="center" maxW="300px">
-			  There are currently no quizzes available for the {subject.toUpperCase()} subject. 
-			  New quizzes will appear here when they're published.
-			</Text>
-		  </VStack>
-		</Center>
-	  )}
-	</TabPanel>
-  );
+	if (isLoading) {
+		return (
+			<TabPanel>
+				<Center h="200px">
+					<Spinner size="xl" color="blue.500" />
+				</Center>
+			</TabPanel>
+		);
+	}
+
+	return (
+		<TabPanel>
+			{quizzesFetched.length > 0 ? (
+				<SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+					{quizzesFetched.map((data) => (
+						<QuizCard key={data._id} quiz={data} />
+					))}
+				</SimpleGrid>
+			) : (
+				<Center h="300px">
+					<VStack spacing={4}>
+						<Icon as={MdBook} boxSize={16} color="gray.300" />
+						<Heading size="md" color="gray.500">
+							No {subject.toUpperCase()} Quizzes
+						</Heading>
+						<Text color="gray.400" textAlign="center" maxW="300px">
+							There are currently no quizzes available for the{' '}
+							{subject.toUpperCase()} subject. New quizzes will appear here when
+							they're published.
+						</Text>
+					</VStack>
+				</Center>
+			)}
+		</TabPanel>
+	);
 };
 
- const QuizCard = ({ quiz }: {quiz: QuizProfile}) => {
-	
-	const {userData} = useAuthStore()
+const QuizCard = ({ quiz }: { quiz: QuizProfile }) => {
+	const { setTabIndex, fetchQuizById, setQuestions, setQuizProfile } =
+		QuizStore();
+
 	const getCategoryColor = (category: string) => {
 		const colors: Record<string, string> = {
 			terms: 'blue',
@@ -77,30 +87,51 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 		return colors[category] || colors.default;
 	};
 
-	const {fetchQuizById} = QuizStore()
-
 	const formatTime = (minutes: number) => {
 		if (minutes === 0) return 'No time limit';
 		return `${minutes} min`;
 	};
 
 	const handleSelectedQuizFetch = async (quizId: string) => {
-		
-		try{
-			const response = await fetchQuizById(quizId)
-			if(!response.success){
-				window.alert('Cannot fetched quiz')
-				console.log("Failed to fetch the quiz")
+		try {
+			setQuestions([]);
+			// setQuizProfile()
+			const response = await fetchQuizById(quizId);
+			if (!response.success) {
+				window.alert('Cannot fetched quiz');
+				console.log('Failed to fetch the quiz');
 				return;
 			}
-			console.log('quiz: ', response.data)
+			const {
+				title,
+				subject,
+				category,
+				timeLimit,
+				passingScore,
+				isPublished,
+				_id,
+				questions,
+				totalPoints,
+			} = response.data;
 
-		}catch(err){
-
-			console.log('quiz fetched error: ',err)
+			const quizProfile = {
+				title,
+				subject,
+				category,
+				timeLimit,
+				passingScore,
+				isPublished,
+				totalPoints,
+				_id,
+			};
+			console.log('questions: ', questions);
+			setQuizProfile(quizProfile);
+			setQuestions(questions);
+			setTabIndex(1);
+		} catch (err) {
+			console.log('quiz fetched error: ', err);
 		}
-	}
-
+	};
 
 	return (
 		<Card
@@ -116,9 +147,8 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 			border="1px solid"
 			borderColor="whiteAlpha.200"
 			shadow="md"
-            marginBlock={'1'}
-			// onClick={() => handleSelectedQuizFetch(quiz._id)}
-			marginInline={{ sm:0, base:-5}}
+			marginBlock={'1'}
+			marginInline={{ sm: 0, base: -5 }}
 		>
 			<CardHeader pb={2}>
 				<Flex justify="space-between" align="start">
@@ -134,8 +164,6 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 							{quiz.category}
 						</Badge>
 
-						{userData?.isAdmin && 
-						
 						<Badge
 							colorScheme={quiz.isPublished ? 'green' : 'orange'}
 							variant="outline"
@@ -143,7 +171,6 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 						>
 							{quiz.isPublished ? 'Published' : 'Draft'}
 						</Badge>
-						}
 					</VStack>
 				</Flex>
 			</CardHeader>
@@ -152,7 +179,11 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 				<VStack spacing={4} align="stretch">
 					<SimpleGrid columns={2} spacing={4}>
 						<HStack spacing={2}>
-							<Icon as={quiz.timeLimit ? MdHourglassBottom: MdHourglassDisabled} color="blue.500" boxSize={4} />
+							<Icon
+								as={quiz.timeLimit ? MdHourglassBottom : MdHourglassDisabled}
+								color="blue.500"
+								boxSize={4}
+							/>
 							<Text
 								fontSize="sm"
 								color={useColorModeValue('gray.600', 'gray.400')}
@@ -160,7 +191,6 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 								{formatTime(quiz.timeLimit)}
 							</Text>
 						</HStack>
-
 
 						<HStack spacing={2}>
 							<Icon as={MdDoneOutline} color="yellow.500" boxSize={4} />
@@ -181,43 +211,30 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 								{quiz.totalPoints} points
 							</Text>
 						</HStack>
-						
 
 						<HStack spacing={1}>
-
-							
-							
-							
-							<Button w={'5rem'}	
-								onClick={() => handleSelectedQuizFetch(quiz._id)}
+							<Button
+								w={'5rem'}
+								onClick={() => {
+									handleSelectedQuizFetch(quiz._id);
+								}}
 								fontSize="sm"
 							>
 								Edit
 							</Button>
-							<Button
-								bg={'red'}
-								fontSize="sm"
-							>
+							<Button bg={'red'} fontSize="sm">
 								Delete
 							</Button>
-					
-							
-						
-							
-							<Button
-								fontSize="sm"
-								bgColor={'green'}
-							>
+
+							<Button fontSize="sm" bgColor={'green'}>
 								Play
 							</Button>
-				
-						</HStack>	
+						</HStack>
 					</SimpleGrid>
 				</VStack>
 			</CardBody>
 		</Card>
 	);
 };
- 
 
 export default QuizCard;

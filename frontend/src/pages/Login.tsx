@@ -255,7 +255,7 @@ const SignUpForm = () => {
 					</FormControl>
 
 					{/* Password */}
-					<FormControl isRequired isInvalid={incorrectPassword || !!errorMessage}>
+					<FormControl isRequired isInvalid={incorrectPassword}>
 						<InputGroup>
 							<Input
 								placeholder="Password"

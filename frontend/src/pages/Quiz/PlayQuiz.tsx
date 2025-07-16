@@ -48,8 +48,8 @@ const PlayQuiz = ({
 			{quizAttemptResults && quizAttemptResults.answers.length ? (
 			<EvaluatedQuiz quizAttemptResults={quizAttemptResults} questions={questions}/>	
 			) 
-			
-			: (
+			: 
+			(
 			<TestModeQuiz questions={questions} userId={userId} quizId={quizId} timeLimit={timeLimit}/>	
 			)}
 		</Container>
