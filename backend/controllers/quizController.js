@@ -274,11 +274,11 @@ export const getUserQuizHistory = async (req, res) => {
 
 export const deleteQuiz = async (req, res) => {
 	try {
-		const { quizId } = req.params;
-		if (!quizId) {
+		const { id } = req.params;
+		if (!id) {
 			return res.json({ success: false, message: 'NO Quiz ID provided' });
 		}
-		const quiz = await Quiz.findByIdAndDelete(quizId);
+		const quiz = await Quiz.findByIdAndDelete(id);
 		if (!quiz) {
 			return res.json({ success: false, message: 'Quiz not found' });
 		}

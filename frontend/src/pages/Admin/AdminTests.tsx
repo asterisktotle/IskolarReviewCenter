@@ -45,7 +45,6 @@ const AdminTests = () => {
 	const {userData} = useAuth()
 
 	const [tabIndexQuizzes, setTabIndexQuizzes] = useState(0);
-	const [clearQuizForm, setClearQuizForm] = useState(!!tabIndex); // default 0(false) index set to Quizzes tab, 1 for Create Quiz tab 
 
 	// Color mode values
 	const cardBg = useColorModeValue('white', 'gray.800');
