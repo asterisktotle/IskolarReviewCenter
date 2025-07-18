@@ -15,6 +15,7 @@ import {
 	Spinner,
 	Icon,
 	Button,
+	useToast,
 } from '@chakra-ui/react';
 import {
 	MdBook,
@@ -74,9 +75,9 @@ export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject }) => {
 };
 
 const QuizCard = ({ quiz }: { quiz: QuizProfile }) => {
-	const { setTabIndex, fetchQuizById, setQuestions, setQuizProfile } =
+	const { setTabIndex, fetchQuizById, setQuestions, setQuizProfile, deleteQuiz, fetchQuizParams } =
 		QuizStore();
-
+	const toast = useToast()
 	const getCategoryColor = (category: string) => {
 		const colors: Record<string, string> = {
 			terms: 'blue',
@@ -132,6 +133,37 @@ const QuizCard = ({ quiz }: { quiz: QuizProfile }) => {
 			console.log('quiz fetched error: ', err);
 		}
 	};
+
+	const handleDelete = async (quizId: string) => {
+    try {
+        const response = await deleteQuiz(quizId);
+        if (response && response.success) {
+            toast({
+                title: 'Quiz deleted successfully.',
+                status: 'success',
+                duration: 3000,
+                isClosable: true,
+            });
+            fetchQuizParams(); // Refetch the quiz list
+        } else {
+            toast({
+                title: 'Failed to delete quiz.',
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+            console.error('Failed to delete quiz:', response?.message || 'Unknown error');
+        }
+    } catch (err) {
+        toast({
+            title: 'An error occurred while deleting the quiz.',
+            status: 'error',
+            duration: 3000,
+            isClosable: true,
+        });
+        console.error('Delete quiz exception:', err);
+    }
+};
 
 	return (
 		<Card
@@ -222,7 +254,7 @@ const QuizCard = ({ quiz }: { quiz: QuizProfile }) => {
 							>
 								Edit
 							</Button>
-							<Button bg={'red'} fontSize="sm">
+							<Button onClick={() => handleDelete(quiz._id)} bg={'red'} fontSize="sm">
 								Delete
 							</Button>
 

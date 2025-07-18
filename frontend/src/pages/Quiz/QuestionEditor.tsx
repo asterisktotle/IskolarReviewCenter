@@ -1,5 +1,4 @@
 import {
-	Container,
 	FormControl,
 	VStack,
 	Editable,
@@ -7,32 +6,18 @@ import {
 	EditablePreview,
 	FormLabel,
 	RadioGroup,
-	Stack,
 	Radio,
 	Input,
 	Select,
 	HStack,
 	Button,
-	Flex,
-	Icon,
 	IconButton,
 	NumberInput,
 	NumberInputField,
-	Tabs,
-	TabList,
-	TabPanels,
-	Tab,
-	TabPanel,
-	Box,
-	Text,
-	Divider,
 	Badge,
 	Card,
-	CardHeader,
 	CardBody,
-	Heading,
 	useColorModeValue,
-	useToast,
 } from '@chakra-ui/react';
 import { QuestionOption } from '../../hooks/useQuestionMaker';
 import parseOptions from '../../utils/parserOptions';
@@ -211,7 +196,7 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 				<VStack spacing={4} align="stretch">
 					{/* Question Header */}
 					<HStack justify="space-between">
-						<Badge colorScheme="blue" px={2} py={1}>
+						<Badge colorScheme="blue" rounded={5} px={3} py={1}>
 							Question {questions.indexOf(question) + 1}
 						</Badge>
 						<HStack spacing={2}>
@@ -228,7 +213,7 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 							</Select>
 							<IconButton
 								size="sm"
-								colorScheme="red"
+								background="red"
 								onClick={() => handleRemoveQuestion(question.id)}
 								icon={<DeleteIcon />}
 								aria-label="Delete question"
@@ -253,11 +238,11 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 						>
 							<EditablePreview
 								p={3}
+								w={'full'}
 								borderRadius="md"
-								border="1px"
+								border="2px"
 								borderColor={borderColor}
 								minH="40px"
-								_hover={{ bg: 'gray.50' }}
 							/>
 							<EditableInput
 								p={3}

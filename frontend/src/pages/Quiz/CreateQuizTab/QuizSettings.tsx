@@ -1,5 +1,4 @@
 import {
-	Container,
 	FormControl,
 	VStack,
 	Editable,
@@ -20,15 +19,12 @@ import {
 	useToast,
 	useColorModeValue,
 } from '@chakra-ui/react';
-import { useState } from 'react';
 import QuizStore from '../../../store/quizStore';
 
 const QuizSettings = () => {
 	const { quizProfile, setQuizProfile, publishQuiz, isLoading } = QuizStore();
 
 	const toast = useToast();
-	const [published, setPublished] = useState<boolean>(false);
-	// const [clearQuizForm, setClearQuizForm] = useState(true);
 
 	// Color mode values
 	const cardBg = useColorModeValue('white', 'gray.800');
@@ -64,7 +60,7 @@ const QuizSettings = () => {
 					<FormControl>
 						<FormLabel>Quiz Title</FormLabel>
 						<Editable
-							defaultValue={quizProfile.title}
+							placeholder='Enter a quiz title'
 							onChange={(value) => handleChangeQuizProfile('title', value)}
 						>
 							<EditablePreview
@@ -72,6 +68,7 @@ const QuizSettings = () => {
 								borderRadius="md"
 								border="1px"
 								borderColor={borderColor}
+								w={'full'}
 							/>
 							<EditableInput p={3} />
 						</Editable>
@@ -86,7 +83,7 @@ const QuizSettings = () => {
 							<FormLabel>Subject</FormLabel>
 							<RadioGroup
 								onChange={(value) => handleChangeQuizProfile('subject', value)}
-								defaultValue={quizProfile.subject}
+								// value={quizProfile.subject}
 							>
 								<Stack direction="row" spacing={4}>
 									<Radio value="mesl">MESL</Radio>
@@ -106,7 +103,6 @@ const QuizSettings = () => {
 							>
 								<NumberInputField
 									placeholder="0"
-									defaultValue={quizProfile.timeLimit}
 								/>
 							</NumberInput>
 						</FormControl>
@@ -115,7 +111,7 @@ const QuizSettings = () => {
 					<FormControl>
 						<FormLabel>Test Category</FormLabel>
 						<RadioGroup
-							defaultValue={quizProfile.category}
+							// defaultValue={quizProfile.category}
 							onChange={(value) => handleChangeQuizProfile('category', value)}
 						>
 							<Stack direction={{ base: 'column', md: 'row' }} spacing={4}>

@@ -98,6 +98,8 @@ interface QuizStore {
 	removeQuestion: (questionId: number) => void;
 	updateQuestion: (questionId: number, updatedQuestion: QuestionData) => void;
 	publishQuiz: () => Promise<any>;
+	deleteQuiz: (quizId: string) => Promise<any>;
+
 	
 	// User Actions
 	quizAttemptResults: QuizAttemptResult | null;
@@ -236,6 +238,32 @@ const QuizStore = create<QuizStore>((set, get) => ({
 			setIsLoading(false);
 		}
 	},
+	deleteQuiz: async (quizId: string) => {
+		const { setIsLoading } = get();
+		try {
+			setIsLoading(true);
+			const response = await axios.delete(
+				BACKEND_URL + `/api/quiz/delete-quiz/${quizId}`
+			);
+
+			if (!response || !response.data.success) {
+				console.error(
+					'Delete quiz error: ',
+					response?.data?.message || 'Unknown error occurred'
+				);
+				return;
+			}
+
+			console.log('Quiz deleted successfully:', response.data);
+			return response.data;
+		} catch (err) {
+			console.error('Delete quiz exception:', err);
+			throw new Error(err.message);
+		} finally {
+			setIsLoading(false);
+		}
+	},
+	
 	fetchQuizParams: async (searchParams = {}) => {
 		const { setQuizzesFetch, setIsLoading } = get();
 		const stringParams: { [key: string]: string } = {};
