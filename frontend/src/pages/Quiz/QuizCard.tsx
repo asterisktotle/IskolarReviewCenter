@@ -1,35 +1,41 @@
 import {
-    Card,
-    CardBody,
-    CardHeader,
-    Heading,
-    Text,
-    Badge,
-    VStack,
-    HStack,
-    Flex,
-    useColorModeValue,
-    SimpleGrid,
-    Icon,
-    Button,
-    useToast,
+	Card,
+	CardBody,
+	CardHeader,
+	Heading,
+	Text,
+	Badge,
+	VStack,
+	HStack,
+	Flex,
+	useColorModeValue,
+	SimpleGrid,
+	Icon,
+	Button,
+	useToast,
 } from '@chakra-ui/react';
 import {
-    MdDoneOutline,
-    MdHourglassBottom,
-    MdHourglassDisabled,
-    MdOutlineChecklist,
+	MdDoneOutline,
+	MdHourglassBottom,
+	MdHourglassDisabled,
+	MdOutlineChecklist,
 } from 'react-icons/md';
 import QuizStore, { QuizProfile } from '../../store/quizStore';
 
 const QuizCard = ({ quiz }: { quiz: QuizProfile }) => {
-    //Responsibility
-    // It displays individual quiz
-    // It can delete the quiz 
-    // It can edit by getting the data in quizProfile then redirecting tab to create Quiz 
-	const { setTabIndex, fetchQuizById, setQuestions, setQuizProfile, deleteQuiz, fetchQuizParams } =
-		QuizStore();
-	const toast = useToast()
+	//Responsibility
+	// It displays individual quiz
+	// It can delete the quiz
+	// It can edit by getting the data in quizProfile then redirecting tab to create Quiz
+	const {
+		setTabIndex,
+		fetchQuizById,
+		setQuestions,
+		setQuizProfile,
+		deleteQuiz,
+		fetchQuizParams,
+	} = QuizStore();
+	const toast = useToast();
 	const getCategoryColor = (category: string) => {
 		const colors: Record<string, string> = {
 			terms: 'blue',
@@ -45,44 +51,29 @@ const QuizCard = ({ quiz }: { quiz: QuizProfile }) => {
 		return `${minutes} min`;
 	};
 
-	const handleSelectedQuizFetch = async (quizId: string) => {
+	const handleEdit = async (quizId: string) => {
 		try {
 			setQuestions([]);
-			// setQuizProfile()
 			const response = await fetchQuizById(quizId);
-			if (!response.success) {
-				window.alert('Cannot fetched quiz');
-				console.log('Failed to fetch the quiz');
+			if (!response || !response.success) {
+				window.alert('Cannot fetch quiz');
 				return;
 			}
-			const {
-				title,
-				subject,
-				category,
-				timeLimit,
-				passingScore,
-				totalPoints,
-				questions,
-				isPublished,
-				_id,
-			} = response.data;
+			const { questions, title, subject, timeLimit, passingScore, category, isPublished, totalPoints , _id} = response.data;
+			// Normalize questions
+			if (!questions) {
+				console.error('There is no questions');
+				return null;
+			}
+			const normalizedQuestions = questions.map((q) => ({
+				...q,
+				id: q._id || q.id, // always have .id
+			}));
 
-            console.log('selected quiz',response.data)
 
-			const quizProfile = {
-				title,
-				subject,
-				category,
-				timeLimit,
-				passingScore,
-				isPublished,
-                questions,
-				totalPoints,
-				_id,
-			};
-			// console.log('questions: ', questions);
-            // const questionWithIds = questions.map
-			setQuizProfile(quizProfile); 
+			console.log('normalized q: ', normalizedQuestions)
+			setQuizProfile({ title, subject, timeLimit, passingScore, category, isPublished, totalPoints, _id  });
+			setQuestions(normalizedQuestions);
 			setTabIndex(1);
 		} catch (err) {
 			console.log('quiz fetched error: ', err);
@@ -90,35 +81,38 @@ const QuizCard = ({ quiz }: { quiz: QuizProfile }) => {
 	};
 
 	const handleDelete = async (quizId: string) => {
-    try {
-        const response = await deleteQuiz(quizId);
-        if (response && response.success) {
-            toast({
-                title: 'Quiz deleted successfully.',
-                status: 'success',
-                duration: 3000,
-                isClosable: true,
-            });
-            fetchQuizParams(); // Refetch the quiz list
-        } else {
-            toast({
-                title: 'Failed to delete quiz.',
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            });
-            console.error('Failed to delete quiz:', response?.message || 'Unknown error');
-        }
-    } catch (err) {
-        toast({
-            title: 'An error occurred while deleting the quiz.',
-            status: 'error',
-            duration: 3000,
-            isClosable: true,
-        });
-        console.error('Delete quiz exception:', err);
-    }
-};
+		try {
+			const response = await deleteQuiz(quizId);
+			if (response && response.success) {
+				toast({
+					title: 'Quiz deleted successfully.',
+					status: 'success',
+					duration: 3000,
+					isClosable: true,
+				});
+				fetchQuizParams(); // Refetch the quiz list
+			} else {
+				toast({
+					title: 'Failed to delete quiz.',
+					status: 'error',
+					duration: 3000,
+					isClosable: true,
+				});
+				console.error(
+					'Failed to delete quiz:',
+					response?.message || 'Unknown error'
+				);
+			}
+		} catch (err) {
+			toast({
+				title: 'An error occurred while deleting the quiz.',
+				status: 'error',
+				duration: 3000,
+				isClosable: true,
+			});
+			console.error('Delete quiz exception:', err);
+		}
+	};
 
 	return (
 		<Card
@@ -203,14 +197,17 @@ const QuizCard = ({ quiz }: { quiz: QuizProfile }) => {
 							<Button
 								w={'5rem'}
 								onClick={() => {
-									handleSelectedQuizFetch(quiz._id);
+									handleEdit(quiz._id);
 								}}
 								fontSize="sm"
 							>
 								Edit
 							</Button>
 							<Button
-                             onClick={() => handleDelete(quiz._id)} bg={'red'} fontSize="sm">
+								onClick={() => handleDelete(quiz._id)}
+								bg={'red'}
+								fontSize="sm"
+							>
 								Delete
 							</Button>
 

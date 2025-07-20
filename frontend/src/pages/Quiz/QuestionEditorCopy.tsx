@@ -22,8 +22,10 @@ import {
 import QuizStore, { QuestionData } from '../../store/quizStore';
 import convertQuestionType from '../../utils/converQuestionType';
 import { AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
+import parseOptions from '../../utils/parserOptions';
+import { QuestionOption } from '../../hooks/useQuestionMaker';
 const QuestionEditorCopy = ({ question }: { question: QuestionData }) => {
-	const {questions, removeQuestion, updateQuestion } = QuizStore();
+	const {questions, removeQuestion, updateQuestion, quizProfile } = QuizStore();
 	
 	
 
@@ -35,25 +37,27 @@ const QuestionEditorCopy = ({ question }: { question: QuestionData }) => {
 		optionId: number | string,
 		updatedOption: string // the content
 	) => {
-		if(!listOfQuestions) return null;
+		
 
-		const currentQuestion = listOfQuestions.find((q) => q._id === questionId);
-		if (!currentQuestion) {
-			console.log(`Question with ID ${questionId} does not exist`);
-			return null
-		}
+		
 
-		if (currentQuestion.type !== 'multiple-choice') {
-			return console.log(
-				`Question with ID ${questionId} is not multiple-choice`
-			);
-		}
+		// const currentQuestion = question((q) => q._id === questionId);
+		// if (!currentQuestion) {
+		// 	console.log(`Question with ID ${questionId} does not exist`);
+		// 	return null
+		// }
 
-		console.log(
-			`Question ID: ${questionId}, optionId: ${optionId}, updatedOption: ${updatedOption}`
-		)
+		// if (currentQuestion.type !== 'multiple-choice') {
+		// 	return console.log(
+		// 		`Question with ID ${questionId} is not multiple-choice`
+		// 	);
+		// }
 
-		// //For bulk answer paste
+		// console.log(
+		// 	`Question ID: ${questionId}, optionId: ${optionId}, updatedOption: ${updatedOption}`
+		// )
+
+		// // //For bulk answer paste
 		// let formattedOptions: QuestionOption[];
 
 		// if (updatedOption.match(/[\n\r]+/)) {
@@ -64,10 +68,10 @@ const QuestionEditorCopy = ({ question }: { question: QuestionData }) => {
 		// 	);
 		// }
 
-		const updatedQuestion: QuestionData = {
-			...currentQuestion,
-			options: formattedOptions,
-		};
+		// const updatedQuestion: QuestionData = {
+		// 	...currentQuestion,
+		// 	options: formattedOptions,
+		// };
 		updateQuestion(questionId, updatedQuestion);
 	};
 

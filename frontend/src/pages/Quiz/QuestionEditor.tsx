@@ -19,23 +19,24 @@ import {
 	CardBody,
 	useColorModeValue,
 } from '@chakra-ui/react';
-import QuizStore, { QuestionData } from '../../store/quizStore';
+import QuizStore, { QuestionData, QuestionOption } from '../../store/quizStore';
 import convertQuestionType from '../../utils/converQuestionType';
 import { AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
 import parseOptions from '../../utils/parserOptions';
 const QuestionEditor = ({ question }: { question: QuestionData }) => {
-	const { questions, removeQuestion, updateQuestion } = QuizStore();
+	const { questions, removeQuestion, updateQuestion} = QuizStore();
 	
 
 	const borderColor = useColorModeValue('gray.200', 'gray.600');
 	const cardBg = useColorModeValue('white', 'gray.800');
+
 
 	const handleUpdateOptions = (
 		questionId: number | string,
 		optionId: number | string,
 		updatedOption: string
 	) => {
-		const currentQuestion = questions.find((q) => q.id === questionId);
+		const currentQuestion = questions.find((q) => q.id == questionId);
 		if (!currentQuestion) {
 			return console.log(`Question with ID ${questionId} does not exist`);
 		}
@@ -57,7 +58,7 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 			formattedOptions = parseOptions(updatedOption);
 		} else {
 			formattedOptions = currentQuestion.options.map((option) =>
-				option.id === optionId ? { ...option, text: updatedOption } : option
+				option.id == optionId ? { ...option, text: updatedOption } : option
 			);
 		}
 
@@ -72,7 +73,7 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 		questionId: number | string,
 		shortAnswerValue: string
 	) => {
-		const currentQuestion = questions.find((q) => q.id === questionId);
+		const currentQuestion = questions.find((q) => q.id == questionId);
 
 		if (!currentQuestion) {
 			return console.log(`Question with ID ${questionId} does not exist`);
@@ -91,10 +92,10 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 	};
 
 	const handleQuestionType = (
-		questionId: number,
+		questionId: number | string,
 		questionType: 'multiple-choice' | 'short-answer'
 	) => {
-		const currentQuestion = questions.find((q) => q.id === questionId);
+		const currentQuestion = questions.find((q) => q.id == questionId);
 
 		if (!currentQuestion) {
 			return console.log(`Question with ID ${questionId} does not exist`);
@@ -104,7 +105,7 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 		updateQuestion(questionId, updatedQuestion);
 	};
 
-	const handleRemoveQuestion = (questionId: number) => {
+	const handleRemoveQuestion = (questionId: number | string) => {
 		if (questions.length === 0) {
 			return null;
 		} else {
@@ -112,8 +113,10 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 		}
 	};
 
-	const handleAddOption = (questionId: number) => {
+	//POTENTIAL BUG FOR CREATING IDS 
+	const handleAddOption = (questionId: number | string) => {
 		const currentQuestion = questions.find((q) => q.id === questionId);
+		// console.log('current questions: ', currentQuestion)
 		if (!currentQuestion) {
 			return console.log(`Question with ID ${questionId} does not exist`);
 		}
@@ -126,7 +129,7 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 		const optionLength = currentQuestion.options.length;
 
 		const newOption = {
-			id: optionLength + 1,
+			id: Date.now().toString() + optionLength.toString() ,
 			text: '',
 			isCorrect: false,
 		};
@@ -137,9 +140,10 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 		};
 
 		updateQuestion(questionId, updatedQuestion);
+
 	};
 
-	const handleRemoveChoices = (questionId: number, optionId: number) => {
+	const handleRemoveChoices = (questionId: number | string , optionId: number | string) => {
 		const updatedQuestion = questions.find((q) => q.id === questionId);
 		if (!updatedQuestion) {
 			return console.log(`Question with ID ${questionId} does not exist`);
@@ -163,7 +167,7 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 		updateQuestion(questionId, question);
 	};
 
-	const handleCorrectOption = (questionId: number, optionId: number) => {
+	const handleCorrectOption = (questionId: number | string, optionId: number | string) => {
 		const currentQuestion = questions.find((q) => q.id === questionId);
 
 		if (!currentQuestion) {
@@ -176,17 +180,18 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 		}
 
 		const correctOption = currentQuestion.options.map((option) => {
-			if (option.id === optionId) {
+			if(option.id == optionId){
 				return {
 					...option,
-					isCorrect: true,
-				};
-			} else
+					isCorrect: true
+				}
+			} else {
 				return {
 					...option,
-					isCorrect: false,
-				};
-		});
+					isCorrect: false
+				}
+			}
+		} )
 
 		const updatedQuestion: QuestionData = {
 			...currentQuestion,
@@ -227,12 +232,8 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 					</HStack>
 
 					{/* Question Text */}
-					<FormControl 
-					// key={question._id}
-					>
-						<FormLabel fontSize="sm" fontWeight="medium">
-							Question Text
-						</FormLabel>
+					<FormControl>
+						
 						<Editable
 							placeholder={'Enter a question'}
 							key={question._id || question.id}
@@ -291,18 +292,16 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 										?.id.toString() || ''
 								}
 								onChange={(value) =>
-									handleCorrectOption(question.id, Number(value))
+									handleCorrectOption(question.id, value)
 								}
 							>
 								<VStack spacing={2} align="stretch">
 									{question.options?.map((choice, index) => {
-										console.log('option id: ', choice.id)										
-										console.log('option _id db: ', choice._id)										
 										return ( 
 										<HStack key={`${question.id}-${choice.id}`} spacing={2}>
 											<Radio value={choice.id.toString()} colorScheme="green" />
 											<Input
-												id={ question._id + choice._id||choice.id.toString()}
+												// id={ question._id + choice._id||choice.id.toString()}
 												onChange={(e) =>
 													handleUpdateOptions(
 														question.id,

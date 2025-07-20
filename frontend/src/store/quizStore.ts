@@ -6,14 +6,14 @@ axios.defaults.withCredentials = true;
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export interface QuestionOption {
-	id: number;
+	id: number | string;
 	text: string;
 	isCorrect: boolean;
-	_id: string;
+	_id?: string;
 }
 
 interface BaseQuestionData {
-	id: number;
+	id: number | string;
 	questionText: string;
 	points: number;
 	_id?: string;
@@ -61,33 +61,31 @@ export interface FetchResponse {
 	success: boolean;
 }
 
-
 export interface QuizAttemptResult {
-  quiz: string;
-  quizTitle: string;
-  user: string;
-  answers: Array<{
-	questionId: string;
-	selectedOption?: string;
-	textAnswer?: string;
-	isCorrect: boolean;
-	pointsEarned: number;
-  }>;
-  currentScore: number;
-  scores: number[];
-  currentPercentageScore: number;
-  percentageScores: number[];
-  passed: boolean;
-  completedAt: string;
-  attemptNumber: number;
-  attemptDates: string[];
+	quiz: string;
+	quizTitle: string;
+	user: string;
+	answers: Array<{
+		questionId: string;
+		selectedOption?: string;
+		textAnswer?: string;
+		isCorrect: boolean;
+		pointsEarned: number;
+	}>;
+	currentScore: number;
+	scores: number[];
+	currentPercentageScore: number;
+	percentageScores: number[];
+	passed: boolean;
+	completedAt: string;
+	attemptNumber: number;
+	attemptDates: string[];
 }
 
 interface QuizStore {
 	// storing quizzes data
 	quizzesFetch: QuizProfile[];
 	setQuizzesFetch: (quizzes: QuizProfile[]) => void;
-	
 
 	//Admin Create Quiz Actions
 	questions: QuestionData[];
@@ -96,11 +94,15 @@ interface QuizStore {
 	setQuizProfile: (quizProfile: QuizProfile) => void;
 	addQuestions: (question: QuestionData) => void;
 	removeQuestion: (questionId: number) => void;
-	updateQuestion: (questionId: number | string, updatedQuestion: QuestionData) => void;
+	updateQuestion: (
+		questionId: number | string,
+		updatedQuestion: QuestionData
+	) => void;
 	publishQuiz: () => Promise<any>;
+	updateQuiz: (quizId: string) => Promise<any>;
 	deleteQuiz: (quizId: string) => Promise<any>;
 
-	
+
 	// User Actions
 	quizAttemptResults: QuizAttemptResult | null;
 	setQuizAttemptResults: (quizAttempt: QuizAttemptResult | null) => void;
@@ -108,7 +110,7 @@ interface QuizStore {
 	loadQuizAttemptResults: () => void;
 	fetchQuizParams: (searchParams?: { [key: string]: string | boolean }) => void;
 	fetchQuizById: (quizId: string) => Promise<FetchResponse | void>;
-	//Utils 	
+	//Utils
 	isLoading: boolean;
 	setIsLoading: (isLoading: boolean) => void;
 	tabIndex: number;
@@ -152,11 +154,11 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		attemptNumber: 0,
 		attemptDates: [],
 	},
-	setQuizAttemptResults: (quizAttemptResults) => set({quizAttemptResults}),
+	setQuizAttemptResults: (quizAttemptResults) => set({ quizAttemptResults }),
 	isLoading: false,
 	setIsLoading: (isLoading) => set({ isLoading }),
 	tabIndex: 0,
-	setTabIndex: (tabIndex) => set({tabIndex}),
+	setTabIndex: (tabIndex) => set({ tabIndex }),
 	addQuestions: async (question: QuestionData) => {
 		const { setQuestions, questions } = get();
 
@@ -183,14 +185,18 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		);
 		setQuestions(updatedQuestions);
 	},
-	updateQuestion: (questionId: number | string, updatedQuestion: QuestionData) => {
-		const { questions,  setQuestions } = get();
+	updateQuestion: (
+		questionId: number | string,
+		updatedQuestion: QuestionData
+	) => {
+		const { questions, setQuestions } = get();
+	
 
 		//check if question exist
 		const questionExist = questions.some((q) => q.id === questionId);
 
 		if (!questionExist) {
-			console.log('Cannot updated, question does not exist')
+			console.log('Cannot updated, question does not exist');
 			return null;
 		}
 
@@ -200,12 +206,18 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		setQuestions(updatedQuestions);
 	},
 	publishQuiz: async () => {
-		const { quizProfile, questions, setIsLoading, setQuizProfile, setQuestions } = get();
+		const {
+			quizProfile,
+			questions,
+			setIsLoading,
+			setQuizProfile,
+			setQuestions,
+		} = get();
 
-		if(!questions.length){
-			throw new Error("No quiz submitted")
+		if (!questions.length) {
+			throw new Error('No quiz submitted');
 		}
-		
+
 		try {
 			setIsLoading(true);
 			const { data } = await axios.post(BACKEND_URL + '/api/quiz/create-quiz', {
@@ -218,24 +230,49 @@ const QuizStore = create<QuizStore>((set, get) => ({
 				timeLimit: quizProfile.timeLimit,
 				isPublished: quizProfile.isPublished,
 			});
-			
+
 			// Clearing the forms field
-			setQuizProfile(
-				{title: 'Quiz Title',
+			setQuizProfile({
+				title: 'Quiz Title',
 				subject: 'mesl',
 				category: 'terms',
 				timeLimit: 0,
 				passingScore: 50,
 				totalPoints: 0,
 				questions: [],
-				isPublished: false,}
-			)
-			setQuestions([])
+				isPublished: false,
+			});
+			setQuestions([]);
 			return data;
 		} catch (err) {
 			console.log('publishQUiz error: ', err);
 		} finally {
 			setIsLoading(false);
+		}
+	},
+	updateQuiz: async (quizId: string) => {
+		const {quizProfile, questions, setIsLoading} = get();
+		const {title, subject, category,  timeLimit, passingScore, isPublished} = quizProfile
+		try{
+			setIsLoading(true)
+			const response = await axios.put(BACKEND_URL + '/api/quiz/update-quiz/' + quizId , {
+				title,
+				subject,
+				category,
+				timeLimit,
+				passingScore,
+				isPublished,
+				questions: questions
+			})
+			if(!response.data.success){
+				console.error('cannot update', response.data.message)
+			}
+			console.log('response data:', response.data)
+			return response;
+		}catch(err){
+			throw new Error(err.message)
+		}finally{
+			setIsLoading(false)
 		}
 	},
 	deleteQuiz: async (quizId: string) => {
@@ -263,7 +300,7 @@ const QuizStore = create<QuizStore>((set, get) => ({
 			setIsLoading(false);
 		}
 	},
-	
+
 	fetchQuizParams: async (searchParams = {}) => {
 		const { setQuizzesFetch, setIsLoading } = get();
 		const stringParams: { [key: string]: string } = {};
@@ -312,7 +349,7 @@ const QuizStore = create<QuizStore>((set, get) => ({
 
 	//TODO: do a clean up to the quiz attempt after seeing the result
 	evaluateSubmittedQuiz: async (quizForm: QuizFormEvaluation) => {
-		const { setIsLoading , setQuizAttemptResults} = get();
+		const { setIsLoading, setQuizAttemptResults } = get();
 		try {
 			setIsLoading(true);
 			const { data } = await axios.post(BACKEND_URL + '/api/quiz/submit-quiz', {
@@ -323,20 +360,21 @@ const QuizStore = create<QuizStore>((set, get) => ({
 			if (!data.success) {
 				throw new Error(data.message);
 			}
-			
+
 			console.log('quiz evaluation: ', data);
-			setQuizAttemptResults(data.data)
-			const {answers, passed, currentPercentageScore, currentScore, quiz} = data.data
+			setQuizAttemptResults(data.data);
+			const { answers, passed, currentPercentageScore, currentScore, quiz } =
+				data.data;
 			const result = {
 				answers,
 				passed,
 				currentPercentageScore,
 				currentScore,
-				quiz
-			}
-			console.log('Saved to local storage: ', result)
-			localStorage.setItem('quizResult',JSON.stringify(result))
-			return data.success
+				quiz,
+			};
+			console.log('Saved to local storage: ', result);
+			localStorage.setItem('quizResult', JSON.stringify(result));
+			return data.success;
 			// return data;
 		} catch (err) {
 			console.log('fetching error: ', err);
@@ -346,13 +384,11 @@ const QuizStore = create<QuizStore>((set, get) => ({
 	},
 
 	loadQuizAttemptResults: () => {
-	
-		const savedResults = localStorage.getItem('quizResult')
-		if(savedResults){
-			set({quizAttemptResults: JSON.parse(savedResults)})
+		const savedResults = localStorage.getItem('quizResult');
+		if (savedResults) {
+			set({ quizAttemptResults: JSON.parse(savedResults) });
 		}
 	},
-	
 
 	getQuizHistory: async (quizId, userId) => {
 		// not implemented yet

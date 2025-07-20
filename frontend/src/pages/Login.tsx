@@ -24,7 +24,6 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
 	signupSchema,
-
 	forgotPasswordSchema,
 	otpSchema,
 } from '../schema/formSchema';
@@ -231,11 +230,9 @@ const SignUpForm = () => {
 			}
 		};
 
-		
-
 		return (
 			<form onSubmit={handleSignInForm}>
-				<VStack padding={3} spacing={3} align={'stretch'} >
+				<VStack padding={3} spacing={3} align={'stretch'}>
 					<Box fontSize={30}> SIGN IN</Box>
 
 					{/* Email */}
@@ -446,7 +443,6 @@ const SignUpForm = () => {
 		const handleOTP = async (userData) => {
 			const { email, password, otp } = userData;
 
-		
 			try {
 				setOtpMessageError('');
 				setSuccessChangePass(false);
@@ -467,7 +463,7 @@ const SignUpForm = () => {
 				}
 				setSuccessChangePass(true);
 				setOtpMessage(data.message);
-				console.log('otp msg ',otpMessage )
+				console.log('otp msg ', otpMessage);
 				console.log('success change password');
 			} catch (err) {
 				console.log(err.message);
@@ -493,7 +489,7 @@ const SignUpForm = () => {
 		}
 
 		return (
-			<Box  bgColor={'green'}>
+			<Box bgColor={'green'}>
 				<form
 					onSubmit={handleSubmit(handleOTP)}
 					className="flex flex-col items-center gap-2 "
@@ -599,9 +595,18 @@ const SignUpForm = () => {
 
 	return (
 		<div className=" h-svh flex flex-col justify-center items-center text-white">
-			<div className=" z-20 px-3 py-4 rounded-3xl w-[90%] max-w-[25rem] sm:w-[25rem] lg:w-[30rem] 2xl:w-[50rem] bg-themeBlue-800">
+			<Box
+				backdropFilter="blur(10px)"
+				border="1px solid"
+				borderColor="whiteAlpha.500"
+				shadow="md"
+				marginBlock={'1'}
+				marginInline={{ sm: 0, base: -5 }}
+				p={5}
+				rounded={'lg'}
+			>
 				{renderForm()}
-			</div>
+			</Box>
 		</div>
 	);
 };

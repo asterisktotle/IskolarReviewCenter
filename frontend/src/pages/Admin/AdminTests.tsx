@@ -163,29 +163,19 @@ const AdminTests = () => {
 
 								{/* Questions Section */}
 								<Box>
-									<Heading mb={4} size="md">Questions</Heading>
 									
 										<VStack spacing={4} align="stretch">
-											{quizProfile.questions ? 
+											{/* {quizProfile.questions ? 
 											quizProfile.questions.map((item) => (
 												<QuestionEditorCopy question={item}  key={item._id}/>
 											) )
 											:
 											<div> Questions is blank</div>
-											}
+											} */}
 											
 											{tabIndex &&
 												questions?.map((q, index) => 
-													{
-														if(!q._id){
-															console.log(`I will use index: ${index}, as q_id is ${q._id}`)
-														
-														} 
-
-														console.log(`Question ${index + 1}: ${q._id} `)
-														return	<QuestionEditor key={q._id || index} question={q} />
-													}	
-												
+													<QuestionEditor key={q._id || index} question={q} />
 												)}
 											<Button
 												leftIcon={<AddIcon />}

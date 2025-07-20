@@ -367,7 +367,6 @@ export const updateQuiz = async (req, res) => {
 		return res.json({
 			success: true,
 			message: 'Quiz updated successfully',
-			quiz: quiz,
 		});
 	} catch (err) {
 		return res.json({ success: false, message: err.message });

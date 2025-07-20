@@ -20,9 +20,10 @@ import {
 	useColorModeValue,
 } from '@chakra-ui/react';
 import QuizStore from '../../../store/quizStore';
+import { useEffect } from 'react';
 
 const QuizSettings = () => {
-	const { quizProfile, setQuizProfile, publishQuiz, isLoading } = QuizStore();
+	const { quizProfile, setQuizProfile, publishQuiz, isLoading , updateQuiz} = QuizStore();
 
 	const toast = useToast();
 
@@ -36,7 +37,6 @@ const QuizSettings = () => {
 			...quizProfile,
 			[field]: value,
 		});
-		console.log('quiz profile: ', quizProfile);
 	};
 
 	const handleSaveQuiz = async () => {
@@ -49,6 +49,21 @@ const QuizSettings = () => {
 			loading: { title: 'Quiz creating', description: 'Please wait' },
 		});
 	};
+
+	const handleUpdateQuiz = async (quizId: string) => {
+		toast.promise(updateQuiz(quizId), {
+			success: { title: 'Quiz created', description: 'Lez go' },
+			error: {
+				title: 'Quiz failed to upload',
+				description: 'Something wrong',
+			},
+			loading: { title: 'Quiz creating', description: 'Please wait' },
+		});
+	};
+
+	
+
+	
 
 	return (
 		<Card bg={cardBg} borderColor={borderColor}>
@@ -164,7 +179,9 @@ const QuizSettings = () => {
 						>
 							{quizProfile.isPublished ? 'Published' : 'Draft'}
 						</Button>
+						{quizProfile._id && <Button onClick={() => handleUpdateQuiz(quizProfile._id)}>Update</Button>}
 						<Button variant="outline">Scan PDF</Button>
+						
 					</HStack>
 				</VStack>
 			</CardBody>

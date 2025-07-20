@@ -74,7 +74,7 @@ export default function Simple() {
 	};
 
 	return (
-		<>
+		
 			<Box px={4}>
 				<Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
 					<IconButton
@@ -89,8 +89,7 @@ export default function Simple() {
 							src="/iskolar.png"
 							alt="iskolar logo"
 							w={'10rem'}
-							// display={{ sm: 'none' }}
-							onClick={() => console.log('click home')}
+						
 						/>
 						<HStack
 							as={'nav'}
@@ -118,7 +117,6 @@ export default function Simple() {
 								<Avatar
 									size={'md'}
 									name={userData?.name}
-									// backgroundColor={'grey'}
 								/>
 							</MenuButton>
 							<MenuList bg={'black'} textColor={'white'} padding={4} >
@@ -156,13 +154,12 @@ export default function Simple() {
 						p={4}
 						display={{ md: 'none' }}
 						position={'fixed'}
-			
-						zIndex={10}
-						color={'blue.800'}
+						bg={'black'}
+						zIndex={5}
 						w={'10rem'}
 						borderRadius={5}
 					>
-						<Stack as={'nav'} spacing={5}>
+						<Stack as={'nav'} spacing={5}  >
 							{userData?.isAdmin
 								? adminLinks.map((name, path) => (
 										<NavLink key={path}>{name}</NavLink>
@@ -174,6 +171,6 @@ export default function Simple() {
 					</Box>
 				) : null}
 			</Box>
-		</>
+		
 	);
 }

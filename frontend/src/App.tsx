@@ -16,6 +16,7 @@ import AdminTests from './pages/Admin/AdminTests';
 import UserTests from './pages/User/UserTests';
 import ViewPdf from './pages/PdfViewer';
 import UserPlayQuiz from './pages/Quiz/UserPlayQuiz';
+import NotFound from './pages/NotFoundFallBack';
 
 const App = () => {
 	const getAuth = useAuthStore((state) => state.getAuth);
@@ -23,7 +24,8 @@ const App = () => {
 
 	useEffect(() => {
 		getAuth();
-	}, []);
+		console.log('get auth');
+	}, [getAuth]);
 
 	return (
 		<div className="text-white px-5">
@@ -55,10 +57,14 @@ const App = () => {
 							<Route path="/dashboard" element={<Home />} />
 							<Route path="/user-tests" element={<UserTests />} />
 							<Route path="/user-lectures" element={<UsersLecture />} />
-							<Route path="/user-tests/play/:quizId" element={<UserPlayQuiz/>} />
+							<Route
+								path="/user-tests/play/:quizId"
+								element={<UserPlayQuiz />}
+							/>
 						</>
 					)}
-					{/* USERS */}
+					{/* Fall back  */}
+					<Route path="*" element={<NotFound/>} />
 				</Route>
 			</Routes>
 		</div>
