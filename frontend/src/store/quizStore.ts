@@ -9,45 +9,110 @@ export interface QuestionOption {
 	id: number;
 	text: string;
 	isCorrect: boolean;
+	_id: string;
 }
 
 interface BaseQuestionData {
 	id: number;
 	questionText: string;
 	points: number;
+	_id?: string;
 }
 
 export interface MultipleChoiceQuestion extends BaseQuestionData {
 	type: 'multiple-choice';
 	options: QuestionOption[];
 	correctAnswer?: never;
+	_id?: string;
 }
 interface ShortAnswerQuestion extends BaseQuestionData {
 	type: 'short-answer';
 	correctAnswer: string;
 	options?: never;
 }
-
 export type QuestionData = MultipleChoiceQuestion | ShortAnswerQuestion;
+
+export interface AnswerState {
+	questionId: string;
+	selectedOption?: string;
+	textAnswer?: string;
+}
+
+export interface QuizFormEvaluation {
+	quizId: string;
+	userId: string;
+	answers: AnswerState[];
+}
 
 export interface QuizProfile {
 	title: string;
 	subject: 'mesl' | 'mdsp' | 'pipe';
 	category: 'terms' | 'weekly-test' | 'take-home-test' | 'pre-board-exam';
-	timeLimit?: number;
-	passingScore?: number;
+	timeLimit: number;
+	passingScore: number;
 	totalPoints: number;
-	questions: QuestionData[];
+	questions?: QuestionData[];
+	isPublished: boolean;
+	_id?: string;
+}
+
+export interface FetchResponse {
+	data: QuizProfile;
+	success: boolean;
+}
+
+
+export interface QuizAttemptResult {
+  quiz: string;
+  quizTitle: string;
+  user: string;
+  answers: Array<{
+	questionId: string;
+	selectedOption?: string;
+	textAnswer?: string;
+	isCorrect: boolean;
+	pointsEarned: number;
+  }>;
+  currentScore: number;
+  scores: number[];
+  currentPercentageScore: number;
+  percentageScores: number[];
+  passed: boolean;
+  completedAt: string;
+  attemptNumber: number;
+  attemptDates: string[];
 }
 
 interface QuizStore {
+	// storing quizzes data
+	quizzesFetch: QuizProfile[];
+	setQuizzesFetch: (quizzes: QuizProfile[]) => void;
+	
+
+	//Admin Create Quiz Actions
 	questions: QuestionData[];
-	quizProfile: QuizProfile;
 	setQuestions: (questions: QuestionData[]) => void;
+	quizProfile: QuizProfile;
 	setQuizProfile: (quizProfile: QuizProfile) => void;
 	addQuestions: (question: QuestionData) => void;
 	removeQuestion: (questionId: number) => void;
-	updateQuestion: (questionId: number, updatedQuestion: QuestionData) => void;
+	updateQuestion: (questionId: number | string, updatedQuestion: QuestionData) => void;
+	publishQuiz: () => Promise<any>;
+	deleteQuiz: (quizId: string) => Promise<any>;
+
+	
+	// User Actions
+	quizAttemptResults: QuizAttemptResult | null;
+	setQuizAttemptResults: (quizAttempt: QuizAttemptResult | null) => void;
+	evaluateSubmittedQuiz: (quizForm: QuizFormEvaluation) => void | Promise<any>;
+	loadQuizAttemptResults: () => void;
+	fetchQuizParams: (searchParams?: { [key: string]: string | boolean }) => void;
+	fetchQuizById: (quizId: string) => Promise<FetchResponse | void>;
+	//Utils 	
+	isLoading: boolean;
+	setIsLoading: (isLoading: boolean) => void;
+	tabIndex: number;
+	setTabIndex: (tabIndex: number) => void;
 }
 
 const QuizStore = create<QuizStore>((set, get) => ({
@@ -56,19 +121,47 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		subject: 'mesl',
 		category: 'terms',
 		timeLimit: 0,
-		passingScore: 0,
+		passingScore: 50,
 		totalPoints: 0,
 		questions: [],
+		isPublished: false,
 	},
-	setQuizProfile: (quizProfile) => set({ quizProfile }),
+	setQuizProfile: (updates) =>
+		set((state) => ({
+			quizProfile: {
+				...state.quizProfile,
+				...updates,
+			},
+		})),
 	questions: [],
 	setQuestions: (questions) => set({ questions }),
-	//Add new question
+	quizzesFetch: [],
+	setQuizzesFetch: (quizzesFetch) => set({ quizzesFetch }),
+
+	quizAttemptResults: {
+		quiz: '',
+		quizTitle: '',
+		user: '',
+		answers: [],
+		currentScore: 0,
+		scores: [],
+		currentPercentageScore: 0,
+		percentageScores: [],
+		passed: false,
+		completedAt: '',
+		attemptNumber: 0,
+		attemptDates: [],
+	},
+	setQuizAttemptResults: (quizAttemptResults) => set({quizAttemptResults}),
+	isLoading: false,
+	setIsLoading: (isLoading) => set({ isLoading }),
+	tabIndex: 0,
+	setTabIndex: (tabIndex) => set({tabIndex}),
 	addQuestions: async (question: QuestionData) => {
 		const { setQuestions, questions } = get();
 
 		const newQuestion: QuestionData = { ...question };
-		setQuestions([newQuestion, ...questions]);
+		setQuestions([...questions, newQuestion]);
 	},
 	removeQuestion: (questionId: number) => {
 		const { questions, setQuestions } = get();
@@ -90,14 +183,15 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		);
 		setQuestions(updatedQuestions);
 	},
-	updateQuestion: (questionId: number, updatedQuestion: QuestionData) => {
-		const { questions, setQuestions } = get();
+	updateQuestion: (questionId: number | string, updatedQuestion: QuestionData) => {
+		const { questions,  setQuestions } = get();
 
 		//check if question exist
 		const questionExist = questions.some((q) => q.id === questionId);
 
 		if (!questionExist) {
-			return;
+			console.log('Cannot updated, question does not exist')
+			return null;
 		}
 
 		const updatedQuestions = questions.map((question) =>
@@ -106,8 +200,14 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		setQuestions(updatedQuestions);
 	},
 	publishQuiz: async () => {
-		const { quizProfile, questions } = get();
+		const { quizProfile, questions, setIsLoading, setQuizProfile, setQuestions } = get();
+
+		if(!questions.length){
+			throw new Error("No quiz submitted")
+		}
+		
 		try {
+			setIsLoading(true);
 			const { data } = await axios.post(BACKEND_URL + '/api/quiz/create-quiz', {
 				title: quizProfile.title,
 				subject: quizProfile.subject,
@@ -116,30 +216,147 @@ const QuizStore = create<QuizStore>((set, get) => ({
 				totalPoints: quizProfile.totalPoints,
 				passingScore: quizProfile.passingScore,
 				timeLimit: quizProfile.timeLimit,
+				isPublished: quizProfile.isPublished,
 			});
-
-			if (data.success) {
-				console.log('Quiz published successfully');
-			} else {
-				console.log('QUiz published failed');
-			}
+			
+			// Clearing the forms field
+			setQuizProfile(
+				{title: 'Quiz Title',
+				subject: 'mesl',
+				category: 'terms',
+				timeLimit: 0,
+				passingScore: 50,
+				totalPoints: 0,
+				questions: [],
+				isPublished: false,}
+			)
+			setQuestions([])
+			return data;
 		} catch (err) {
 			console.log('publishQUiz error: ', err);
+		} finally {
+			setIsLoading(false);
 		}
 	},
-	fetchQuizParams: async (searchParams = {}) => {
-		const params = new URLSearchParams(searchParams);
+	deleteQuiz: async (quizId: string) => {
+		const { setIsLoading } = get();
 		try {
+			setIsLoading(true);
+			const response = await axios.delete(
+				BACKEND_URL + `/api/quiz/delete-quiz/${quizId}`
+			);
+
+			if (!response || !response.data.success) {
+				console.error(
+					'Delete quiz error: ',
+					response?.data?.message || 'Unknown error occurred'
+				);
+				return;
+			}
+
+			console.log('Quiz deleted successfully:', response.data);
+			return response.data;
+		} catch (err) {
+			console.error('Delete quiz exception:', err);
+			throw new Error(err.message);
+		} finally {
+			setIsLoading(false);
+		}
+	},
+	
+	fetchQuizParams: async (searchParams = {}) => {
+		const { setQuizzesFetch, setIsLoading } = get();
+		const stringParams: { [key: string]: string } = {};
+		for (const key in searchParams) {
+			stringParams[key] = String(searchParams[key]);
+		}
+
+		const params = new URLSearchParams(stringParams);
+		try {
+			setIsLoading(true);
+
 			const { data } = await axios.get(
-				BACKEND_URL + `api/quiz/get-all-quizzes?${params}`
+				BACKEND_URL + `/api/quiz/get-all-quizzes?${params}`
 			);
 
 			if (data.success) {
-				return data.data[0];
-			} else console.log('Quiz cannot get');
+				setQuizzesFetch(data.data);
+				return;
+			}
 		} catch (err) {
 			console.log('fetching error: ', err);
+		} finally {
+			setIsLoading(false);
 		}
+	},
+	fetchQuizById: async (quizId: string) => {
+		const { setIsLoading } = get();
+
+		try {
+			setIsLoading(true);
+			const { data } = await axios.get(
+				BACKEND_URL + `/api/quiz/get-quiz/${quizId}`
+			);
+
+			if (!data.success) {
+				throw new Error(data.message);
+			}
+			return data;
+		} catch (err) {
+			//make a an error message later on
+			console.log('fetching error: ', err);
+		} finally {
+			setIsLoading(false);
+		}
+	},
+
+	//TODO: do a clean up to the quiz attempt after seeing the result
+	evaluateSubmittedQuiz: async (quizForm: QuizFormEvaluation) => {
+		const { setIsLoading , setQuizAttemptResults} = get();
+		try {
+			setIsLoading(true);
+			const { data } = await axios.post(BACKEND_URL + '/api/quiz/submit-quiz', {
+				quizId: quizForm.quizId,
+				userId: quizForm.userId,
+				answers: quizForm.answers,
+			});
+			if (!data.success) {
+				throw new Error(data.message);
+			}
+			
+			console.log('quiz evaluation: ', data);
+			setQuizAttemptResults(data.data)
+			const {answers, passed, currentPercentageScore, currentScore, quiz} = data.data
+			const result = {
+				answers,
+				passed,
+				currentPercentageScore,
+				currentScore,
+				quiz
+			}
+			console.log('Saved to local storage: ', result)
+			localStorage.setItem('quizResult',JSON.stringify(result))
+			return data.success
+			// return data;
+		} catch (err) {
+			console.log('fetching error: ', err);
+		} finally {
+			setIsLoading(false);
+		}
+	},
+
+	loadQuizAttemptResults: () => {
+	
+		const savedResults = localStorage.getItem('quizResult')
+		if(savedResults){
+			set({quizAttemptResults: JSON.parse(savedResults)})
+		}
+	},
+	
+
+	getQuizHistory: async (quizId, userId) => {
+		// not implemented yet
+		console.log('getquiz history: ', quizId, userId);
 	},
 }));
 

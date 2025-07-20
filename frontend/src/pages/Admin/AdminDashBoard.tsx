@@ -34,13 +34,13 @@ const AdminDashBoard = () => {
 			<CardBody>
 				<Stack spacing={2}>
 					<Box>
-						<Text fontSize="sm" color="gray.600" fontWeight="medium">
+						<Text fontSize="sm" color="gray.200" fontWeight="medium">
 							Name
 						</Text>
 						<Text fontWeight="semibold">{user.name}</Text>
 					</Box>
 					<Box>
-						<Text fontSize="sm" color="gray.600" fontWeight="medium">
+						<Text fontSize="sm" color="gray.200" fontWeight="medium">
 							Email
 						</Text>
 						<Text fontSize="sm" wordBreak="break-word">
@@ -48,7 +48,7 @@ const AdminDashBoard = () => {
 						</Text>
 					</Box>
 					<Box>
-						<Text fontSize="sm" color="gray.600" fontWeight="medium" mb={1}>
+						<Text fontSize="sm" color="gray.200" fontWeight="medium" mb={1}>
 							Status
 						</Text>
 						<Badge colorScheme={user.isAccountVerified ? 'green' : 'red'}>
@@ -112,9 +112,9 @@ const AdminDashBoard = () => {
 						<Tbody>
 							{usersList && usersList.length > 0 ? (
 								usersList.map((user) => (
-									<Tr key={user._id} _hover={{ bg: 'gray.50' }}>
+									<Tr key={user._id} _hover={{ bg: 'gray.600' }}>
 										<Td fontWeight="medium">{user.name}</Td>
-										<Td color="gray.600">{user.email}</Td>
+										<Td color="gray.200">{user.email}</Td>
 										<Td>
 											<Badge
 												colorScheme={user.isAccountVerified ? 'green' : 'red'}
@@ -127,7 +127,7 @@ const AdminDashBoard = () => {
 								))
 							) : (
 								<Tr>
-									<Td colSpan={3} textAlign="center" py={8} color="gray.500">
+									<Td colSpan={3} textAlign="center" py={8} color="gray.200">
 										No users found
 									</Td>
 								</Tr>

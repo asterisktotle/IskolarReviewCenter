@@ -11,9 +11,8 @@ interface UserData {
 	isAccountVerified: boolean;
 }
 
-interface PdfFiles {
+export interface PdfFiles {
 	_id: string;
-	fileId: string;
 	subject: string;
 	category: string;
 	title: string;
@@ -47,6 +46,7 @@ interface AdminStore {
 	setCategory: (category: string) => void;
 	setSubject: (subject: string) => void;
 	uploadPdfFile: () => Promise<any>;
+	deletePdfFile: (id: string) => Promise<any>;
 }
 
 const AdminStore = create<AdminStore>((set, get) => ({
@@ -119,7 +119,7 @@ const AdminStore = create<AdminStore>((set, get) => ({
 
 	// Prepare form data before submission
 	uploadPdfFile: async () => {
-		const { title, file, subject, category, resetForm } = get();
+		const { title, file, subject, category, resetForm, getAllPdf } = get();
 
 		// Validation check
 		if (!title || !file || !subject || !category) {
@@ -135,28 +135,45 @@ const AdminStore = create<AdminStore>((set, get) => ({
 		formData.append('subject', subject);
 		formData.append('category', category);
 
-		// Uploading PDF
 		try {
 			const result = await axios.post(
 				BACKEND_URL + '/api/pdf/pdf-lectures',
-				formData,
-				{
-					headers: {
-						'Content-Type': 'multipart/form-data',
-					},
-				}
+				formData
 			);
+
 			resetForm();
-			set({ loading: false });
+			getAllPdf();
 			return result;
 		} catch (err) {
-			set({ loading: false });
 			console.error('Upload error: ', err);
 			throw err;
+		} finally {
+			set({ loading: false });
 		}
 	},
 
-	// Upload Function
+	deletePdfFile: async (id: string) => {
+		const { getAllPdf } = get();
+		try {
+			set({ loading: true });
+
+			const result = await axios.delete(
+				BACKEND_URL + '/api/pdf/pdf-lectures/' + id
+			);
+
+			if (!result.data.success) {
+				console.error(result.data.message);
+			}
+			// console.log('file deleted');
+			getAllPdf();
+			return result;
+		} catch (err) {
+			console.error('Upload error: ', err);
+			throw err;
+		} finally {
+			set({ loading: false });
+		}
+	},
 }));
 
 export default AdminStore;

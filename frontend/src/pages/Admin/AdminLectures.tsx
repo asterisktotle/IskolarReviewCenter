@@ -101,6 +101,7 @@ const UploadPdf = () => {
 							placeholder="Enter File Name"
 							required
 							onChange={(e) => setTitle(e.target.value)}
+							value={title}
 						/>
 						<FormErrorMessage>Please enter a title</FormErrorMessage>
 					</FormControl>
@@ -144,6 +145,9 @@ const AdminLectures = () => {
 	const navigate = useNavigate();
 	const [openUploadForm, setOpenUploadForm] = useState(false);
 	const { getAllPdf, pdfList, messageError, loading } = AdminStore();
+	const toast = useToast();
+
+	const { deletePdfFile } = AdminStore();
 
 	useEffect(() => {
 		getAllPdf();
@@ -151,6 +155,16 @@ const AdminLectures = () => {
 
 	const handleViewPdf = (pdfId: string) => {
 		navigate(`/view-pdf/${pdfId}`);
+	};
+
+	const handleDelete = (id: string) => {
+		toast.promise(deletePdfFile(id), {
+			success: { title: 'File deleted' },
+			error: {
+				title: 'File failed to delete',
+			},
+			loading: { title: 'Deleting file' },
+		});
 	};
 
 	return (
@@ -178,22 +192,25 @@ const AdminLectures = () => {
 							<Th>Subject</Th>
 							<Th>Category</Th>
 							<Th>Title</Th>
-							<Th>File</Th>
+							<Th>Options</Th>
 						</Tr>
 					</Thead>
 					<Tbody>
 						{pdfList &&
 							pdfList.map((pdf) => (
-								<Tr key={pdf.fileId}>
+								<Tr
+									key={pdf._id}
+									_hover={{ bgColor: 'gray.600' }}
+									cursor={'pointer'}
+								>
 									<Td>{pdf.subject.toUpperCase()}</Td>
 									<Td>{pdf.category.toUpperCase()}</Td>
-									<Td>{pdf.title}</Td>
-									<Td
-										cursor={'pointer'}
-										_hover={{ color: 'blue.500' }}
-										onClick={() => handleViewPdf(pdf._id)}
-									>
-										View
+									<Td onClick={() => handleViewPdf(pdf._id)}>{pdf.title}</Td>
+									<Td>
+										<Button>Edit</Button>
+										<Button onClick={() => handleDelete(pdf._id)}>
+											Delete
+										</Button>
 									</Td>
 								</Tr>
 							))}

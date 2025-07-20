@@ -18,8 +18,8 @@ const pdfSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
-	fileId: {
-		type: mongoose.Schema.Types.ObjectId,
+	s3Url: {
+		type: String,
 		required: true,
 	},
 	uploadDate: {

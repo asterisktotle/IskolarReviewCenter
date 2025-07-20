@@ -4,7 +4,6 @@ import UsersLecture from './User/UserLecture'; // Adjust import path as needed
 
 const Home = () => {
 	const { userData } = useAuth();
-	console.log('userdata: ', userData);
 
 	if (userData?.isAdmin) {
 		return <AdminDashBoard />;
@@ -25,7 +24,7 @@ const Home = () => {
 						<div className="pt-16 pb-20 sm:pt-24 sm:pb-32 lg:pt-32 lg:pb-40">
 							<div className="text-center">
 								{/* Greeting */}
-								<div className="mb-8 sm:mb-12">
+								<div >
 									<h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent leading-tight">
 										Hello
 									</h1>
@@ -48,7 +47,7 @@ const Home = () => {
 									<div className="inline-flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-8 sm:mb-12">
 										<div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
 										<span className="text-sm font-medium text-gray-200">
-											{userData.isAccountVerified
+											{!userData.isAccountVerified
 												? 'Account Verified'
 												: 'Account Pending Verification'}
 										</span>

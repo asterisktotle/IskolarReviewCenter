@@ -24,7 +24,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
 	signupSchema,
-	signinSchema,
+
 	forgotPasswordSchema,
 	otpSchema,
 } from '../schema/formSchema';
@@ -224,8 +224,6 @@ const SignUpForm = () => {
 			e.preventDefault();
 			setEmail(userEmail);
 			setPassword(userPass);
-			console.log('user info submitted: ', userEmail, userPass);
-
 			try {
 				await login();
 			} catch (err) {
@@ -233,9 +231,11 @@ const SignUpForm = () => {
 			}
 		};
 
+		
+
 		return (
 			<form onSubmit={handleSignInForm}>
-				<VStack padding={3} spacing={3} align={'stretch'}>
+				<VStack padding={3} spacing={3} align={'stretch'} >
 					<Box fontSize={30}> SIGN IN</Box>
 
 					{/* Email */}
@@ -251,7 +251,7 @@ const SignUpForm = () => {
 								setUserEmail(e.target.value);
 							}}
 						/>
-						<FormErrorMessage>No user email</FormErrorMessage>
+						<FormErrorMessage>Email not found</FormErrorMessage>
 					</FormControl>
 
 					{/* Password */}
@@ -277,7 +277,6 @@ const SignUpForm = () => {
 								/>
 							</InputRightElement>
 						</InputGroup>
-
 						<FormErrorMessage>Incorrect password.</FormErrorMessage>
 					</FormControl>
 
@@ -447,7 +446,7 @@ const SignUpForm = () => {
 		const handleOTP = async (userData) => {
 			const { email, password, otp } = userData;
 
-			console.log('userdata: ', email, password, otp);
+		
 			try {
 				setOtpMessageError('');
 				setSuccessChangePass(false);
@@ -468,6 +467,7 @@ const SignUpForm = () => {
 				}
 				setSuccessChangePass(true);
 				setOtpMessage(data.message);
+				console.log('otp msg ',otpMessage )
 				console.log('success change password');
 			} catch (err) {
 				console.log(err.message);
@@ -493,7 +493,7 @@ const SignUpForm = () => {
 		}
 
 		return (
-			<Box>
+			<Box  bgColor={'green'}>
 				<form
 					onSubmit={handleSubmit(handleOTP)}
 					className="flex flex-col items-center gap-2 "
@@ -513,7 +513,7 @@ const SignUpForm = () => {
 					<FormControl isRequired isInvalid={!!errors.password}>
 						<InputGroup>
 							<Input
-								placeholder="Password"
+								placeholder="New Password"
 								type={togglePassword ? 'text' : 'password'}
 								{...register('password')}
 							/>

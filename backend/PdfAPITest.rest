@@ -1,0 +1,14 @@
+### GET  All PDF
+GET http://localhost:3100/api/pdf/pdf-lectures
+
+### POST upload a pdf to s3 bucket [use POSTMAN]
+POST http://localhost:3100/api/pdf/pdf-lectures
+
+### Get a quiz with queries 
+ GET http://localhost:3100/api/quiz/get-all-quizzes?subject=mesl&category=terms
+ 
+
+### Get a quiz by title
+ GET http://localhost:3100/api/quiz/get-all-quizzes?title=Test+Quiz
+
+

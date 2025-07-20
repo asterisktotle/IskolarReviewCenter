@@ -26,7 +26,7 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState, useCallback } from 'react';
 import { pdfjs, Document, Page } from 'react-pdf';
-import usePdfViewer from '../hooks/usePdfViewer.ts';
+// import usePdfViewer from '../hooks/usePdfViewer.ts';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import {
@@ -42,6 +42,8 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 	'pdfjs-dist/build/pdf.worker.min.mjs',
 	import.meta.url
 ).toString();
+
+import usePdfViewer from '../hooks/usePdfViewer';
 
 const ViewPdf = () => {
 	const { pdfId } = useParams();
@@ -208,6 +210,7 @@ const ViewPdf = () => {
 						variant="ghost"
 						color="white"
 						_hover={{ bg: 'whiteAlpha.200' }}
+						aria-label="previous page"
 					/>
 				</Tooltip>
 
@@ -241,6 +244,7 @@ const ViewPdf = () => {
 						variant="ghost"
 						color="white"
 						_hover={{ bg: 'whiteAlpha.200' }}
+						aria-label="next page"
 					/>
 				</Tooltip>
 			</HStack>

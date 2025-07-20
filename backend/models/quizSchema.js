@@ -82,6 +82,10 @@ const QuizSchema = new Schema(
 			type: Number,
 			default: 0, // in minutes
 		},
+		isPublished: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	{ timestamps: true }
 );
@@ -122,22 +126,44 @@ const QuizAttemptSchema = new Schema({
 				type: Schema.Types.ObjectId,
 				required: true,
 			},
-			questionText: String, // optional: store the actual question for record-keeping
-			selectedOptions: [String], // for multiple-choice or true/false
+			
+			selectedOption: {
+				type: Schema.Types.ObjectId,
+				ref: 'Question.options', // reference to the options in QuestionSchema
+			}, // for multiple-choice or true/false
 			textAnswer: String, // for short-answer
 			isCorrect: Boolean,
 			pointsEarned: Number,
 		},
 	],
-	score: {
+	currentScore: {
 		type: Number,
+		required: true,
 	},
-	percentageScore: {
+	scores: {
+		type: [Number],	
+		default: [],
+	},
+	currentPercentageScore: {
 		type: Number,
+
+	},
+	percentageScores: {
+		type: [Number],
+		default: [],
 	},
 	passed: {
 		type: Boolean,
 	},
+	attemptNumber: {
+		type: Number,
+		default: 1,
+	},
+	 attemptDates: {
+        type: [Date],
+        default: [] 
+    },
+	
 });
 
 const Quiz = mongoose.model('Quiz', QuizSchema);
