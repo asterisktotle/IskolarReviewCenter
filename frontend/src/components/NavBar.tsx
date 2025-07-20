@@ -32,7 +32,7 @@ const adminLinks = [
 	{ name: 'Tests', path: '/admin-tests' },
 ];
 
-const NavLink = ({ children }) => {
+const NavLink = ({ children } : any) => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const isActive = location.pathname === children.path;
@@ -118,20 +118,20 @@ export default function Simple() {
 								<Avatar
 									size={'md'}
 									name={userData?.name}
-									backgroundColor={'grey'}
+									// backgroundColor={'grey'}
 								/>
 							</MenuButton>
-							<MenuList padding={4} >
-								<Text fontWeight={'bold'}>{userData?.name}</Text>
+							<MenuList bg={'black'} textColor={'white'} padding={4} >
+								<Text fontWeight={'bold'} textColor={'white'}>{userData?.name}</Text>
 								{userData?.isAdmin && (
-									<Text fontSize={'sm'} color={'gray.500'}>
+									<Text fontSize={'sm'} >
 										Admin
 									</Text>
 								)}
 								<MenuDivider />
 
 								<MenuItem 
-									
+									bg={'black'}
 									onClick={() => {
 										if (!userData?.isAccountVerified) {
 											return navigate('/email-verify');
@@ -142,10 +142,10 @@ export default function Simple() {
 									{!userData?.isAccountVerified ? 'Verify Account' : 'Account'}
 								</MenuItem>
 
-								<MenuItem>Settings</MenuItem>
+								<MenuItem bg={'black'}>Settings</MenuItem>
 								<MenuDivider />
 								{/* <MenuItem onClick={logout}>Verify Account</MenuItem> */}
-								<MenuItem onClick={handleLogOut}>Logout</MenuItem>
+								<MenuItem bg={'black'} onClick={handleLogOut}>Logout</MenuItem>
 							</MenuList>
 						</Menu>
 					</Flex>
@@ -156,7 +156,7 @@ export default function Simple() {
 						p={4}
 						display={{ md: 'none' }}
 						position={'fixed'}
-						backgroundColor={'white'}
+			
 						zIndex={10}
 						color={'blue.800'}
 						w={'10rem'}

@@ -24,6 +24,13 @@ export const createQuiz = async (req, res) => {
 		});
 	}
 
+	if(passingScore > 100 || passingScore < 1){
+			return res.json({
+			success: false,
+			message: 'Passing score should not be greater than 100% or less than 1%',
+		});
+	}
+
 	try {
 		const quiz = new Quiz({
 			title,
@@ -129,7 +136,7 @@ export const submitAndEvaluateQuiz = async (req, res) => {
 
 			const evaluatedAnswers = [];
 			let totalPoints = 0;
-			const passingScore = quiz.passingScore || 0;
+			const passingScore = quiz.passingScore || 50;
 
 			for (let userAnswer of answers) {
 				const question = quiz.questions.id(userAnswer.questionId);

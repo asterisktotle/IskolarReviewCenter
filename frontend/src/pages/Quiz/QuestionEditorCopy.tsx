@@ -22,9 +22,9 @@ import {
 import QuizStore, { QuestionData } from '../../store/quizStore';
 import convertQuestionType from '../../utils/converQuestionType';
 import { AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
-import parseOptions from '../../utils/parserOptions';
-const QuestionEditor = ({ question }: { question: QuestionData }) => {
-	const { questions, removeQuestion, updateQuestion } = QuizStore();
+const QuestionEditorCopy = ({ question }: { question: QuestionData }) => {
+	const {questions, removeQuestion, updateQuestion } = QuizStore();
+	
 	
 
 	const borderColor = useColorModeValue('gray.200', 'gray.600');
@@ -33,11 +33,14 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 	const handleUpdateOptions = (
 		questionId: number | string,
 		optionId: number | string,
-		updatedOption: string
+		updatedOption: string // the content
 	) => {
-		const currentQuestion = questions.find((q) => q.id === questionId);
+		if(!listOfQuestions) return null;
+
+		const currentQuestion = listOfQuestions.find((q) => q._id === questionId);
 		if (!currentQuestion) {
-			return console.log(`Question with ID ${questionId} does not exist`);
+			console.log(`Question with ID ${questionId} does not exist`);
+			return null
 		}
 
 		if (currentQuestion.type !== 'multiple-choice') {
@@ -51,15 +54,15 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 		)
 
 		// //For bulk answer paste
-		let formattedOptions: QuestionOption[];
+		// let formattedOptions: QuestionOption[];
 
-		if (updatedOption.match(/[\n\r]+/)) {
-			formattedOptions = parseOptions(updatedOption);
-		} else {
-			formattedOptions = currentQuestion.options.map((option) =>
-				option.id === optionId ? { ...option, text: updatedOption } : option
-			);
-		}
+		// if (updatedOption.match(/[\n\r]+/)) {
+		// 	formattedOptions = parseOptions(updatedOption);
+		// } else {
+		// 	formattedOptions = currentQuestion.options.map((option) =>
+		// 		option.id === optionId ? { ...option, text: updatedOption } : option
+		// 	);
+		// }
 
 		const updatedQuestion: QuestionData = {
 			...currentQuestion,
@@ -228,9 +231,8 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 
 					{/* Question Text */}
 					<FormControl 
-					// key={question._id}
 					>
-						<FormLabel fontSize="sm" fontWeight="medium">
+						<FormLabel htmlFor={question._id || question.id.toString()} fontSize="sm" fontWeight="medium">
 							Question Text
 						</FormLabel>
 						<Editable
@@ -256,6 +258,7 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 							/>
 							<EditableInput
 								p={3}
+								id={question._id || question.id.toString()}
 								// key={question._id}
 								onChange={(e) =>
 									updateQuestion(question.id, {
@@ -271,7 +274,7 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 					{question.type === 'multiple-choice' ? (
 						<FormControl>
 							<HStack justify="space-between" mb={2}>
-								<FormLabel fontSize="sm" fontWeight="medium" mb={0}>
+								<FormLabel as={'label'} fontSize="sm" fontWeight="medium" mb={0}>
 									Answer Choices
 								</FormLabel>
 								<Button
@@ -348,7 +351,7 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 								Correct Answer
 							</FormLabel>
 							<Input
-								id={ question._id || Date.now.toString()}
+								// id={ question._id || Date.now.toString()}
 								onChange={(e) =>
 									handleUpdateShortAnswer(question._id ? question._id : question.id.toString() , e.target.value)
 								}
@@ -383,4 +386,4 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 	);
 };
 
-export default QuestionEditor;
+export default QuestionEditorCopy;

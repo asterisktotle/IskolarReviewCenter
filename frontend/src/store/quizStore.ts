@@ -96,7 +96,7 @@ interface QuizStore {
 	setQuizProfile: (quizProfile: QuizProfile) => void;
 	addQuestions: (question: QuestionData) => void;
 	removeQuestion: (questionId: number) => void;
-	updateQuestion: (questionId: number, updatedQuestion: QuestionData) => void;
+	updateQuestion: (questionId: number | string, updatedQuestion: QuestionData) => void;
 	publishQuiz: () => Promise<any>;
 	deleteQuiz: (quizId: string) => Promise<any>;
 
@@ -121,7 +121,7 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		subject: 'mesl',
 		category: 'terms',
 		timeLimit: 0,
-		passingScore: 0,
+		passingScore: 50,
 		totalPoints: 0,
 		questions: [],
 		isPublished: false,
@@ -138,7 +138,6 @@ const QuizStore = create<QuizStore>((set, get) => ({
 	quizzesFetch: [],
 	setQuizzesFetch: (quizzesFetch) => set({ quizzesFetch }),
 
-	
 	quizAttemptResults: {
 		quiz: '',
 		quizTitle: '',
@@ -184,14 +183,15 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		);
 		setQuestions(updatedQuestions);
 	},
-	updateQuestion: (questionId: number, updatedQuestion: QuestionData) => {
-		const { questions, setQuestions } = get();
+	updateQuestion: (questionId: number | string, updatedQuestion: QuestionData) => {
+		const { questions,  setQuestions } = get();
 
 		//check if question exist
 		const questionExist = questions.some((q) => q.id === questionId);
 
 		if (!questionExist) {
-			return;
+			console.log('Cannot updated, question does not exist')
+			return null;
 		}
 
 		const updatedQuestions = questions.map((question) =>
@@ -225,7 +225,7 @@ const QuizStore = create<QuizStore>((set, get) => ({
 				subject: 'mesl',
 				category: 'terms',
 				timeLimit: 0,
-				passingScore: 0,
+				passingScore: 50,
 				totalPoints: 0,
 				questions: [],
 				isPublished: false,}

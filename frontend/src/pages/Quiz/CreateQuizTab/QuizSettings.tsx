@@ -58,9 +58,10 @@ const QuizSettings = () => {
 			<CardBody>
 				<VStack spacing={4} align="stretch">
 					<FormControl>
-						<FormLabel>Quiz Title</FormLabel>
+						<FormLabel htmlFor='quiz_title'>Quiz Title</FormLabel>
 						<Editable
 							placeholder='Enter a quiz title'
+							value={quizProfile.title}
 							onChange={(value) => handleChangeQuizProfile('title', value)}
 						>
 							<EditablePreview
@@ -70,7 +71,7 @@ const QuizSettings = () => {
 								borderColor={borderColor}
 								w={'full'}
 							/>
-							<EditableInput p={3} />
+							<EditableInput id='quiz_title' p={3} />
 						</Editable>
 					</FormControl>
 
@@ -80,10 +81,11 @@ const QuizSettings = () => {
 						align="start"
 					>
 						<FormControl>
-							<FormLabel>Subject</FormLabel>
+							<FormLabel as='legend'>Subject</FormLabel>
 							<RadioGroup
 								onChange={(value) => handleChangeQuizProfile('subject', value)}
-								// value={quizProfile.subject}
+								value={quizProfile.subject}
+								id='subject'
 							>
 								<Stack direction="row" spacing={4}>
 									<Radio value="mesl">MESL</Radio>
@@ -94,24 +96,46 @@ const QuizSettings = () => {
 						</FormControl>
 
 						<FormControl>
-							<FormLabel>Time Limit (minutes)</FormLabel>
+							<FormLabel htmlFor='time_limit'>Time Limit (minutes)</FormLabel>
 							<NumberInput
+								value={quizProfile.timeLimit}
 								onChange={(value) =>
 									handleChangeQuizProfile('timeLimit', value)
 								}
 								maxW="150px"
+								min={0}
+								max={60*24}
 							>
 								<NumberInputField
+									id='time_limit'
 									placeholder="0"
+								/>
+							</NumberInput>
+						</FormControl>
+
+						<FormControl>
+							<FormLabel htmlFor='passing_score'>Passing Score (%)</FormLabel>
+							<NumberInput
+								value={quizProfile.passingScore}
+								onChange={(value) =>
+									handleChangeQuizProfile('passingScore', value)
+								}
+								maxW="150px"
+								min={1}
+								max={100}
+							>
+								<NumberInputField
+									id='passing_score'
+									placeholder="50"
 								/>
 							</NumberInput>
 						</FormControl>
 					</Stack>
 
 					<FormControl>
-						<FormLabel>Test Category</FormLabel>
+						<FormLabel as='legend'>Test Category</FormLabel>
 						<RadioGroup
-							// defaultValue={quizProfile.category}
+							value={quizProfile.category}
 							onChange={(value) => handleChangeQuizProfile('category', value)}
 						>
 							<Stack direction={{ base: 'column', md: 'row' }} spacing={4}>
@@ -123,15 +147,15 @@ const QuizSettings = () => {
 						</RadioGroup>
 					</FormControl>
 
-					<HStack spacing={3}>
+					<HStack >
 						<Button
 							onClick={handleSaveQuiz}
 							backgroundColor={'orange.500'}
 							disabled={isLoading}
 						>
-							Save Quiz
+							Save
 						</Button>
-						<Button backgroundColor={'red.500'}>Delete Quiz</Button>
+						<Button backgroundColor={'red.500'}>Delete</Button>
 						<Button
 							onClick={() =>
 								handleChangeQuizProfile('isPublished', !quizProfile.isPublished)

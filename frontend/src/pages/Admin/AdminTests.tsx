@@ -1,7 +1,6 @@
 import {
 	Container,
 	VStack,
-	HStack,
 	Button,
 	Flex,
 	Icon,
@@ -17,7 +16,6 @@ import {
 	CardBody,
 	Heading,
 	useColorModeValue,
-	useToast,
 } from '@chakra-ui/react';
 import { AddIcon, EditIcon } from '@chakra-ui/icons';
 import { MdPlayArrow, MdFormatListBulleted } from 'react-icons/md';
@@ -29,8 +27,10 @@ import { SubjectQuizTab } from '../../components/QuizList';
 import QuestionEditor from '../Quiz/QuestionEditor';
 import QuizSettings from '../Quiz/CreateQuizTab/QuizSettings';
 import { useAuth } from '../../hooks/useAuth';
+import QuestionEditorCopy from '../Quiz/QuestionEditorCopy';
 
 const AdminTests = () => {
+	// TODO: Add Create New Quiz so that Create Quiz will clear questions data
 	// Stores
 	const {
 		fetchQuizParams,
@@ -166,9 +166,26 @@ const AdminTests = () => {
 									<Heading mb={4} size="md">Questions</Heading>
 									
 										<VStack spacing={4} align="stretch">
+											{quizProfile.questions ? 
+											quizProfile.questions.map((item) => (
+												<QuestionEditorCopy question={item}  key={item._id}/>
+											) )
+											:
+											<div> Questions is blank</div>
+											}
+											
 											{tabIndex &&
-												questions?.map((q) => 
-													<QuestionEditor key={q._id} question={q} />
+												questions?.map((q, index) => 
+													{
+														if(!q._id){
+															console.log(`I will use index: ${index}, as q_id is ${q._id}`)
+														
+														} 
+
+														console.log(`Question ${index + 1}: ${q._id} `)
+														return	<QuestionEditor key={q._id || index} question={q} />
+													}	
+												
 												)}
 											<Button
 												leftIcon={<AddIcon />}
@@ -178,9 +195,6 @@ const AdminTests = () => {
 												Add Question
 											</Button>
 										</VStack>
-
-									
-									 
 								</Box>
 							</VStack>
 						</TabPanel>
@@ -196,8 +210,8 @@ const AdminTests = () => {
 										See how your quiz will look to students
 									</Text>
 								</Box>
-
-								{questions.length > 0 ? (
+								{/* Conditional Render: Check if the questions is already fetch then show the questions */}
+								{quizProfile._id && userData?.userId && questions.length > 0 ? (
 									<VStack spacing={6} align="stretch">
 										<PlayQuiz 
 											questions={questions}
@@ -212,7 +226,7 @@ const AdminTests = () => {
 											<Text color="gray.500" mb={4}>
 												No quiz available for preview
 											</Text>
-											<Button onClick={() => setTabIndex(0)} colorScheme="blue">
+											<Button onClick={() => setTabIndex(1)} colorScheme="blue">
 												Create Questions First
 											</Button>
 										</CardBody>
