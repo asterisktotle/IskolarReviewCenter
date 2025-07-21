@@ -3,7 +3,7 @@ import Home from './pages/Home';
 
 import EmailVerify from './pages/EmailVerify';
 import ResetPassword from './pages/ResetPassword';
-import SignUpForm from './pages/Login';
+
 import AuthenticatedRoute from './AuthRoute';
 import { useEffect } from 'react';
 import useAuthStore from './store/authStore';
@@ -17,6 +17,7 @@ import UserTests from './pages/User/UserTests';
 import ViewPdf from './pages/PdfViewer';
 import UserPlayQuiz from './pages/Quiz/UserPlayQuiz';
 import NotFound from './pages/NotFoundFallBack';
+import AuthenticationPage from './pages/AuthenticationPage';
 
 const App = () => {
 	const getAuth = useAuthStore((state) => state.getAuth);
@@ -31,7 +32,7 @@ const App = () => {
 		<div className="text-white px-5">
 			<Routes>
 				{/* Public routes */}
-				<Route path="/" element={<SignUpForm />} />
+				<Route path="/" element={<AuthenticationPage />} />
 				<Route path="/sidebar" element={<SimpleSidebar />} />
 
 				{/* Protected routes */}

@@ -16,6 +16,8 @@ interface SendOTPVerify {
 	message: string;
 }
 
+type formState = 'signup' | 'signin'|'forgot-password' |'otp-form'
+
 interface AuthStore {
 	// Form display states
 	isLogin: boolean;
@@ -31,6 +33,7 @@ interface AuthStore {
 	noUserEmail: boolean;
 
 	userData: UserData | null;
+	authForm: formState
 
 	//Setters
 	setIsLogin: (value: boolean) => void;
@@ -40,6 +43,7 @@ interface AuthStore {
 	setPassword: (password: string) => void;
 	setIncorrectPassword: (value: boolean) => void;
 	setNoUserEmail: (value: boolean) => void;
+	setAuthForm: (value:formState) => void;
 	//API Keys
 	backendUrl: string;
 
@@ -64,6 +68,7 @@ const useAuthStore = create<AuthStore>()(
 			backendUrl: BACKEND_URL,
 			userData: null,
 			otp: [0, 0, 0, 0, 0, 0],
+			authForm: 'signin',
 
 			// Setters
 			setIsLogin: (value) => set({ isLogin: value }),
@@ -72,6 +77,7 @@ const useAuthStore = create<AuthStore>()(
 			setIncorrectPassword: (value) => set({ incorrectPassword: value }),
 			setNoUserEmail: (value) => set({ noUserEmail: value }),
 			setUserData: (data) => set({ userData: data || null }),
+			setAuthForm: (value) => set({authForm: value}),
 
 			getUserData: async () => {
 				const { backendUrl, setUserData } = get();
