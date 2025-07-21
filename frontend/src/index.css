@@ -4,13 +4,6 @@
 * {
 	font-family: 'Montserrat', serif;
 } */
-@theme {
-	--color-darkblue-950: #032030;
-	--color-darkblue-900: #003554;
-	--color-themeBlue-800: #004d73;
-	--color-themeBlue-700: #0c638d;
-	--color-themeBlue-600: #006da5;
-}
 
 @layer utilities {
 	.text-custom {

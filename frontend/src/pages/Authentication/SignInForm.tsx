@@ -9,6 +9,7 @@ import {
 	InputGroup,
 	Button,
 	Flex,
+    Text
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import useAuthStore from '../../store/authStore';
@@ -47,8 +48,8 @@ const SignInForm = () => {
         return (
             <form onSubmit={handleSignInForm}>
                 <VStack padding={3} spacing={3} align={'stretch'}>
-                    <Box fontSize={30}> SIGN IN</Box>
-
+                    <Text textStyle='2xl' >Sign in to your account</Text>
+                    {/* <p className=' md:text-3xl'>Sign in to your account</p> */}
                     {/* Email */}
                     <FormControl isRequired isInvalid={noUserEmail}>
                         <Input
@@ -92,12 +93,16 @@ const SignInForm = () => {
                     </FormControl>
 
                     <Button
-                       
                         type="submit"
                     >
                         Sign In
                     </Button>
-                    <Box
+                   
+                </VStack>
+
+                
+                    
+                 <Text
                         _hover={{
                             textColor: 'orange',
                         }}
@@ -105,15 +110,18 @@ const SignInForm = () => {
                         w={'full'}
                         textAlign={'center'}
                         onClick={() => {
-                            console.log('click forgot pass')
                             setAuthForm('forgot-password')}}
                     >
                         {' '}
                         Forgot Password
-                    </Box>
-                </VStack>
+                    </Text>
                 <Flex gap={1}>
+                    
+                 
+
                     Don't have an account?
+
+               
                     <Box
                         _hover={{
                             textColor: 'yellow',
@@ -124,6 +132,7 @@ const SignInForm = () => {
                         Sign up
                     </Box>
                 </Flex>
+                    
             </form>
         );
     };

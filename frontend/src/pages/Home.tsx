@@ -10,12 +10,12 @@ const Home = () => {
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+		<div className="min-h-screen ">
 			{/* Hero Section */}
 			<div className="relative overflow-hidden">
 				{/* Background Pattern */}
-				<div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
-				<div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent" />
+				{/* <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
+				<div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent" /> */}
 
 				{/* Main Content */}
 				<div className="relative px-4 sm:px-6 lg:px-8">
@@ -25,34 +25,20 @@ const Home = () => {
 							<div className="text-center">
 								{/* Greeting */}
 								<div >
-									<h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent leading-tight">
-										Hello
-									</h1>
 									<div className="mt-4 sm:mt-6">
 										<span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-purple-300">
-											{userData ? userData.name : 'Developer'}
+											{userData ? userData.name : 'Iskolar'}
 										</span>
 									</div>
 								</div>
 
 								{/* Welcome Message */}
-								<div className="mx-auto max-w-3xl mb-12 sm:mb-16">
+								
 									<p className="text-lg sm:text-xl md:text-2xl text-gray-300 leading-relaxed">
 										Welcome back! Ready to continue your learning journey?
 									</p>
-								</div>
 
-								{/* Status Indicators */}
-								{userData && (
-									<div className="inline-flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-8 sm:mb-12">
-										<div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-										<span className="text-sm font-medium text-gray-200">
-											{!userData.isAccountVerified
-												? 'Account Verified'
-												: 'Account Pending Verification'}
-										</span>
-									</div>
-								)}
+								
 							</div>
 						</div>
 					</div>
@@ -72,7 +58,7 @@ const Home = () => {
 							<h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
 								Your Learning Dashboard
 							</h2>
-							<p className="text-gray-400 text-lg max-w-2xl mx-auto">
+							<p className="text-gray-400 text-sm max-w-2xl mx-auto">
 								Track your progress and continue where you left off
 							</p>
 						</div>
@@ -80,13 +66,13 @@ const Home = () => {
 						{/* Users Lecture Component Wrapper */}
 						<div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6 sm:p-8 lg:p-12 shadow-2xl">
 							<UsersLecture />
+							{/* Add performance track record on quizzes */}
 						</div>
 					</div>
 				</div>
 			</div>
 
-			{/* Bottom Gradient */}
-			<div className="h-32 bg-gradient-to-t from-slate-900 to-transparent"></div>
+
 		</div>
 	);
 };

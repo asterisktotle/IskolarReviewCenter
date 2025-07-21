@@ -73,24 +73,10 @@ const customTheme = extendTheme({
 createRoot(document.getElementById('root')!).render(
 	<ChakraProvider theme={customTheme}>
 		<BrowserRouter>
-			<div className="min-h-screen relative overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-					{/* Background Pattern */}
-					<div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
-
-					{/* Gradient Orbs */}
-					<div className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
-					<div className="absolute top-0 -right-4 w-72 h-72 bg-slate-500 rounded-full mix-blend-multiply filter blur-xl opacity-20  "></div>
-					<div className="absolute -bottom-8 left-20 w-72 h-72 bg-purple-600 rounded-full mix-blend-multiply filter blur-xl opacity-20  "></div>
-				</div>
-
-				{/* Content Wrapper */}
-				<div className="relative z-10 text-white">
+	
+				
 					<App />
-				</div>
-
-				{/* Additional Styling for specific pages can be added here */}
-			</div>
+				
 		</BrowserRouter>
 	</ChakraProvider>
 );
