@@ -3,6 +3,8 @@ import './index.css';
 import App from './App.tsx';
 import { BrowserRouter } from 'react-router-dom';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
+// Supports weights 100-900
+
 
 // Custom theme to match the homepage design
 const customTheme = extendTheme({
