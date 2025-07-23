@@ -1,4 +1,4 @@
-import { Button, Img } from '@chakra-ui/react';
+import { Button, Img, Spinner } from '@chakra-ui/react';
 import useAuthStore from '../store/authStore';
 import { useState } from 'react';
 
@@ -12,7 +12,7 @@ const EmailVerify = () => {
 	const handleSendEmail = async () => {
 		setIsLoading(true);
 		setErrorMessage('');
-		// setIsSent(false)
+		setIsSent(false)
 
 		try {
 			const data = await sendOTPVerify();
@@ -52,7 +52,7 @@ const EmailVerify = () => {
 				w={'200px'}
 				alt="iskolar"
 			/>
-
+				{loading && <Spinner/>}
 			<div className="flex flex-col items-center gap-2">
 				<div className="text-center">
 					<p className="">Thanks for Signing Up!</p>

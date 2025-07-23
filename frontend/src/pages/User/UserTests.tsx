@@ -35,6 +35,8 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import QuizStore, { QuizProfile } from '../../store/quizStore';
 import { MdOutlineClass } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
+import FilterQuiz from '../../utils/filteredQuiz';
+import DesktopDisplay from '../Quiz/UserPlayQuiz/DesktopDisplay';
 
 
 const UsersTest = () => {
@@ -65,22 +67,9 @@ const UsersTest = () => {
 		navigate(`/user-tests/play/${quizId}`)
 	}
 
-	// Filter logic
-	const filteredQuizzes = quizzesFetch.filter((q) => q.isPublished).filter((quiz) => {
-			const matchesSearch =
-				quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				quiz.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				quiz.category.toLowerCase().includes(searchTerm.toLowerCase());
 
-			const matchesCategory =
-				selectedCategory === 'all' ||
-				quiz.category.toLowerCase() === selectedCategory.toLowerCase();
-			const matchesSubject =
-				selectedSubject === 'all' ||
-				quiz.subject.toLowerCase() === selectedSubject.toLowerCase();
-
-			return matchesSearch && matchesCategory && matchesSubject;
-		});
+	//Filtering Function
+	const filteredQuizzes = FilterQuiz({quizzesFetch, searchTerm, selectedCategory, selectedSubject})
 
 	// Get unique categories and subjects for filters
 	const categories = [
@@ -305,136 +294,7 @@ const UsersTest = () => {
 						</VStack>
 					) : (
 						// Desktop Table View
-						<Box
-							bg="whiteAlpha.100"
-							backdropFilter="blur(10px)"
-							borderRadius="xl"
-							border="1px solid"
-							borderColor="whiteAlpha.200"
-							overflow="hidden"
-						>
-							<TableContainer>
-								<Table variant="simple">
-									<Thead bg="whiteAlpha.200">
-										<Tr>
-											<Th
-												textAlign={'center'}
-												color="white"
-												fontSize="sm"
-												fontWeight="bold"
-											>
-												Subject
-											</Th>
-											<Th
-												textAlign={'center'}
-												color="white"
-												fontSize="sm"
-												fontWeight="bold"
-											>
-												Category
-											</Th>
-											<Th
-												textAlign={'center'}
-												color="white"
-												fontSize="sm"
-												fontWeight="bold"
-											>
-												Title
-											</Th>
-											<Th
-												textAlign={'center'}
-												color="white"
-												fontSize="sm"
-												fontWeight="bold"
-											>
-												Items
-											</Th>
-											<Th
-												textAlign={'center'}
-												color="white"
-												fontSize="sm"
-												fontWeight="bold"
-											>
-												Passing Score
-											</Th>
-											<Th
-												textAlign={'center'}
-												color="white"
-												fontSize="sm"
-												fontWeight="bold"
-											>
-												Time Limit
-											</Th>
-										</Tr>
-									</Thead>
-									<Tbody>
-										{filteredQuizzes.filter(q => q.isPublished).map((quiz) => (
-											<Tr
-												onClick={() => console.log('play quiz: ', quiz._id)}
-												key={quiz._id}
-												_hover={{ bg: 'whiteAlpha.100' }}
-												transition="background 0.2s ease"
-											>
-												<Td color="gray.200" textAlign={'center'}>
-													<Badge colorScheme="purple" variant="subtle">
-														{quiz.subject.toUpperCase()}
-													</Badge>
-												</Td>
-												<Td color="gray.200" textAlign={'center'}>
-													<Badge colorScheme="blue" variant="outline">
-														{quiz.category.toUpperCase()}
-													</Badge>
-												</Td>
-												<Td
-													textAlign={'center'}
-													cursor="pointer"
-													color="white"
-													fontWeight="medium"
-													_hover={{ color: 'purple.300' }}
-													transition="color 0.2s ease"
-													onClick={() => handlePlayQuiz(quiz._id)}
-												>
-													{quiz.title}
-												</Td>
-												<Td
-													textAlign={'center'}
-													cursor="pointer"
-													color="white"
-													fontWeight="medium"
-													_hover={{ color: 'purple.300' }}
-													// onClick={() => handleViewPdf(quiz._id)}
-													transition="color 0.2s ease"
-												>
-													{quiz.totalPoints}
-												</Td>
-												<Td
-													textAlign={'center'}
-													cursor="pointer"
-													color="white"
-													fontWeight="medium"
-													_hover={{ color: 'purple.300' }}
-													// onClick={() => handleViewPdf(quiz._id)}
-													transition="color 0.2s ease"
-												>
-													{quiz.passingScore}%
-												</Td>
-												<Td
-													textAlign={'center'}
-													cursor="pointer"
-													color="white"
-													fontWeight="medium"
-													_hover={{ color: 'purple.300' }}
-													// onClick={() => handleViewPdf(quiz._id)}
-													transition="color 0.2s ease"
-												>
-													{quiz.timeLimit} mins
-												</Td>
-											</Tr>
-										))}
-									</Tbody>
-								</Table>
-							</TableContainer>
-						</Box>
+						<DesktopDisplay filteredQuizzes={filteredQuizzes} handlePlayQuiz={handlePlayQuiz} />
 					)
 				) : (
 					// Empty State

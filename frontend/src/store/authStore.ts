@@ -186,11 +186,10 @@ const useAuthStore = create<AuthStore>()(
 
 					//Error handling
 					if (!data.success) {
-						console.log('VerifyEmail:', data.message);
+						console.log('VerifyEmail error:', data.message);
 						return data;
 					}
-
-					console.log('VerifyEmail: ', data.message);
+					console.log('data')
 					return data;
 				} catch (err) {
 					console.log('VerifyEmail Catch Error: ', err.message);
@@ -205,7 +204,6 @@ const useAuthStore = create<AuthStore>()(
 							otp,
 						}
 					);
-					console.log('verifyOTPEmail: ', data);
 					return data;
 				} catch (err) {
 					console.log('verifyOTP catch error: ', err.message);

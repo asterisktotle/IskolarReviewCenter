@@ -73,6 +73,8 @@ export default function Simple() {
 		navigate('/');
 	};
 
+	
+
 	return (
 		
 			<Box px={4}>
@@ -131,18 +133,12 @@ export default function Simple() {
 								<MenuItem 
 									bg={'black'}
 									onClick={() => {
-										if (!userData?.isAccountVerified) {
-											return navigate('/email-verify');
-										}
-										navigate('/account-settings');
+										navigate('/email-verify');
 									}}
 								>
 									{!userData?.isAccountVerified ? 'Verify Account' : 'Account'}
 								</MenuItem>
 
-								<MenuItem bg={'black'}>Settings</MenuItem>
-								<MenuDivider />
-								{/* <MenuItem onClick={logout}>Verify Account</MenuItem> */}
 								<MenuItem bg={'black'} onClick={handleLogOut}>Logout</MenuItem>
 							</MenuList>
 						</Menu>

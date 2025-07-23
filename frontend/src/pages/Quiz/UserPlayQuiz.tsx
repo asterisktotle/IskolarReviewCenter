@@ -50,7 +50,7 @@ const UserPlayQuiz = () => {
 			</Box>
 
 			<VStack spacing={6} align="stretch">
-				{quizData && quizData._id && userData?.userId && (
+				{quizData && quizData._id && userData?.userId && quizData.questions && (
 					<PlayQuiz
 						questions={quizData.questions}
 						timeLimit={quizData.timeLimit}

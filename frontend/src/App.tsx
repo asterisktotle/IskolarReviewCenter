@@ -8,7 +8,6 @@ import AuthenticatedRoute from './AuthRoute';
 import { useEffect } from 'react';
 import useAuthStore from './store/authStore';
 import AdminDashBoard from './pages/Admin/AdminDashBoard';
-import AccountSettings from './pages/AccountSettings';
 import SimpleSidebar from './components/SideBar';
 import AdminLectures from './pages/Admin/AdminLectures';
 import UsersLecture from './pages/User/UserLecture';
@@ -67,7 +66,6 @@ const App = () => {
 								<Route path="/dashboard" element={<Home />} />
 								<Route path="/email-verify" element={<EmailVerify />} />
 								<Route path="/reset-password" element={<ResetPassword />} />
-								<Route path="/account-settings" element={<AccountSettings />} />
 
 								{/* ADMIN */}
 								{userData?.isAdmin && (
