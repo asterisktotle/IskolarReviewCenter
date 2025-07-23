@@ -20,7 +20,6 @@ import {
 	useColorModeValue,
 } from '@chakra-ui/react';
 import QuizStore from '../../../store/quizStore';
-import { useEffect } from 'react';
 
 const QuizSettings = () => {
 	const { quizProfile, setQuizProfile, publishQuiz, isLoading , updateQuiz} = QuizStore();

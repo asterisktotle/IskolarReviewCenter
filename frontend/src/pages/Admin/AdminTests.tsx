@@ -27,7 +27,6 @@ import { SubjectQuizTab } from '../../components/QuizList';
 import QuestionEditor from '../Quiz/QuestionEditor';
 import QuizSettings from '../Quiz/CreateQuizTab/QuizSettings';
 import { useAuth } from '../../hooks/useAuth';
-import QuestionEditorCopy from '../Quiz/QuestionEditorCopy';
 
 const AdminTests = () => {
 	// TODO: Add Create New Quiz so that Create Quiz will clear questions data
@@ -165,13 +164,7 @@ const AdminTests = () => {
 								<Box>
 									
 										<VStack spacing={4} align="stretch">
-											{/* {quizProfile.questions ? 
-											quizProfile.questions.map((item) => (
-												<QuestionEditorCopy question={item}  key={item._id}/>
-											) )
-											:
-											<div> Questions is blank</div>
-											} */}
+										
 											
 											{tabIndex &&
 												questions?.map((q, index) => 
