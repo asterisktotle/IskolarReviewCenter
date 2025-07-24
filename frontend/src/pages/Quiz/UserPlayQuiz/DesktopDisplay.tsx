@@ -9,7 +9,8 @@ import {
 	Box,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { QuizProfile } from '../../../store/quizStore';
+import { QuizProfile } from '../../../types/QuizTypes';
+
 
 type TableHeadTypes = string[]
 const tableHeadContent: TableHeadTypes = ['Subject', 'Category', 'Items', 'PassingScore', 'TimeLimit']

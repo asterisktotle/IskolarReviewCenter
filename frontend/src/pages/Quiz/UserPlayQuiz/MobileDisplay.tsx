@@ -15,8 +15,9 @@ import {
 	MdHourglassDisabled,
 	MdOutlineChecklist,
 } from 'react-icons/md';
-import  type { QuizProfile } from '../../../store/quizStore';
+
 import { useNavigate } from 'react-router-dom';
+import { QuizProfile } from '../../../types/QuizTypes';
 
 const MobileDisplay = ({quiz}: {quiz:QuizProfile}) => {
 

@@ -19,10 +19,12 @@ import {
 	CardBody,
 	useColorModeValue,
 } from '@chakra-ui/react';
-import QuizStore, { QuestionData, QuestionOption } from '../../store/quizStore';
+
 import convertQuestionType from '../../utils/converQuestionType';
 import { AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
 import parseOptions from '../../utils/parserOptions';
+import { QuestionData, QuestionOption } from '../../types/QuizTypes';
+import QuizStore from '../../store/quizStore';
 const QuestionEditor = ({ question }: { question: QuestionData }) => {
 	const { questions, removeQuestion, updateQuestion} = QuizStore();
 	

@@ -1,4 +1,5 @@
-import { QuestionOption } from '../store/quizStore';
+import { QuestionOption } from "../types/QuizTypes";
+
 
 // Parse the input text into separate options
 export const parseOptions = (text: string) => {

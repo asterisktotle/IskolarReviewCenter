@@ -14,14 +14,14 @@ import {
 
 import { useMemo } from 'react';
 import QuizCard from '../pages/Quiz/QuizCard';
-import { QuizProfile } from '../store/quizStore';
 
-type  Subject = 'mesl' | 'mdsp' | 'pipe'; 
+import { QuizProfile, SubjectTypes } from '../types/QuizTypes';
+
 
 type SubjectTabTypes = {
 	isLoading: boolean;
 	quizzesFetch: QuizProfile[];
-	subject: Subject;
+	subject: SubjectTypes;
 }
 
 export const SubjectQuizTab = ({ isLoading, quizzesFetch, subject } : SubjectTabTypes) => {

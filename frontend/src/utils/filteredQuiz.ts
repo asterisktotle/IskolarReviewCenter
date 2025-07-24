@@ -1,5 +1,4 @@
-import { CategoryTypes, SubjectTypes } from "../interfaces/QuizzesTypes";
-import { QuizProfile } from "../store/quizStore";
+import { CategoryTypes, QuizProfile, SubjectTypes } from "../types/QuizTypes";
 
 
 interface FilterTypes {
@@ -8,6 +7,7 @@ interface FilterTypes {
         searchTerm: string,
         selectedCategory: CategoryTypes ,
         selectedSubject: SubjectTypes,
+
     }
 }
 

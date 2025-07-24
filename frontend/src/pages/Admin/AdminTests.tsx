@@ -20,13 +20,14 @@ import {
 import { AddIcon, EditIcon } from '@chakra-ui/icons';
 import { MdPlayArrow, MdFormatListBulleted } from 'react-icons/md';
 import { useEffect, useState } from 'react';
-import { QuestionData } from '../../hooks/useQuestionMaker';
-import QuizStore from '../../store/quizStore';
+
+import QuizStore, { QuestionData } from '../../store/quizStore';
 import PlayQuiz from '../Quiz/PlayQuiz';
 import { SubjectQuizTab } from '../../components/QuizList';
 import QuestionEditor from '../Quiz/QuestionEditor';
 import QuizSettings from '../Quiz/CreateQuizTab/QuizSettings';
 import { useAuth } from '../../hooks/useAuth';
+import { SubjectTypes } from '../../types/QuizTypes';
 
 const AdminTests = () => {
 	// TODO: Add Create New Quiz so that Create Quiz will clear questions data
@@ -63,6 +64,8 @@ const AdminTests = () => {
 		};
 		addQuestions(baseQuestion);
 	};
+
+	const subjects : SubjectTypes[] = ['mesl', 'pipe', 'mdsp']
 
 	// QUIZ CARD COMPONENT
 
@@ -112,40 +115,31 @@ const AdminTests = () => {
 										variant={'soft-rounded'}
 									>
 										<TabList>
+											{subjects.length && subjects.map((subj) => 
+												
 											<Tab>
 												<Flex align="center" gap={2}>
-													MESL
+													{subj.toUpperCase()}
 												</Flex>
 											</Tab>
-											<Tab>
-												<Flex align="center" gap={2}>
-													PIPE
-												</Flex>
-											</Tab>
-											<Tab>
-												<Flex align="center" gap={2}>
-													MDSP
-												</Flex>
-											</Tab>
+
+											
+											)}
 										</TabList>
 
 										<TabPanels>
 											{/* QUIZ SUBJECTS */}
-											<SubjectQuizTab
-												quizzesFetch={quizzesFetch}
-												subject={'mesl'}
-												isLoading={isLoading}
-											/>
-											<SubjectQuizTab
-												quizzesFetch={quizzesFetch}
-												subject={'pipe'}
-												isLoading={isLoading}
-											/>
-											<SubjectQuizTab
-												quizzesFetch={quizzesFetch}
-												subject={'mdsp'}
-												isLoading={isLoading}
-											/>
+											{subjects.length && subjects.map((subj) => 
+												
+													<SubjectQuizTab
+														quizzesFetch={quizzesFetch}
+														subject={subj}
+														isLoading={isLoading}
+													/>
+
+												)
+											}
+											
 										</TabPanels>
 									</Tabs>
 								</Box>
