@@ -1,300 +1,127 @@
 import {
-	Input,
 	Text,
 	Container,
 	VStack,
-	Table,
-	Thead,
-	Tbody,
-	Tr,
-	Th,
-	Td,
-	TableContainer,
 	Box,
-	Card,
-	CardBody,
-	Stack,
-	Badge,
 	Spinner,
 	useBreakpointValue,
-	InputGroup,
-	InputLeftElement,
-	Select,
-	HStack,
-	Button,
-	Icon,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
-import {
-	MdCheck,
-	MdHourglassBottom,
-	MdHourglassDisabled,
-	MdOutlineChecklist,
-} from 'react-icons/md';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import QuizStore, { QuizProfile } from '../../store/quizStore';
+import { useMemo, useState } from 'react';
+import QuizStore from '../../store/quizStore';
 import { MdOutlineClass } from 'react-icons/md';
-import { useNavigate } from 'react-router-dom';
 import FilterQuiz from '../../utils/filteredQuiz';
 import DesktopDisplay from '../Quiz/UserPlayQuiz/DesktopDisplay';
-
+import MobileDisplay from '../Quiz/UserPlayQuiz/MobileDisplay';
+import SearchComponent from '../Quiz/UserPlayQuiz/SearchComponent';
+import { useQuery } from '@tanstack/react-query';
+import { QuizProfile } from '../../store/quizStore';
 
 const UsersTest = () => {
 	//RESPONSIBILITY
 	// It display list of quiz
 	// It can search quizzes
-	// It can play and navigate to the test mode page 
-	const { fetchQuizParams, quizzesFetch, isLoading } = QuizStore();
+	// It can play and navigate to the test mode page
+	const { fetchQuizParams } = QuizStore();
 
-	//Actions
-	const [searchTerm, setSearchTerm] = useState('');
-	const [selectedCategory, setSelectedCategory] = useState('all');
-	const [selectedSubject, setSelectedSubject] = useState('all');
-	const navigate = useNavigate()
+	const [filters, setFilters] = useState<{
+		searchTerm: string;
+		selectedCategory:
+			| 'all'
+			| 'terms'
+			| 'weekly-test'
+			| 'take-home-test'
+			| 'pre-board-exam';
+		selectedSubject: 'all' | 'mesl' | 'mdsp' | 'pipe';
+	}>({
+		searchTerm: '',
+		selectedCategory: 'all',
+		selectedSubject: 'all',
+	});
+
+	const handleFiltersChange = (newFilters: Partial<typeof filters>) => {
+		setFilters((prev) => ({ ...prev, ...newFilters }));
+	};
+
+	const {
+		data: quizzesFetch = [] as QuizProfile[],
+		isLoading,
+		error,
+	} = useQuery({
+		queryKey: ['quizzes'],
+		queryFn: () => fetchQuizParams(),
+		staleTime: 5 * 60 * 1000, //5 minutes refresh
+		gcTime: 10 * 60 * 1000, // 10 minutes to keep in cache
+		refetchOnWindowFocus: false, // don't refresh on tab switch
+		refetchOnMount: false, // don't refresh if data exist
+		retry: 2, // retry failed request 2 times
+		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+	});
+
+	// Memoize expensive filtering operation
+	const filteredQuizzes = useMemo(() => {
+		if (!quizzesFetch) return [];
+		return FilterQuiz({ quizzesFetch, filters });
+	}, [quizzesFetch, filters]);
+
+	// Memoize categories and subject to prevent recalculation
+	const { categories, subjects } = useMemo(() => {
+		const categ = [
+			...new Set(filteredQuizzes?.map((quiz) => quiz.category) || []),
+		];
+		const subj = [
+			...new Set(filteredQuizzes?.map((quiz) => quiz.subject) || []),
+		];
+		return { categories: categ, subjects: subj };
+	}, [filteredQuizzes]);
 
 	// Responsive breakpoint
 	const isMobile = useBreakpointValue({ base: true, lg: false });
 	const cardSpacing = useBreakpointValue({ base: 3, md: 4 });
-
-	// Fetch quizzes
-	useEffect(() => {
-		fetchQuizParams();
-		
-	}, []);
-
-	// Handle play quiz action
-	const handlePlayQuiz = (quizId: string) => {
-		navigate(`/user-tests/play/${quizId}`)
-	}
-
-
-	//Filtering Function
-	const filteredQuizzes = FilterQuiz({quizzesFetch, searchTerm, selectedCategory, selectedSubject})
-
-	// Get unique categories and subjects for filters
-	const categories = [
-		...new Set(quizzesFetch?.map((quiz) => quiz.category) || []),
-	];
-	const subjects = [
-		...new Set(quizzesFetch?.map((quiz) => quiz.subject) || []),
-	];
 
 	if (isLoading) {
 		return (
 			<Container maxW="full" centerContent py={10}>
 				<VStack spacing={4}>
 					<Spinner size="xl" color="purple.500" thickness="4px" />
-					<Text color="gray.300">Loading your lectures...</Text>
+					<Text color="gray.300">Loading your quizzes..</Text>
 				</VStack>
 			</Container>
 		);
 	}
 
-	// Mobile Card Component
-	const MobileCard = ({ quiz }: { quiz: QuizProfile }) => (
-		<Card
-			cursor="pointer"
-			transition="all 0.2s ease"
-			_hover={{
-				transform: 'translateY(-2px)',
-				shadow: 'lg',
-				borderColor: 'purple.400',
-			}}
-			_active={{ transform: 'translateY(0px)' }}
-			bg="whiteAlpha.100"
-			backdropFilter="blur(10px)"
-			border="1px solid"
-			borderColor="whiteAlpha.200"
-
-		>
-			<CardBody p={4}>
-				<Stack spacing={3}>
-					{/* Subject and Category Badges */}
-					<HStack justify="space-between" wrap="wrap" spacing={2}>
-						<Badge
-							colorScheme="purple"
-							variant="subtle"
-							fontSize="xs"
-							px={2}
-							py={1}
-							borderRadius="full"
-						>
-							{quiz.subject.toUpperCase()}
-						</Badge>
-						<Badge
-							colorScheme="blue"
-							variant="outline"
-							fontSize="xs"
-							px={2}
-							py={1}
-							borderRadius="full"
-						>
-							{quiz.category.toUpperCase()}
-						</Badge>
-					</HStack>
-
-					{/* Title */}
-					<Box>
-						<Text
-							fontWeight="semibold"
-							color="white"
-							fontSize="md"
-							lineHeight="1.4"
-							noOfLines={2}
-						>
-							{quiz.title.toUpperCase()}
-						</Text>
-					</Box>
-					{/* Points */}
-					<Box display="flex" alignItems="center" gap={2}>
-						<Icon as={MdOutlineChecklist} />
-						<Text fontWeight="semibold" color="white" fontSize="sm">
-							Total Items: {quiz.totalPoints}
-						</Text>
-					</Box>
-					{/* Passing Score */}
-					<Box display="flex" alignItems="center" gap={2}>
-						<Icon as={MdCheck} color={'green'} />
-						<Text fontWeight="semibold" color="white" fontSize="sm">
-							Passing score:{' '}
-							{Math.ceil((quiz.passingScore / 100) * quiz.totalPoints)}
-						</Text>
-					</Box>
-					{/* Time Limit */}
-					<Box display="flex" alignItems="center" gap={2}>
-						<Icon
-							as={quiz.timeLimit ? MdHourglassBottom : MdHourglassDisabled}
-						/>
-						<Text fontWeight="semibold" color="white" fontSize="sm">
-							Time Limit:{' '}
-							{quiz.timeLimit ? `${quiz.timeLimit} mins` : 'Unlimited'}
-						</Text>
-					</Box>
-
-					{/* Action indicator */}
-						<Button fontSize="sm" onClick={() => handlePlayQuiz(quiz._id)}>	
-							Tap to Play →
-						</Button>
-						
-				</Stack>
-			</CardBody>
-		</Card>
-	);
-
-	//TODO
-	//add play quiz when click play
-	//display history of quiz
-
-	// if (messageError) {
-	// 	return (
-	// 		<Container maxW="full" py={6}>
-	// 			<Alert status="error" bg="red.900" color="white" borderRadius="md">
-	// 				<AlertIcon />
-	// 				<AlertDescription>{messageError}</AlertDescription>
-	// 			</Alert>
-	// 		</Container>
-	// 	);
-	// }
+	if (error) {
+		return (
+			<Container maxW="full" centerContent py={10}>
+				<Text color="red.400">Error loading quizzes: {error.message}</Text>
+			</Container>
+		);
+	}
 
 	return (
 		<Container maxW="full" p={0}>
 			<VStack spacing={6} align="stretch">
 				{/* Search and Filters */}
-				<Box
-					bg="whiteAlpha.100"
-					backdropFilter="blur(10px)"
-					p={4}
-					borderRadius="xl"
-					border="1px solid"
-					borderColor="whiteAlpha.200"
-				>
-					<VStack spacing={4}>
-						{/* Search */}
-						<InputGroup size={isMobile ? 'md' : 'lg'}>
-							<InputLeftElement pointerEvents="none">
-								<MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
-							</InputLeftElement>
-							<Input
-								placeholder="Search quizzes, subjects, or categories..."
-								value={searchTerm}
-								onChange={(e) => setSearchTerm(e.target.value)}
-								bg="whiteAlpha.100"
-								border="1px solid"
-								borderColor="whiteAlpha.300"
-								color="white"
-								_placeholder={{ color: 'gray.400' }}
-								_focus={{
-									borderColor: 'purple.400',
-									boxShadow: '0 0 0 1px rgba(168, 85, 247, 0.6)',
-								}}
-							/>
-						</InputGroup>
-
-						{/* Filters */}
-						<Stack direction={isMobile ? 'column' : 'row'} spacing={3} w="full">
-							<Select
-								value={selectedSubject}
-								onChange={(e) => setSelectedSubject(e.target.value)}
-								bg="whiteAlpha.100"
-								border="1px solid"
-								borderColor="whiteAlpha.300"
-								color="white"
-								_focus={{ borderColor: 'purple.400' }}
-								size={isMobile ? 'md' : 'lg'}
-							>
-								<option value="all" style={{ background: '#1a202c' }}>
-									All Subjects
-								</option>
-								{subjects.map((subject) => (
-									<option
-										key={subject}
-										value={subject}
-										style={{ background: '#1a202c' }}
-									>
-										{subject.toUpperCase()}
-									</option>
-								))}
-							</Select>
-
-							<Select
-								value={selectedCategory}
-								onChange={(e) => setSelectedCategory(e.target.value)}
-								bg="whiteAlpha.100"
-								border="1px solid"
-								borderColor="whiteAlpha.300"
-								color="white"
-								_focus={{ borderColor: 'purple.400' }}
-								size={isMobile ? 'md' : 'lg'}
-							>
-								<option value="all" style={{ background: '#1a202c' }}>
-									All Categories
-								</option>
-								{categories.map((category) => (
-									<option
-										key={category}
-										value={category}
-										style={{ background: '#1a202c' }}
-									>
-										{category.toUpperCase()}
-									</option>
-								))}
-							</Select>
-						</Stack>
-					</VStack>
-				</Box>
+				<SearchComponent
+					categories={categories}
+					subjects={subjects}
+					filters={filters}
+					onFiltersChange={handleFiltersChange}
+				/>
 
 				{/* Content */}
 				{filteredQuizzes && filteredQuizzes.length > 0 ? (
 					isMobile ? (
 						//  Mobile Card View
 						<VStack spacing={cardSpacing} align="stretch">
-							{filteredQuizzes.filter(q => q.isPublished).map((quiz) => (
-								<MobileCard key={quiz._id} quiz={quiz} />
-							))}
+							{filteredQuizzes
+								.filter((q) => q.isPublished)
+								.map((quiz) => (
+									<MobileDisplay key={quiz._id} quiz={quiz} />
+								))}
 						</VStack>
 					) : (
 						// Desktop Table View
-						<DesktopDisplay filteredQuizzes={filteredQuizzes} handlePlayQuiz={handlePlayQuiz} />
+						<DesktopDisplay filteredQuizzes={filteredQuizzes} />
 					)
 				) : (
 					// Empty State
@@ -312,9 +139,9 @@ const UsersTest = () => {
 								No quizzes found
 							</Text>
 							<Text color="gray.400" fontSize="sm">
-								{searchTerm ||
-								selectedCategory !== 'all' ||
-								selectedSubject !== 'all'
+								{filters.searchTerm ||
+								filters.selectedCategory !== 'all' ||
+								filters.selectedSubject !== 'all'
 									? 'Try adjusting your search or filters'
 									: 'No Quiz available at the moment'}
 							</Text>

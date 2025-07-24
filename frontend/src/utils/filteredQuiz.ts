@@ -1,31 +1,33 @@
+import { CategoryTypes, SubjectTypes } from "../interfaces/QuizzesTypes";
 import { QuizProfile } from "../store/quizStore";
 
 
-type FilterQuizTypes = {
-    quizzesFetch: QuizProfile[]
-    searchTerm: string
-    selectedCategory: string;
-    selectedSubject: string;
-
+interface FilterTypes {
+    quizzesFetch: QuizProfile[],
+    filters:{
+        searchTerm: string,
+        selectedCategory: CategoryTypes ,
+        selectedSubject: SubjectTypes,
+    }
 }
 
-const FilterQuiz = ({quizzesFetch, searchTerm, selectedCategory, selectedSubject} : FilterQuizTypes) => {
+const FilterQuiz = ({quizzesFetch, filters} : FilterTypes) => {
     
     const publishedQuizzes = quizzesFetch.filter((allQuiz) => allQuiz.isPublished)
     const filteredQuizzes = publishedQuizzes.filter((quiz) => {
         
         const matchesSearches = 
-            quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            quiz.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            quiz.category.toLowerCase().includes(searchTerm.toLowerCase());
+            quiz.title.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+            quiz.subject.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+            quiz.category.toLowerCase().includes(filters.searchTerm.toLowerCase());
     
         const matchesCategory = 
-            selectedCategory === 'all' ||
-            quiz.category.toLowerCase() === selectedCategory.toLowerCase()
+            filters.selectedCategory === 'all' ||
+            quiz.category.toLowerCase() === filters.selectedCategory.toLowerCase()
 
         const matchesSubject =
-            selectedSubject === 'all' ||
-            quiz.subject.toLowerCase() === selectedSubject.toLowerCase();
+            filters.selectedSubject === 'all' ||
+            quiz.subject.toLowerCase() === filters.selectedSubject.toLowerCase();
         
 
         return matchesSearches && matchesCategory && matchesSubject;

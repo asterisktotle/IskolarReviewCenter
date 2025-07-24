@@ -7,8 +7,9 @@ import {
 	Td,
 	TableContainer,
 	Box,
-	Badge,
 } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
+import { QuizProfile } from '../../../store/quizStore';
 
 type TableHeadTypes = string[]
 const tableHeadContent: TableHeadTypes = ['Subject', 'Category', 'Items', 'PassingScore', 'TimeLimit']
@@ -37,8 +38,10 @@ const DisplayTableHead = ({listOfContent }: {listOfContent:TableHeadTypes}) => {
     )
 }
 
-const DesktopDisplay = ({filteredQuizzes, handlePlayQuiz}) => {
-  return (
+const DesktopDisplay = ({filteredQuizzes}: {filteredQuizzes: QuizProfile[]}) => {
+    const navigate = useNavigate()
+ 
+    return (
     <Box
         bg="whiteAlpha.100"
         backdropFilter="blur(10px)"
@@ -63,14 +66,12 @@ const DesktopDisplay = ({filteredQuizzes, handlePlayQuiz}) => {
                             transition="background 0.2s ease"
                         >
                             <Td color="gray.200" textAlign={'center'}>
-                                <Badge colorScheme="purple" variant="subtle">
+                                
                                     {quiz.subject.toUpperCase()}
-                                </Badge>
                             </Td>
                             <Td color="gray.200" textAlign={'center'}>
-                                <Badge colorScheme="blue" variant="outline">
+                                
                                     {quiz.category.toUpperCase()}
-                                </Badge>
                             </Td>
                             <Td
                                 textAlign={'center'}
@@ -79,7 +80,7 @@ const DesktopDisplay = ({filteredQuizzes, handlePlayQuiz}) => {
                                 fontWeight="medium"
                                 _hover={{ color: 'purple.300' }}
                                 transition="color 0.2s ease"
-                                onClick={() => handlePlayQuiz(quiz._id)}
+                                onClick={() => navigate(`/user-tests/play/${quiz._id}`)}
                             >
                                 {quiz.title}
                             </Td>
