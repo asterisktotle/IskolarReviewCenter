@@ -81,12 +81,10 @@ const SignUpForm = () => {
 		});
 
 		return (
-			<form onSubmit={handleSubmit(registerForm)}>
-				<Container>
-					<Container backdropBlur={'3xl'} blur={'3xl'}>
-						<Box fontSize={30}> WELCOME</Box>
-						<Box fontSize={15}>Create an account and join us!</Box>
-					</Container>
+			<form className='flex flex-col text-center my-4' onSubmit={handleSubmit(registerForm)}>
+		
+				
+					<Box fontSize={15}>Create an account and join us!</Box>
 
 					<VStack padding={3} spacing={3} align={'stretch'}>
 						<FormControl isInvalid={!!errors.name}>
@@ -172,7 +170,7 @@ const SignUpForm = () => {
 							Register
 						</Button>
 					</VStack>
-				</Container>
+			
 				<Flex gap={1}>
 					Already have an account?
 					<Box

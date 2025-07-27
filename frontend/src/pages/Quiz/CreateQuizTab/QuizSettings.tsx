@@ -20,9 +20,11 @@ import {
 	useColorModeValue,
 } from '@chakra-ui/react';
 import QuizStore from '../../../store/quizStore';
+import { useRef } from 'react';
 
 const QuizSettings = () => {
-	const { quizProfile, setQuizProfile, publishQuiz, isLoading , updateQuiz} = QuizStore();
+	const { quizProfile, setQuizProfile, publishQuiz, isLoading, updateQuiz } =
+		QuizStore();
 
 	const toast = useToast();
 
@@ -60,9 +62,29 @@ const QuizSettings = () => {
 		});
 	};
 
-	
+	// Select and Scan PDF
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const handleScanBtn = fileInputRef.current?.click();
 
-	
+	const handleFileChange = async (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
+		const file = event.target.files?.[0];
+		if (!file) return;
+
+		const formData = new FormData();
+		formData.append('pdf', file);
+
+		// Optionally, trigger extraction after upload
+		// await axios.post("/api/extract-questions", { filePath: response.data.filePath });
+	};
+
+	const category = [
+		{ value: 'terms', name: 'Terms' },
+		{ value: 'weekly-test', name: 'Weekly Test' },
+		{ value: 'take-home-test', name: 'Take Home Test' },
+		{ value: 'pre-board-exam', name: 'Pre-board Exam' },
+	];
 
 	return (
 		<Card bg={cardBg} borderColor={borderColor}>
@@ -72,9 +94,9 @@ const QuizSettings = () => {
 			<CardBody>
 				<VStack spacing={4} align="stretch">
 					<FormControl>
-						<FormLabel htmlFor='quiz_title'>Quiz Title</FormLabel>
+						<FormLabel htmlFor="quiz_title">Quiz Title</FormLabel>
 						<Editable
-							placeholder='Enter a quiz title'
+							placeholder="Enter a quiz title"
 							value={quizProfile.title}
 							onChange={(value) => handleChangeQuizProfile('title', value)}
 						>
@@ -85,7 +107,7 @@ const QuizSettings = () => {
 								borderColor={borderColor}
 								w={'full'}
 							/>
-							<EditableInput id='quiz_title' p={3} />
+							<EditableInput id="quiz_title" p={3} />
 						</Editable>
 					</FormControl>
 
@@ -95,11 +117,11 @@ const QuizSettings = () => {
 						align="start"
 					>
 						<FormControl>
-							<FormLabel as='legend'>Subject</FormLabel>
+							<FormLabel as="legend">Subject</FormLabel>
 							<RadioGroup
 								onChange={(value) => handleChangeQuizProfile('subject', value)}
 								value={quizProfile.subject}
-								id='subject'
+								id="subject"
 							>
 								<Stack direction="row" spacing={4}>
 									<Radio value="mesl">MESL</Radio>
@@ -110,25 +132,23 @@ const QuizSettings = () => {
 						</FormControl>
 
 						<FormControl>
-							<FormLabel htmlFor='time_limit'>Time Limit (minutes)</FormLabel>
+							<FormLabel htmlFor="time_limit">Time Limit (minutes)</FormLabel>
 							<NumberInput
+								id="time-limit"
 								value={quizProfile.timeLimit}
 								onChange={(value) =>
 									handleChangeQuizProfile('timeLimit', value)
 								}
 								maxW="150px"
 								min={0}
-								max={60*24}
+								max={60 * 24}
 							>
-								<NumberInputField
-									id='time_limit'
-									placeholder="0"
-								/>
+								<NumberInputField id="time_limit" placeholder="0" />
 							</NumberInput>
 						</FormControl>
 
 						<FormControl>
-							<FormLabel htmlFor='passing_score'>Passing Score (%)</FormLabel>
+							<FormLabel htmlFor="passing_score">Passing Score (%)</FormLabel>
 							<NumberInput
 								value={quizProfile.passingScore}
 								onChange={(value) =>
@@ -138,30 +158,26 @@ const QuizSettings = () => {
 								min={1}
 								max={100}
 							>
-								<NumberInputField
-									id='passing_score'
-									placeholder="50"
-								/>
+								<NumberInputField id="passing_score" placeholder="50" />
 							</NumberInput>
 						</FormControl>
 					</Stack>
 
 					<FormControl>
-						<FormLabel as='legend'>Test Category</FormLabel>
+						<FormLabel as="legend">Test Category</FormLabel>
 						<RadioGroup
 							value={quizProfile.category}
 							onChange={(value) => handleChangeQuizProfile('category', value)}
 						>
 							<Stack direction={{ base: 'column', md: 'row' }} spacing={4}>
-								<Radio value="terms">Terms</Radio>
-								<Radio value="weekly-test">Weekly Exam</Radio>
-								<Radio value="take-home-test">Take Home Exam</Radio>
-								<Radio value="pre-board-exam">Pre-board Exam</Radio>
+								{category.map((categ) => (
+									<Radio value={categ.value}>{categ.name}</Radio>
+								))}
 							</Stack>
 						</RadioGroup>
 					</FormControl>
 
-					<HStack >
+					<HStack>
 						<Button
 							onClick={handleSaveQuiz}
 							backgroundColor={'orange.500'}
@@ -178,8 +194,11 @@ const QuizSettings = () => {
 						>
 							{quizProfile.isPublished ? 'Published' : 'Draft'}
 						</Button>
-						{quizProfile._id && <Button onClick={() => handleUpdateQuiz(quizProfile._id)}>Update</Button>}
-						<Button variant="outline">Scan PDF</Button>
+						{quizProfile._id && (
+							<Button onClick={() => handleUpdateQuiz(quizProfile._id)}>
+								Update
+							</Button>
+						)}
 						
 					</HStack>
 				</VStack>

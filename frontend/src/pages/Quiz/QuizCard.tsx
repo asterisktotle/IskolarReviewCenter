@@ -20,7 +20,8 @@ import {
 	MdHourglassDisabled,
 	MdOutlineChecklist,
 } from 'react-icons/md';
-import QuizStore, { QuizProfile } from '../../store/quizStore';
+import QuizStore from '../../store/quizStore';
+import { QuizProfile } from '../../types/QuizTypes';
 
 const QuizCard = ({ quiz }: { quiz: QuizProfile }) => {
 	//Responsibility
@@ -195,7 +196,7 @@ const QuizCard = ({ quiz }: { quiz: QuizProfile }) => {
 
 						<HStack spacing={1}>
 							<Button
-								w={'5rem'}
+								
 								onClick={() => {
 									handleEdit(quiz._id);
 								}}
@@ -211,9 +212,7 @@ const QuizCard = ({ quiz }: { quiz: QuizProfile }) => {
 								Delete
 							</Button>
 
-							<Button fontSize="sm" bgColor={'green'}>
-								Play
-							</Button>
+							
 						</HStack>
 					</SimpleGrid>
 				</VStack>

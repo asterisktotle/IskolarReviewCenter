@@ -1,12 +1,50 @@
 @import 'tailwindcss';
-/* @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap'); */
-/* 
-* {
-	font-family: 'Montserrat', serif;
-} */
+
+
+@theme {
+	--animate-float: float 6s ease-in-out infinite;
+  	--animate-pulse-subtle: pulse-subtle 4s ease-in-out infinite;
+	--animate-meteor: meteor 5s linear infinite;
+	 
+	
+	@keyframes pulse-subtle {
+		0%,
+		100% {
+		opacity: 1;
+		}
+		50% {
+		opacity: 0.8;
+		}
+	}
+	@keyframes meteor {
+		0% {
+		opacity: 1;
+		transform: rotate(215deg) translateX(0);
+		}
+		70% {
+		opacity: 1;
+		}
+		100% {
+		opacity: 1;
+		transform: rotate(215deg) translateX(-500px);
+		}
+  	}
+ 
+}
 
 @layer utilities {
 	.text-custom {
 		font-size: 2rem;
 	}
+}
+
+@utility star {
+	@apply absolute rounded-full bg-white;
+  box-shadow: 0 0 10px 2px rgba(255,255,255,0.4)
+}
+
+
+@utility meteor {
+  @apply absolute bg-linear-to-r from-white via-white to-transparent rounded-full;
+  box-shadow: 0 0 10px 5px rgba(255,255,255,0.3)
 }

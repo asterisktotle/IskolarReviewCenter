@@ -47,9 +47,8 @@ const SignInForm = () => {
 
         return (
             <form onSubmit={handleSignInForm}>
-                <VStack padding={3} spacing={3} align={'stretch'}>
+                <VStack spacing={3} align={'stretch'}>
                     <Text textStyle='2xl' >Sign in to your account</Text>
-                    {/* <p className=' md:text-3xl'>Sign in to your account</p> */}
                     {/* Email */}
                     <FormControl isRequired isInvalid={noUserEmail}>
                         <Input

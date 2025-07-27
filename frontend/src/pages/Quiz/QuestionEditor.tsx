@@ -26,12 +26,10 @@ import parseOptions from '../../utils/parserOptions';
 import { QuestionData, QuestionOption } from '../../types/QuizTypes';
 import QuizStore from '../../store/quizStore';
 const QuestionEditor = ({ question }: { question: QuestionData }) => {
-	const { questions, removeQuestion, updateQuestion} = QuizStore();
-	
+	const { questions, removeQuestion, updateQuestion } = QuizStore();
 
 	const borderColor = useColorModeValue('gray.200', 'gray.600');
 	const cardBg = useColorModeValue('white', 'gray.800');
-
 
 	const handleUpdateOptions = (
 		questionId: number | string,
@@ -48,10 +46,6 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 				`Question with ID ${questionId} is not multiple-choice`
 			);
 		}
-
-		console.log(
-			`Question ID: ${questionId}, optionId: ${optionId}, updatedOption: ${updatedOption}`
-		)
 
 		// //For bulk answer paste
 		let formattedOptions: QuestionOption[];
@@ -115,7 +109,7 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 		}
 	};
 
-	//POTENTIAL BUG FOR CREATING IDS 
+	//POTENTIAL BUG FOR CREATING IDS
 	const handleAddOption = (questionId: number | string) => {
 		const currentQuestion = questions.find((q) => q.id === questionId);
 		// console.log('current questions: ', currentQuestion)
@@ -131,7 +125,7 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 		const optionLength = currentQuestion.options.length;
 
 		const newOption = {
-			id: Date.now().toString() + optionLength.toString() ,
+			id: Date.now().toString() + optionLength.toString(),
 			text: '',
 			isCorrect: false,
 		};
@@ -142,10 +136,12 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 		};
 
 		updateQuestion(questionId, updatedQuestion);
-
 	};
 
-	const handleRemoveChoices = (questionId: number | string , optionId: number | string) => {
+	const handleRemoveChoices = (
+		questionId: number | string,
+		optionId: number | string
+	) => {
 		const updatedQuestion = questions.find((q) => q.id === questionId);
 		if (!updatedQuestion) {
 			return console.log(`Question with ID ${questionId} does not exist`);
@@ -169,7 +165,10 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 		updateQuestion(questionId, question);
 	};
 
-	const handleCorrectOption = (questionId: number | string, optionId: number | string) => {
+	const handleCorrectOption = (
+		questionId: number | string,
+		optionId: number | string
+	) => {
 		const currentQuestion = questions.find((q) => q.id === questionId);
 
 		if (!currentQuestion) {
@@ -182,18 +181,18 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 		}
 
 		const correctOption = currentQuestion.options.map((option) => {
-			if(option.id == optionId){
+			if (option.id == optionId) {
 				return {
 					...option,
-					isCorrect: true
-				}
+					isCorrect: true,
+				};
 			} else {
 				return {
 					...option,
-					isCorrect: false
-				}
+					isCorrect: false,
+				};
 			}
-		} )
+		});
 
 		const updatedQuestion: QuestionData = {
 			...currentQuestion,
@@ -203,7 +202,7 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 	};
 
 	return (
-		<Card  mb={4} bg={cardBg} borderColor={borderColor}>
+		<Card mb={4} bg={cardBg} borderColor={borderColor}>
 			<CardBody>
 				<VStack spacing={4} align="stretch">
 					{/* Question Header */}
@@ -215,7 +214,10 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 							<Select
 								value={question.type}
 								onChange={(e) =>
-									handleQuestionType(question.id, e.target.value)
+									handleQuestionType(
+										question.id,
+										e.target.value as 'multiple-choice' | 'short-answer'
+									)
 								}
 								size="sm"
 								maxW="200px"
@@ -235,11 +237,9 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 
 					{/* Question Text */}
 					<FormControl>
-						
 						<Editable
 							placeholder={'Enter a question'}
 							key={question._id || question.id}
-							id={question._id || question.id.toString()}
 							value={question.questionText}
 							onSubmit={(value) =>
 								updateQuestion(question.id, {
@@ -255,7 +255,6 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 								border="2px"
 								borderColor={borderColor}
 								minH="40px"
-
 							/>
 							<EditableInput
 								p={3}
@@ -271,7 +270,7 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 					</FormControl>
 
 					{/* Question Options */}
-					{question.type === 'multiple-choice' ? (
+					{question.type === 'multiple-choice' && question.options.length ? (
 						<FormControl>
 							<HStack justify="space-between" mb={2}>
 								<FormLabel fontSize="sm" fontWeight="medium" mb={0}>
@@ -288,58 +287,54 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 							</HStack>
 
 							<RadioGroup
-								value={
-									question.options
-										.find((opt) => opt.isCorrect)
-										?.id.toString() || ''
-								}
-								onChange={(value) =>
-									handleCorrectOption(question.id, value)
-								}
+								value={question.options
+									.find((opt) => opt.isCorrect)
+									?.id?.toString()}
+								onChange={(value) => handleCorrectOption(question.id, value)}
 							>
 								<VStack spacing={2} align="stretch">
 									{question.options?.map((choice, index) => {
-										return ( 
-										<HStack key={`${question.id}-${choice.id}`} spacing={2}>
-											<Radio value={choice.id.toString()} colorScheme="green" />
-											<Input
-												// id={ question._id + choice._id||choice.id.toString()}
-												onChange={(e) =>
-													handleUpdateOptions(
-														question.id,
-														choice.id,
-														e.target.value
-													)
-												}
-												value={choice.text}
-												placeholder={`Option ${index + 1}`}
-												size="sm"
-												onPaste={(e) => {
-													e.preventDefault();
-													const pastedText = e.clipboardData.getData('text');
-													handleUpdateOptions(
-														question.id,
-														choice.id,
-														pastedText
-													);
-												}}
-											/>
-											<IconButton
-												size="sm"
-												colorScheme="red"
-												variant="ghost"
-												icon={<CloseIcon />}
-												onClick={() =>
-													handleRemoveChoices(question.id, choice.id)
-												}
-												aria-label="Remove option"
-											/>
-										</HStack>
-
-										)
-
-									}
-									)}
+										return (
+											<HStack key={`${question.id}-${choice.id}`} spacing={2}>
+												<Radio
+													value={choice.id.toString()}
+													colorScheme="green"
+												/>
+												<Input
+													// id={ question._id + choice._id||choice.id.toString()}
+													onChange={(e) =>
+														handleUpdateOptions(
+															question.id,
+															choice.id,
+															e.target.value
+														)
+													}
+													value={choice.text}
+													placeholder={`Option ${index + 1}`}
+													size="sm"
+													onPaste={(e) => {
+														e.preventDefault();
+														const pastedText = e.clipboardData.getData('text');
+														handleUpdateOptions(
+															question.id,
+															choice.id,
+															pastedText
+														);
+													}}
+												/>
+												<IconButton
+													size="sm"
+													colorScheme="red"
+													variant="ghost"
+													icon={<CloseIcon />}
+													onClick={() =>
+														handleRemoveChoices(question.id, choice.id)
+													}
+													aria-label="Remove option"
+												/>
+											</HStack>
+										);
+									})}
 								</VStack>
 							</RadioGroup>
 						</FormControl>
@@ -349,9 +344,12 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 								Correct Answer
 							</FormLabel>
 							<Input
-								id={ question._id || Date.now.toString()}
+								id={question._id || Date.now.toString()}
 								onChange={(e) =>
-									handleUpdateShortAnswer(question._id ? question._id : question.id.toString() , e.target.value)
+									handleUpdateShortAnswer(
+										question._id ? question._id : question.id.toString(),
+										e.target.value
+									)
 								}
 								placeholder="Enter the correct answer"
 								size="sm"
@@ -369,9 +367,9 @@ const QuestionEditor = ({ question }: { question: QuestionData }) => {
 							defaultValue={question.points}
 							min={1}
 							onChange={(value) =>
-  								updateQuestion(question._id, {
+								updateQuestion(question._id ?? question.id, {
 									...question,
-									points: parseInt(value) || 1,
+									points: parseInt(value ?? '1') || 1,
 								})
 							}
 						>

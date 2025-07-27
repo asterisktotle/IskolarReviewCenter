@@ -17,7 +17,7 @@ interface QuizStore {
 	quizProfile: QuizProfile;
 	setQuizProfile: (quizProfile: QuizProfile) => void;
 	addQuestions: (question: QuestionData) => void;
-	removeQuestion: (questionId: number) => void;
+	removeQuestion: (questionId: number | string) => void;
 	updateQuestion: (
 		questionId: number | string,
 		updatedQuestion: QuestionData
