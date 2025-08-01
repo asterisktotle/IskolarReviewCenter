@@ -1,10 +1,15 @@
 import axios from 'axios';
 import { create } from 'zustand';
-import { FetchResponse, QuestionData, QuizAttemptResult, QuizFormEvaluation, QuizProfile } from '../types/QuizTypes';
+import {
+	FetchResponse,
+	QuestionData,
+	QuizAttemptResult,
+	QuizFormEvaluation,
+	QuizProfile,
+} from '../types/QuizTypes';
 
 axios.defaults.withCredentials = true;
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
 
 interface QuizStore {
 	// storing quizzes data
@@ -25,7 +30,6 @@ interface QuizStore {
 	publishQuiz: () => Promise<any>;
 	updateQuiz: (quizId: string) => Promise<any>;
 	deleteQuiz: (quizId: string) => Promise<any>;
-
 
 	// User Actions
 	quizAttemptResults: QuizAttemptResult | null;
@@ -89,7 +93,7 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		const newQuestion: QuestionData = { ...question };
 		setQuestions([...questions, newQuestion]);
 	},
-	removeQuestion: (questionId: number) => {
+	removeQuestion: (questionId: number | string) => {
 		const { questions, setQuestions } = get();
 
 		//check if question exist and prevent deletion of all questions
@@ -114,7 +118,6 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		updatedQuestion: QuestionData
 	) => {
 		const { questions, setQuestions } = get();
-	
 
 		//check if question exist
 		const questionExist = questions.some((q) => q.id === questionId);
@@ -175,28 +178,32 @@ const QuizStore = create<QuizStore>((set, get) => ({
 		}
 	},
 	updateQuiz: async (quizId: string) => {
-		const {quizProfile, questions, setIsLoading} = get();
-		const {title, subject, category,  timeLimit, passingScore, isPublished} = quizProfile
-		try{
-			setIsLoading(true)
-			const response = await axios.put(BACKEND_URL + '/api/quiz/update-quiz/' + quizId , {
-				title,
-				subject,
-				category,
-				timeLimit,
-				passingScore,
-				isPublished,
-				questions: questions
-			})
-			if(!response.data.success){
-				console.error('cannot update', response.data.message)
+		const { quizProfile, questions, setIsLoading } = get();
+		const { title, subject, category, timeLimit, passingScore, isPublished } =
+			quizProfile;
+		try {
+			setIsLoading(true);
+			const response = await axios.put(
+				BACKEND_URL + '/api/quiz/update-quiz/' + quizId,
+				{
+					title,
+					subject,
+					category,
+					timeLimit,
+					passingScore,
+					isPublished,
+					questions: questions,
+				}
+			);
+			if (!response.data.success) {
+				console.error('cannot update', response.data.message);
 			}
-			console.log('response data:', response.data)
+			console.log('response data:', response.data);
 			return response;
-		}catch(err){
-			throw new Error(err.message)
-		}finally{
-			setIsLoading(false)
+		} catch (err) {
+			throw new Error(err.message);
+		} finally {
+			setIsLoading(false);
 		}
 	},
 	deleteQuiz: async (quizId: string) => {
@@ -242,11 +249,13 @@ const QuizStore = create<QuizStore>((set, get) => ({
 
 			if (data.success) {
 				setQuizzesFetch(data.data);
-				return;
+				return data.data; 
+			} else {
+				throw new Error('Failed to fetch quizzes');
 			}
 		} catch (err) {
 			console.log('fetching error: ', err);
-		} finally {
+			throw err; 		} finally {
 			setIsLoading(false);
 		}
 	},

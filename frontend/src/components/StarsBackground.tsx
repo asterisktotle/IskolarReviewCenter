@@ -44,7 +44,7 @@ const StarsBackground = () => {
                 yCoordinate: Math.random() * 100,
                 xCoordinate: Math.random() * 100,
                 opacity: Math.random() * 0.5 + 0.2,
-                animationDuration: Math.random() * 4 + 2,
+                animationDuration: (Math.random() * 100) + 10,
             })
         }
 

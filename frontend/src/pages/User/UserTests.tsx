@@ -11,10 +11,10 @@ import QuizStore from '../../store/quizStore';
 import { MdOutlineClass } from 'react-icons/md';
 import FilterQuiz from '../../utils/filteredQuiz';
 import DesktopDisplay from '../Quiz/UserPlayQuiz/DesktopDisplay';
-import MobileDisplay from '../Quiz/UserPlayQuiz/MobileDisplay';
 import SearchComponent from '../Quiz/UserPlayQuiz/SearchComponent';
 import { useQuery } from '@tanstack/react-query';
-import { QuizProfile } from '../../store/quizStore';
+import { QuizProfile } from '../../types/QuizTypes';
+import MobileDisplayTest from '../Quiz/UserPlayQuiz/MobileDisplayTest';
 
 const UsersTest = () => {
 	//RESPONSIBILITY
@@ -59,7 +59,11 @@ const UsersTest = () => {
 
 	// Memoize expensive filtering operation
 	const filteredQuizzes = useMemo(() => {
-		if (!quizzesFetch) return [];
+		if (!quizzesFetch) {
+			console.log('quizzes fetch is undefined: ', quizzesFetch);
+			return [];
+		}
+
 		return FilterQuiz({ quizzesFetch, filters });
 	}, [quizzesFetch, filters]);
 
@@ -99,7 +103,7 @@ const UsersTest = () => {
 
 	return (
 		<Container maxW="full" p={0}>
-			<VStack spacing={6} align="stretch">
+			<VStack spacing={6} align={'stretch'} marginX={4} marginY={4}>
 				{/* Search and Filters */}
 				<SearchComponent
 					categories={categories}
@@ -112,11 +116,11 @@ const UsersTest = () => {
 				{filteredQuizzes && filteredQuizzes.length > 0 ? (
 					isMobile ? (
 						//  Mobile Card View
-						<VStack spacing={cardSpacing} align="stretch">
+						<VStack spacing={cardSpacing} align="stretch" >
 							{filteredQuizzes
 								.filter((q) => q.isPublished)
 								.map((quiz) => (
-									<MobileDisplay key={quiz._id} quiz={quiz} />
+									<MobileDisplayTest key={quiz._id} quiz={quiz} />
 								))}
 						</VStack>
 					) : (

@@ -19,7 +19,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { QuizProfile } from '../../../types/QuizTypes';
 
-const MobileDisplay = ({quiz}: {quiz:QuizProfile}) => {
+const MobileDisplayTest = ({quiz}: {quiz:QuizProfile}) => {
 
     const navigate = useNavigate()
 
@@ -115,4 +115,4 @@ const MobileDisplay = ({quiz}: {quiz:QuizProfile}) => {
   
 }
 
-export default MobileDisplay
+export default MobileDisplayTest

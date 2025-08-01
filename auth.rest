@@ -1,0 +1,65 @@
+### GET /
+GET http://localhost:3100
+
+
+### Register a user POST /AUTH/REGISTER
+POST http://localhost:3100/auth/register
+Content-Type: application/json
+
+{
+    "name" : "14bcneat",
+    "email": "14bcneat@gmail.com",
+    "password": "14bcneat"
+    
+}
+
+### Login a user POST /AUTH/LOGIN
+POST http://localhost:3100/auth/login 
+Content-Type: application/json
+
+{
+    "email": "14bcneat@gmail.com",
+    "password": "14bcneat"
+    
+}
+
+### Logout a user POST /AUTH/LOGOUT
+POST http://localhost:3100/auth/logout
+Content-Type: application/json
+
+{
+    "email": "jander@gmail.com",
+    "password": "1231312"
+    
+}
+
+### Send an account verification OTP POST /AUTH/SEND-OTP
+POST http://localhost:3100/auth/send-otp
+
+### verify account verification OTP POST /AUTH/VERIFY-OTP
+POST http://localhost:3100/auth/verify-otp
+Content-Type: application/json
+
+{
+    "otp": "372837"
+    
+}
+
+### Send reset password OTP POST /AUTH/SEND-OTP
+POST http://localhost:3100/auth/reset-pass-otp
+Content-Type: application/json
+
+
+
+
+### verify reset password OTP POST /AUTH/VERIFY-OTP
+POST http://localhost:3100/auth/verify-reset-pass
+Content-Type: application/json
+
+{
+    "otp": "369746",
+    "password": "newpassword123"
+    
+}
+
+
